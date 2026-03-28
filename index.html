@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>RIDA Network</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: #f5f7fb;
+            color: #1a2c3e;
+            padding-bottom: 70px;
+        }
+
+        /* Navigation Bar */
+        .nav-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            display: flex;
+            justify-content: space-around;
+            padding: 8px 0;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            z-index: 100;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: none;
+            border: none;
+            font-size: 12px;
+            color: #7f8c8d;
+            cursor: pointer;
+            transition: color 0.2s;
+            padding: 4px 8px;
+            border-radius: 8px;
+        }
+
+        .nav-item.active {
+            color: #3498db;
+        }
+
+        .nav-icon {
+            font-size: 24px;
+            margin-bottom: 4px;
+        }
+
+        /* Page Container */
+        .page {
+            display: none;
+            padding: 20px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        /* Cards */
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        /* Buttons */
+        .btn {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 30px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: background 0.2s;
+            margin-top: 8px;
+        }
+
+        .btn:active {
+            background: #2980b9;
+        }
+
+        .btn-secondary {
+            background: #e74c3c;
+        }
+
+        .btn-small {
+            padding: 8px 16px;
+            font-size: 14px;
+            width: auto;
+        }
+
+        /* Mining Animation */
+        .mining-indicator {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #2ecc71;
+            animation: pulse 1.5s infinite;
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(0.8); opacity: 0.5; }
+            100% { transform: scale(1.2); opacity: 1; }
+        }
+
+        .counter {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2ecc71;
+            margin: 10px 0;
+        }
+
+        /* Form Inputs */
+        input, textarea, select {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+
+        /* Transaction List */
+        .tx-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        /* Admin Panel */
+        .admin-section {
+            margin-bottom: 20px;
+            border-top: 1px solid #eee;
+            padding-top: 16px;
+        }
+
+        .admin-section h4 {
+            margin-bottom: 10px;
+        }
+
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #7f8c8d;
+        }
+
+        /* Verification Status */
+        .verified-badge {
+            background: #2ecc71;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 20px;
+            font-size: 12px;
+            display: inline-block;
+        }
+
+        .pending-badge {
+            background: #f39c12;
+        }
+
+        /* Utility */
+        .text-center { text-align: center; }
+        .mb-2 { margin-bottom: 8px; }
+        .mt-2 { margin-top: 8px; }
+    </style>
+</head>
+<body>
+
+<!-- Navigation -->
+<div class="nav-bar">
+    <button class="nav-item" data-page="dashboard">
+        <div class="nav-icon">🏠</div>
+        <span>Dashboard</span>
+    </button>
+    <button class="nav-item" data-page="mining">
+        <div class="nav-icon">⛏️</div>
+        <span>Mine</span>
+    </button>
+    <button class="nav-item" data-page="wallet">
+        <div class="nav-icon">💼</div>
+        <span>Wallet</span>
+    </button>
+    <button class="nav-item" data-page="transactions">
+        <div class="nav-icon">📜</div>
+        <span>History</span>
+    </button>
+    <button class="nav-item" data-page="verification">
+        <div class="nav-icon">✅</div>
+        <span>Verify</span>
+    </button>
+    <button class="nav-item" data-page="announcements">
+        <div class="nav-icon">📢</div>
+        <span>News</span>
+    </button>
+    <button class="nav-item" data-page="admin" id="adminNav" style="display: none;">
+        <div class="nav-icon">⚙️</div>
+        <span>Admin</span>
+    </button>
+</div>
+
+<!-- Login/Signup Page -->
+<div id="authPage" class="page active">
+    <div class="card" style="margin-top: 40px;">
+        <h2 style="text-align: center;">RIDA Network</h2>
+        <div style="margin-top: 20px;">
+            <h3>Login</h3>
+            <input type="text" id="loginEmail" placeholder="Email">
+            <input type="password" id="loginPassword" placeholder="Password">
+            <button class="btn" onclick="login()">Login</button>
+            <hr style="margin: 20px 0;">
+            <h3>Sign Up</h3>
+            <input type="text" id="signupFullName" placeholder="Full Name">
+            <input type="email" id="signupEmail" placeholder="Email">
+            <input type="password" id="signupPassword" placeholder="Password">
+            <button class="btn" onclick="signup()">Create Account</button>
+        </div>
+    </div>
+</div>
+
+<!-- Dashboard Page -->
+<div id="dashboardPage" class="page">
+    <div class="card">
+        <h3>Welcome, <span id="userName">User</span></h3>
+        <p>Balance: <strong id="dashboardBalance">0</strong> RIDA</p>
+        <p>Verification: <span id="verificationStatus" class="verified-badge">Not Verified</span></p>
+    </div>
+    <div class="card">
+        <h3>Recent Transactions</h3>
+        <div id="recentTransactions">Loading...</div>
+    </div>
+</div>
+
+<!-- Mining Page -->
+<div id="miningPage" class="page">
+    <div class="card">
+        <h3>Mining Dashboard</h3>
+        <div id="miningStatusDisplay">
+            <p>Checking mining status...</p>
+        </div>
+        <div id="miningControls"></div>
+        <div id="miningCounter" class="counter text-center"></div>
+    </div>
+</div>
+
+<!-- Wallet Page -->
+<div id="walletPage" class="page">
+    <div class="card">
+        <h3>Send RIDA</h3>
+        <input type="email" id="sendEmail" placeholder="Recipient Email">
+        <input type="number" id="sendAmount" placeholder="Amount" step="0.01" min="0.01">
+        <button class="btn" onclick="sendTransaction()">Send</button>
+        <p id="sendResult" class="text-center mt-2"></p>
+    </div>
+    <div class="card">
+        <h3>Wallet Balance</h3>
+        <p style="font-size: 32px; font-weight: bold; text-align: center;" id="walletBalance">0</p>
+    </div>
+</div>
+
+<!-- Transactions Page -->
+<div id="transactionsPage" class="page">
+    <div class="card">
+        <h3>All Transactions</h3>
+        <div id="allTransactions">Loading...</div>
+    </div>
+</div>
+
+<!-- Verification Page -->
+<div id="verificationPage" class="page">
+    <div class="card">
+        <h3>Verification</h3>
+        <p>Only verified users can send tokens.</p>
+        <p>Verification Fee: <strong>$<span id="verificationFee">6</span> USD</strong> (paid in RIDA at current market rate)</p>
+        <button class="btn" id="requestVerifyBtn" onclick="requestVerification()">Request Verification</button>
+        <div id="verificationStatusMsg" class="mt-2"></div>
+    </div>
+</div>
+
+<!-- Announcements Page -->
+<div id="announcementsPage" class="page">
+    <div class="card">
+        <h3>Latest Announcements</h3>
+        <div id="announcementsList">Loading...</div>
+    </div>
+</div>
+
+<!-- Admin Page -->
+<div id="adminPage" class="page">
+    <div class="card">
+        <h3>Admin Panel</h3>
+        <div class="admin-section">
+            <h4>Pending Transactions</h4>
+            <div id="pendingTransactions">Loading...</div>
+        </div>
+        <div class="admin-section">
+            <h4>Pending Verification Requests</h4>
+            <div id="pendingVerifications">Loading...</div>
+        </div>
+        <div class="admin-section">
+            <h4>Post Announcement</h4>
+            <input type="text" id="announcementTitle" placeholder="Title">
+            <textarea id="announcementContent" placeholder="Content" rows="3"></textarea>
+            <button class="btn" onclick="postAnnouncement()">Post Announcement</button>
+        </div>
+        <div class="admin-section">
+            <h4>Settings</h4>
+            <label>Verification Fee (USD): </label>
+            <input type="number" id="feeSetting" step="1" placeholder="Current fee">
+            <button class="btn btn-small" onclick="updateSetting('verificationFee', document.getElementById('feeSetting').value)">Update Fee</button>
+            <button class="btn btn-small mt-2" onclick="loadAllUsers()">Load All Users</button>
+            <div id="usersList" class="mt-2"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ==================== CONFIGURATION ====================
+    const API_BASE = 'https://script.google.com/macros/s/AKfycbzdrJUn-WbJvkuGz32IZ2gaRtz-DJkrfO0f7X5zzFlLMMhK3Rz5BsLmfW9cPoyfb5j2xw/exec';
+    
+    // ==================== GLOBAL STATE ====================
+    let currentToken = localStorage.getItem('token');
+    let currentUser = null;
+    let miningInterval = null;
+    let miningEndTime = null;
+    
+    // ==================== HELPER FUNCTIONS ====================
+    async function callAPI(action, data = {}) {
+        const payload = { action, ...data };
+        if (currentToken && !payload.token) payload.token = currentToken;
+        
+        const response = await fetch(API_BASE, {
+            method: 'POST',
+            body: JSON.stringify(payload),
+            headers: { 'Content-Type': 'application/json' }
+        });
+        const result = await response.json();
+        if (result.error) throw new Error(result.error);
+        return result;
+    }
+    
+    function showNotification(message, isError = false) {
+        // Simple alert for now; can be replaced with a toast
+        if (isError) alert('Error: ' + message);
+        else alert(message);
+    }
+    
+    // ==================== AUTH ====================
+    async function login() {
+        const email = document.getElementById('loginEmail').value;
+        const password = document.getElementById('loginPassword').value;
+        try {
+            const result = await callAPI('loginUser', { email, password });
+            currentToken = result.data.token;
+            currentUser = result.data.user;
+            localStorage.setItem('token', currentToken);
+            localStorage.setItem('user', JSON.stringify(currentUser));
+            showMainApp();
+        } catch (err) {
+            showNotification(err.message, true);
+        }
+    }
+    
+    async function signup() {
+        const fullName = document.getElementById('signupFullName').value;
+        const email = document.getElementById('signupEmail').value;
+        const password = document.getElementById('signupPassword').value;
+        try {
+            await callAPI('registerUser', { fullName, email, password });
+            showNotification('Account created! Please login.');
+        } catch (err) {
+            showNotification(err.message, true);
+        }
+    }
+    
+    function logout() {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        currentToken = null;
+        currentUser = null;
+        if (miningInterval) clearInterval(miningInterval);
+        document.getElementById('authPage').classList.add('active');
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        document.getElementById('authPage').classList.add('active');
+    }
+    
+    function showMainApp() {
+        document.getElementById('authPage').classList.remove('active');
+        document.getElementById('dashboardPage').classList.add('active');
+        loadDashboard();
+        if (currentUser && currentUser.isAdmin) {
+            document.getElementById('adminNav').style.display = 'flex';
+        } else {
+            document.getElementById('adminNav').style.display = 'none';
+        }
+        // Set up navigation
+        document.querySelectorAll('.nav-item').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const page = btn.getAttribute('data-page');
+                if (page === 'admin' && !currentUser.isAdmin) return;
+                document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+                document.getElementById(page + 'Page').classList.add('active');
+                // Load data when page is shown
+                if (page === 'dashboard') loadDashboard();
+                if (page === 'mining') loadMiningStatus();
+                if (page === 'transactions') loadAllTransactions();
+                if (page === 'verification') loadVerificationPage();
+                if (page === 'announcements') loadAnnouncements();
+                if (page === 'admin') loadAdminPanel();
+                // Update active nav style
+                document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+                btn.classList.add('active');
+            });
+        });
+        // Set active on dashboard initially
+        document.querySelector('.nav-item[data-page="dashboard"]').classList.add('active');
+    }
+    
+    // ==================== DASHBOARD ====================
+    async function loadDashboard() {
+        try {
+            const result = await callAPI('getDashboardData');
+            const data = result.data;
+            document.getElementById('userName').innerText = data.user.fullName;
+            document.getElementById('dashboardBalance').innerText = data.user.balance.toFixed(2);
+            document.getElementById('walletBalance').innerText = data.user.balance.toFixed(2);
+            const statusSpan = document.getElementById('verificationStatus');
+            if (data.user.isVerified) {
+                statusSpan.innerText = 'Verified';
+                statusSpan.className = 'verified-badge';
+            } else {
+                statusSpan.innerText = 'Not Verified';
+                statusSpan.className = 'pending-badge';
+            }
+            
+            let txHtml = '';
+            if (data.recentTransactions.length === 0) txHtml = '<p>No recent transactions</p>';
+            data.recentTransactions.forEach(tx => {
+                txHtml += `<div class="tx-item">
+                    <span>${tx.txId.substring(0,8)}</span>
+                    <span>${tx.amount} RIDA</span>
+                    <span>${tx.status}</span>
+                </div>`;
+            });
+            document.getElementById('recentTransactions').innerHTML = txHtml;
+        } catch (err) {
+            console.error(err);
+            document.getElementById('recentTransactions').innerHTML = '<p>Error loading transactions</p>';
+        }
+    }
+    
+    // ==================== MINING ====================
+    async function loadMiningStatus() {
+        try {
+            const result = await callAPI('getMiningStatus');
+            const status = result.data;
+            const container = document.getElementById('miningStatusDisplay');
+            const controls = document.getElementById('miningControls');
+            const counterDiv = document.getElementById('miningCounter');
+            
+            if (status.status === 'active') {
+                container.innerHTML = `<p><span class="mining-indicator"></span> Mining Active</p><p>Ends in: <span id="miningTimeLeft"></span></p>`;
+                controls.innerHTML = '';
+                startMiningCounter(status.timeLeft, status.endTime);
+            } else if (status.status === 'claimable') {
+                container.innerHTML = `<p>✅ Mining session complete! You can claim your reward.</p>`;
+                controls.innerHTML = `<button class="btn" onclick="claimReward()">Claim 0.1 RIDA</button>`;
+                counterDiv.innerHTML = '';
+                if (miningInterval) clearInterval(miningInterval);
+            } else {
+                container.innerHTML = `<p>⛏️ Not mining</p>`;
+                controls.innerHTML = `<button class="btn" onclick="startMining()">Start Mining (24h)</button>`;
+                counterDiv.innerHTML = '';
+                if (miningInterval) clearInterval(miningInterval);
+            }
+        } catch (err) {
+            console.error(err);
+            document.getElementById('miningStatusDisplay').innerHTML = '<p>Error loading mining status</p>';
+        }
+    }
+    
+    function startMiningCounter(timeLeftMs, endTimeISO) {
+        if (miningInterval) clearInterval(miningInterval);
+        const endTime = new Date(endTimeISO);
+        const totalReward = 0.1;
+        const totalSeconds = 24 * 3600;
+        
+        function update() {
+            const now = new Date();
+            const remaining = Math.max(0, endTime - now);
+            if (remaining <= 0) {
+                clearInterval(miningInterval);
+                loadMiningStatus();
+                return;
+            }
+            const hours = Math.floor(remaining / (3600*1000));
+            const minutes = Math.floor((remaining % (3600*1000)) / (60*1000));
+            const seconds = Math.floor((remaining % (60*1000)) / 1000);
+            const timeLeftElem = document.getElementById('miningTimeLeft');
+            if (timeLeftElem) timeLeftElem.innerText = `${hours}h ${minutes}m ${seconds}s`;
+            
+            // Simulate earned amount
+            const elapsedSeconds = totalSeconds - (remaining / 1000);
+            const earned = (elapsedSeconds / totalSeconds) * totalReward;
+            const counterDiv = document.getElementById('miningCounter');
+            if (counterDiv) counterDiv.innerHTML = `Earning: ${earned.toFixed(8)} RIDA`;
+        }
+        update();
+        miningInterval = setInterval(update, 1000);
+    }
+    
+    async function startMining() {
+        try {
+            await callAPI('startMining');
+            showNotification('Mining started!');
+            loadMiningStatus();
+        } catch (err) {
+            showNotification(err.message, true);
+        }
+    }
+    
+    async function claimReward() {
+        try {
+            const result = await callAPI('claimMiningReward');
+            showNotification(`Claimed ${result.data.reward} RIDA! New balance: ${result.data.newBalance.toFixed(2)} RIDA`);
+            loadMiningStatus();
+            loadDashboard();
+        } catch (err) {
+            showNotification(err.message, true);
+        }
+    }
+    
+    // ==================== WALLET & TRANSACTIONS ====================
+    async function sendTransaction() {
+        const receiverEmail = document.getElementById('sendEmail').value;
+        const amount = parseFloat(document.getElementById('sendAmount').value);
+        if (!receiverEmail || isNaN(amount) || amount <= 0) {
+            showNotification('Please enter valid recipient and amount', true);
+            return;
+    
