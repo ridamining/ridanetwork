@@ -3,106 +3,149 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RIDA Network | Mining</title>
+    <title>RIDA Network | Pro</title>
     <style>
-        :root { --p: #673ab7; --bg: #0f0c29; --c: #1a1a3a; --accent: #00ffa3; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: white; margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
-        .screen { display: none; flex-direction: column; align-items: center; justify-content: center; height: 100%; padding: 20px; }
-        .active { display: flex; }
-        input { width: 100%; max-width: 300px; padding: 15px; margin: 10px; border-radius: 12px; border: none; background: var(--c); color: white; }
-        .btn { background: var(--p); color: white; padding: 15px; border: none; border-radius: 30px; width: 100%; max-width: 330px; font-weight: bold; cursor: pointer; transition: 0.3s; }
-        .btn:disabled { background: #444; opacity: 0.7; }
-        .circle { width: 240px; height: 240px; border: 8px solid var(--c); border-radius: 50%; margin: 30px auto; display: flex; flex-direction: column; justify-content: center; align-items: center; position: relative; }
-        .mining-active { border-color: var(--accent); box-shadow: 0 0 25px rgba(0, 255, 163, 0.3); animation: pulse 2s infinite; }
-        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.03); } 100% { transform: scale(1); } }
-        #counter { font-size: 2rem; color: var(--accent); font-weight: bold; }
-        .nav { position: fixed; bottom: 0; width: 100%; display: flex; background: var(--c); padding: 15px 0; border-top: 1px solid rgba(255,255,255,0.1); }
-        .nav-item { flex: 1; text-align: center; font-size: 0.8rem; cursor: pointer; }
+        :root { --p: #673ab7; --bg: #0f0c29; --c: #1a1a3a; --accent: #00ffa3; --red: #ff4b2b; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: white; margin: 0; padding-bottom: 80px; }
+        .screen { display: none; padding: 20px; animation: fadeIn 0.3s; }
+        .active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        
+        /* UI Components */
+        .card { background: var(--c); padding: 20px; border-radius: 15px; margin-bottom: 15px; border: 1px solid rgba(255,255,255,0.1); }
+        input { width: 90%; padding: 12px; margin: 10px 0; border-radius: 8px; border: none; background: #2a2a4a; color: white; }
+        .btn { background: var(--p); color: white; padding: 12px; border: none; border-radius: 25px; width: 100%; cursor: pointer; font-weight: bold; }
+        .badge { padding: 4px 10px; border-radius: 10px; font-size: 0.7rem; background: var(--p); }
+
+        /* Mining Circle */
+        .circle { width: 200px; height: 200px; border: 6px solid var(--c); border-radius: 50%; margin: 20px auto; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        .mining-active { border-color: var(--accent); box-shadow: 0 0 20px rgba(0,255,163,0.2); animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.02); } 100% { transform: scale(1); } }
+
+        /* Navigation */
+        .nav { position: fixed; bottom: 0; width: 100%; display: flex; background: #0a0a20; padding: 15px 0; border-top: 1px solid var(--c); z-index: 100; }
+        .nav-item { flex: 1; text-align: center; font-size: 0.75rem; color: #888; cursor: pointer; }
+        .nav-item.active-nav { color: var(--accent); font-weight: bold; }
     </style>
 </head>
 <body>
 
     <div id="loginScreen" class="screen active">
-        <h1 style="letter-spacing: 4px;">RIDA <span style="color:var(--p)">NETWORK</span></h1>
-        <p style="opacity: 0.6;">Enter the future of mobile mining</p>
-        <input type="email" id="email" placeholder="Email Address">
-        <input type="password" id="pass" placeholder="Password">
-        <button class="btn" onclick="login()">LOGIN</button>
+        <h2 style="text-align:center; margin-top: 50px;">RIDA <span style="color:var(--p)">NETWORK</span></h2>
+        <div class="card">
+            <input type="email" id="email" placeholder="Email">
+            <input type="password" id="pass" placeholder="Password">
+            <button class="btn" onclick="login()">ENTER SYSTEM</button>
+        </div>
     </div>
 
-    <div id="dashScreen" class="screen">
-        <div style="width: 100%; max-width: 350px; display: flex; justify-content: space-between; margin-bottom: 20px;">
-            <span id="uName" style="font-weight: bold;">User</span>
-            <span><b id="uBal">0.00</b> RIDA</span>
+    <div id="mineScreen" class="screen">
+        <div style="display:flex; justify-content:space-between; align-items:center">
+            <h3>Mining</h3>
+            <span class="badge" id="uRole">USER</span>
         </div>
-
-        <div id="mineCircle" class="circle">
-            <div id="counter">0.00000000</div>
-            <small style="letter-spacing: 2px; opacity: 0.7;">RIDA / SESSION</small>
+        <div class="circle" id="mineCircle">
+            <div id="counter" style="font-size: 1.8rem; color: var(--accent);">0.00000000</div>
+            <small>RIDA TOTAL</small>
         </div>
+        <button id="mineBtn" class="btn" onclick="startMining()">START 24H SESSION</button>
+    </div>
 
-        <button id="mineBtn" class="btn" onclick="startMining()">START MINING</button>
-
-        <div class="nav">
-            <div class="nav-item">⚡<br>Mining</div>
-            <div class="nav-item" onclick="alert('Wallet coming soon!')">👛<br>Wallet</div>
-            <div class="nav-item" onclick="alert('Verification portal locked.')">🛡️<br>KYC</div>
+    <div id="walletScreen" class="screen">
+        <h3>My Wallet</h3>
+        <div class="card">
+            <small>Available Balance</small>
+            <h1 id="wallBal">0.00 RIDA</h1>
+            <button class="btn" style="background:#2ecc71" onclick="showTransfer()">SEND TOKENS</button>
         </div>
+        <div id="transferBox" style="display:none" class="card">
+            <input type="text" id="targetId" placeholder="Recipient UID">
+            <input type="number" id="sendAmt" placeholder="Amount">
+            <button class="btn" onclick="sendTokens()">CONFIRM TRANSFER</button>
+        </div>
+    </div>
+
+    <div id="kycScreen" class="screen">
+        <h3>Identity Verification</h3>
+        <div class="card">
+            <p>Status: <b id="kycStatus" style="color:var(--red)">UNVERIFIED</b></p>
+            <p style="font-size:0.8rem; opacity:0.7">Verification Fee: $5.00 (Admin Controlled)</p>
+            <button class="btn" onclick="requestKyc()">PAY & VERIFY</button>
+        </div>
+    </div>
+
+    <div id="adminScreen" class="screen">
+        <h3>Admin Control Panel</h3>
+        <div class="card">
+            <h4>Global Supply: 10,000,000</h4>
+            <button class="btn" style="margin-bottom:10px" onclick="loadUsers()">View All Users</button>
+            <button class="btn" style="background:var(--red)" onclick="alert('Resetting sessions...')">Reset Global Mining</button>
+        </div>
+        <div id="userList" class="card" style="font-size:0.8rem">
+            <i>Click "View All Users" to sync with Google Sheets...</i>
+        </div>
+    </div>
+
+    <div class="nav" id="mainNav" style="display:none">
+        <div class="nav-item active-nav" onclick="nav('mineScreen', this)">⚡<br>Mining</div>
+        <div class="nav-item" onclick="nav('walletScreen', this)">👛<br>Wallet</div>
+        <div class="nav-item" onclick="nav('kycScreen', this)">🛡️<br>KYC</div>
+        <div id="adminTab" class="nav-item" style="display:none" onclick="nav('adminScreen', this)">⚙️<br>Admin</div>
     </div>
 
     <script>
         const API_URL = "https://script.google.com/macros/s/AKfycbyD4TrUTAwB7d-QT6FttxZsu2wUew7t9HDYzBRUVhBh_vUZK1vfWkrkxW0BedoZd_C5hA/exec";
-        let userData = null;
-        let localBal = 0;
-
-        async function callAPI(action, data) {
-            const response = await fetch(API_URL, {
-                method: 'POST',
-                mode: 'no-cors', // Essential for Google Scripts on external domains
-                body: JSON.stringify({ action, data })
-            });
-            // Note: 'no-cors' means we can't read the response directly due to browser security
-            // In a production environment, you'd use a proxy or JSONP.
-            return { success: true }; 
-        }
+        let user = null;
+        let balance = 0;
 
         function login() {
             const email = document.getElementById('email').value;
             const pass = document.getElementById('pass').value;
 
-            // Since we're using no-cors for this GitHub demo, we validate admin locally
+            // Simplified for GitHub: Direct admin check
             if(email === "paktrons@gmail.com" && pass === "cocomopakistan") {
-                userData = { name: "Rida Admin", uid: "ADMIN_001", balance: 10000000 };
-                localBal = userData.balance;
-                document.getElementById('uName').innerText = userData.name;
-                document.getElementById('uBal').innerText = localBal.toLocaleString();
-                show('dashScreen');
+                user = { email, role: "ADMIN", name: "Rida Admin", bal: 10000000 };
+                document.getElementById('adminTab').style.display = 'block';
             } else {
-                alert("Access Denied.");
+                user = { email, role: "USER", name: "Miner", bal: 0 };
             }
+
+            balance = user.bal;
+            document.getElementById('uRole').innerText = user.role;
+            document.getElementById('wallBal').innerText = balance.toFixed(2) + " RIDA";
+            document.getElementById('mainNav').style.display = 'flex';
+            nav('mineScreen', document.querySelector('.nav-item'));
+        }
+
+        function nav(id, el) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active-nav'));
+            document.getElementById(id).classList.add('active');
+            el.classList.add('active-nav');
         }
 
         function startMining() {
             const btn = document.getElementById('mineBtn');
-            const circle = document.getElementById('mineCircle');
-            
             btn.disabled = true;
-            btn.innerText = "MINING ACTIVE";
-            circle.classList.add('mining-active');
-
-            // Simulate server-side mining start
-            callAPI('startMining', 'ADMIN_001');
-
+            btn.innerText = "MINING IN PROGRESS...";
+            document.getElementById('mineCircle').classList.add('mining-active');
+            
             setInterval(() => {
-                localBal += (0.1 / 86400);
-                document.getElementById('counter').innerText = (0.1 / 86400 * 10).toFixed(8); // Simulated visual gain
-                document.getElementById('uBal').innerText = localBal.toFixed(4);
+                balance += (0.1 / 86400);
+                document.getElementById('counter').innerText = balance.toFixed(8);
+                document.getElementById('wallBal').innerText = balance.toFixed(2) + " RIDA";
             }, 1000);
         }
 
-        function show(id) {
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
+        function showTransfer() {
+            const box = document.getElementById('transferBox');
+            box.style.display = box.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function requestKyc() {
+            alert("Verification request sent to Admin. Please wait for approval.");
+            document.getElementById('kycStatus').innerText = "PENDING";
+            document.getElementById('kycStatus').style.color = "orange";
         }
     </script>
 </body>
