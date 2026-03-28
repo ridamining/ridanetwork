@@ -3,129 +3,131 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>RIDA NETWORK | DOMINION v5.2</title>
+    <title>RIDA NETWORK | TITANIUM v5.5</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
     <style>
-        :root { --accent: #00f2ff; --bg: #020208; --card: rgba(15, 15, 35, 0.7); }
-        body { background: var(--bg); color: #fff; font-family: 'Space Grotesk', sans-serif; overflow-x: hidden; }
-        .cyber-card { background: var(--card); backdrop-filter: blur(20px); border: 1px solid rgba(0, 242, 255, 0.1); border-radius: 28px; }
-        .btn-glow { background: linear-gradient(90deg, #7000ff, #00f2ff); box-shadow: 0 0 20px rgba(0, 242, 255, 0.3); transition: 0.3s; }
-        .btn-glow:disabled { background: #1a1a2e; box-shadow: none; color: #444; }
-        .page { display: none; padding-bottom: 120px; animation: slideUp 0.3s ease-out; }
+        :root { --accent: #00f2ff; --bg: #03030b; --card: rgba(10, 10, 26, 0.85); }
+        body { background: var(--bg); color: #fff; font-family: 'Space Grotesk', sans-serif; overflow-x: hidden; -webkit-tap-highlight-color: transparent; }
+        .cyber-card { background: var(--card); backdrop-filter: blur(15px); border: 1px solid rgba(0, 242, 255, 0.1); border-radius: 30px; }
+        .btn-glow { background: linear-gradient(135deg, #7000ff, #00f2ff); box-shadow: 0 0 20px rgba(0, 242, 255, 0.3); transition: 0.3s; }
+        .btn-glow:disabled { background: #1a1a2e; box-shadow: none; color: #444; opacity: 0.6; }
+        .page { display: none; padding-bottom: 110px; animation: slideUp 0.35s ease-out; }
         .active-page { display: block; }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .status-tag { font-size: 8px; padding: 3px 12px; border-radius: 100px; text-transform: uppercase; font-weight: 900; letter-spacing: 1px; }
-        .nav-blur { background: rgba(2, 2, 8, 0.95); backdrop-filter: blur(15px); border-top: 1px solid rgba(255,255,255,0.05); }
-        #loader-overlay { background: var(--bg); z-index: 9999; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+        .status-tag { font-size: 8px; padding: 2px 10px; border-radius: 100px; text-transform: uppercase; font-weight: 900; letter-spacing: 1px; }
+        .nav-blur { background: rgba(3, 3, 11, 0.96); backdrop-filter: blur(20px); border-top: 1px solid rgba(255,255,255,0.05); }
+        #global-loader { background: var(--bg); z-index: 10000; position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
     </style>
 </head>
 <body class="p-5">
 
-    <div id="loader-overlay" class="fixed inset-0 flex flex-col items-center justify-center">
-        <div class="w-12 h-12 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin"></div>
-        <p class="mt-4 text-[10px] font-bold tracking-[0.3em] text-cyan-400">ENCRYPTING SESSION...</p>
+    <div id="global-loader">
+        <div class="w-14 h-14 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin"></div>
+        <p class="mt-5 text-[9px] font-black tracking-[0.5em] text-cyan-400 uppercase">Verifying Node Integrity</p>
     </div>
 
-    <div id="authArea" class="hidden min-h-screen flex flex-col justify-center space-y-10">
+    <div id="authArea" class="hidden min-h-screen flex flex-col justify-center space-y-12">
         <div class="text-center">
-            <h1 class="text-6xl font-black italic tracking-tighter">RIDA<span class="text-cyan-400">.</span></h1>
-            <p class="text-cyan-400/50 text-[10px] uppercase tracking-[0.4em] font-bold mt-2">Dominion Protocol v5.2</p>
+            <h1 class="text-7xl font-black italic tracking-tighter">RIDA<span class="text-cyan-400">.</span></h1>
+            <p class="text-cyan-400/40 text-[9px] uppercase tracking-[0.6em] font-bold mt-2">Titanium Core v5.5</p>
         </div>
-        <div class="cyber-card p-8 space-y-4">
-            <div id="regInputs" class="hidden"><input id="uName" type="text" placeholder="Full Name" class="w-full p-4 bg-white/5 border border-white/10 rounded-2xl outline-none"></div>
-            <input id="uEmail" type="email" placeholder="Node Email" class="w-full p-4 bg-white/5 border border-white/10 rounded-2xl outline-none">
-            <input id="uPass" type="password" placeholder="Access Key" class="w-full p-4 bg-white/5 border border-white/10 rounded-2xl outline-none">
-            <button onclick="handleAuth()" class="w-full py-4 btn-glow rounded-2xl font-bold uppercase tracking-widest text-sm">Synchronize</button>
-            <p onclick="toggleAuth()" id="toggleTxt" class="text-center text-xs text-gray-500 cursor-pointer pt-2">New user? <span class="text-cyan-400">Register</span></p>
+        <div class="cyber-card p-10 space-y-5">
+            <div id="regInputs" class="hidden"><input id="uName" type="text" placeholder="Full Name" class="w-full p-4 bg-white/5 border border-white/10 rounded-2xl outline-none focus:border-cyan-400"></div>
+            <input id="uEmail" type="email" placeholder="Node Email" class="w-full p-4 bg-white/5 border border-white/10 rounded-2xl outline-none focus:border-cyan-400">
+            <input id="uPass" type="password" placeholder="Access Key" class="w-full p-4 bg-white/5 border border-white/10 rounded-2xl outline-none focus:border-cyan-400">
+            <button onclick="handleAuth()" class="w-full py-4 btn-glow rounded-2xl font-bold uppercase tracking-widest text-xs">Connect Node</button>
+            <p onclick="toggleAuth()" id="toggleTxt" class="text-center text-xs text-gray-500 cursor-pointer pt-3">No account? <span class="text-cyan-400 font-bold">Register</span></p>
         </div>
     </div>
 
     <div id="appArea" class="hidden">
         <div class="flex justify-between items-center mb-8">
             <div class="flex items-center space-x-3">
-                <div class="w-12 h-12 rounded-2xl btn-glow flex items-center justify-center font-bold text-lg">R</div>
+                <div class="w-12 h-12 rounded-2xl btn-glow flex items-center justify-center font-bold text-lg shadow-lg">R</div>
                 <div>
                     <div class="flex items-center gap-2">
-                        <h2 id="topName" class="font-bold text-sm truncate w-24">---</h2>
+                        <h2 id="topName" class="font-bold text-sm truncate w-24">Miner</h2>
                         <span id="topStatus" class="status-tag">---</span>
                     </div>
                     <p id="topUid" class="text-[9px] text-gray-500 font-mono">---</p>
                 </div>
             </div>
             <div class="text-right">
-                <p class="text-[10px] text-cyan-400 font-bold uppercase">Balance</p>
+                <p class="text-[10px] text-cyan-400 font-bold uppercase tracking-wider">Net Balance</p>
                 <p class="text-2xl font-black text-white" id="topBal">0.00</p>
             </div>
         </div>
 
         <div id="page-home" class="page active-page space-y-6">
-            <div class="cyber-card p-10 flex flex-col items-center space-y-8">
-                <div id="mineCircle" class="w-56 h-56 rounded-full border-[8px] border-white/5 flex flex-col items-center justify-center transition-all">
-                    <span id="liveCounter" class="text-3xl font-bold text-cyan-400">0.00000000</span>
-                    <p class="text-[8px] text-gray-500 mt-2 font-black uppercase">Active Extraction</p>
+            <div class="cyber-card p-12 flex flex-col items-center space-y-10 relative overflow-hidden">
+                <div class="absolute -top-10 -right-10 w-40 h-40 bg-cyan-500/5 blur-[80px]"></div>
+                <div id="mineCircle" class="w-60 h-60 rounded-full border-[8px] border-white/5 flex flex-col items-center justify-center transition-all duration-700">
+                    <span id="liveCounter" class="text-4xl font-bold text-cyan-400">0.00000000</span>
+                    <p class="text-[9px] text-gray-500 mt-3 font-black uppercase tracking-widest">Active Extracting</p>
                 </div>
-                <button onclick="startMining()" id="mineBtn" class="w-full py-5 btn-glow rounded-3xl font-black text-xs uppercase">Initialize Mining</button>
+                <button onclick="startMining()" id="mineBtn" class="w-full py-5 btn-glow rounded-3xl font-black text-xs uppercase tracking-widest">Synchronize Extraction</button>
             </div>
             <div class="cyber-card p-5 border-l-4 border-cyan-400 flex items-center gap-4">
-                <span class="text-xl">📢</span>
-                <p id="newsBox" class="text-xs text-gray-400 italic">Syncing news...</p>
+                <span class="text-2xl">📢</span>
+                <p id="newsBox" class="text-xs text-gray-400 italic">Connecting to node news...</p>
             </div>
         </div>
 
         <div id="page-profile" class="page space-y-4">
-            <div class="cyber-card p-6 space-y-4">
+            <div class="cyber-card p-6 space-y-5">
                 <div class="flex justify-between items-start">
                     <h2 id="profName" class="text-xl font-bold">---</h2>
                     <span id="profStatus" class="status-tag">---</span>
                 </div>
-                <div class="grid grid-cols-2 gap-3 text-center">
-                    <div class="bg-white/5 p-3 rounded-2xl"><p class="text-[8px] text-gray-500 uppercase">Referrals</p><p id="profRef" class="font-bold">0</p></div>
-                    <div class="bg-white/5 p-3 rounded-2xl"><p class="text-[8px] text-gray-500 uppercase">Network</p><p class="font-bold text-[10px] text-cyan-400 uppercase">Live</p></div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="bg-white/5 p-4 rounded-2xl border border-white/5"><p class="text-[8px] text-gray-500 uppercase font-bold">Referrals</p><p id="profRef" class="text-lg font-bold">0</p></div>
+                    <div class="bg-white/5 p-4 rounded-2xl border border-white/5"><p class="text-[8px] text-gray-500 uppercase font-bold">Account</p><p class="text-[10px] font-bold text-cyan-400 uppercase">Platinum</p></div>
                 </div>
-                <div class="bg-black/40 p-4 rounded-2xl border border-white/10">
-                    <p id="refLink" class="text-[10px] font-mono break-all text-gray-500">---</p>
-                    <button onclick="copyRef()" class="mt-3 w-full py-2 bg-white/10 rounded-xl text-[9px] font-bold uppercase">Copy Referral</button>
+                <div class="bg-black/40 p-5 rounded-2xl border border-white/10">
+                    <p class="text-[8px] text-cyan-400 font-bold uppercase mb-2">My Referral Link</p>
+                    <p id="refLink" class="text-[10px] font-mono break-all text-gray-500 mb-4">---</p>
+                    <button onclick="copyRef()" class="w-full py-3 bg-white/5 rounded-xl text-[10px] font-bold uppercase border border-white/5">Copy invitation</button>
                 </div>
-            </div>
-            
-            <div class="flex gap-2">
-                <button onclick="checkVerify('send')" class="flex-1 py-4 cyber-card text-[10px] font-bold uppercase tracking-widest">Send RIDA</button>
-                <button onclick="checkVerify('receive')" class="flex-1 py-4 cyber-card text-[10px] font-bold uppercase tracking-widest">Receive</button>
             </div>
 
-            <div class="cyber-card p-6 space-y-4">
-                <h3 class="text-[10px] font-black uppercase text-cyan-400 tracking-widest">Support Core (Private)</h3>
-                <div id="chatBox" class="h-24 overflow-y-auto text-[10px] space-y-2 pr-2 bg-black/30 p-2 rounded-xl"></div>
+            <div class="flex gap-2">
+                <button onclick="checkVerify('send')" class="flex-1 py-5 cyber-card text-[10px] font-bold uppercase tracking-widest">Send RIDA</button>
+                <button onclick="checkVerify('receive')" class="flex-1 py-5 cyber-card text-[10px] font-bold uppercase tracking-widest">Receive</button>
+            </div>
+
+            <div class="cyber-card p-7 space-y-4">
+                <h3 class="text-[10px] font-black uppercase text-cyan-400 tracking-widest">Encrypted Support Core</h3>
+                <div id="chatBox" class="h-32 overflow-y-auto text-[10px] space-y-3 pr-2 bg-black/40 p-3 rounded-2xl border border-white/5"></div>
                 <div class="flex gap-2">
-                    <input id="chatInput" type="text" placeholder="Message Admin..." class="flex-1 p-3 bg-white/5 border border-white/10 rounded-xl text-xs outline-none">
-                    <button onclick="sendMsg()" class="px-5 py-3 btn-glow rounded-xl text-[10px] font-bold uppercase">Send</button>
+                    <input id="chatInput" type="text" placeholder="Message Admin..." class="flex-1 p-4 bg-white/5 border border-white/10 rounded-2xl text-xs outline-none focus:border-cyan-400">
+                    <button onclick="sendMsg()" class="px-6 py-4 btn-glow rounded-2xl text-[10px] font-bold uppercase">Send</button>
                 </div>
             </div>
-            <button onclick="logout()" class="w-full py-4 text-red-500 text-[10px] font-bold uppercase opacity-30">Logout Session</button>
+            <button onclick="logout()" class="w-full py-4 text-red-500 text-[9px] font-black uppercase tracking-widest opacity-40">Disconnect Node</button>
         </div>
 
         <div id="page-admin" class="page space-y-6">
-            <h1 class="text-3xl font-black text-cyan-400 italic">OVERLORD PANEL</h1>
+            <h1 class="text-3xl font-black text-cyan-400 italic">TITANIUM OVERLORD</h1>
             <div class="cyber-card p-6 space-y-4">
-                <h3 class="text-xs font-bold uppercase">Global Broadcast</h3>
-                <textarea id="admMsg" class="w-full p-4 bg-white/5 border border-white/10 rounded-2xl text-xs h-24 outline-none" placeholder="Broadcast message..."></textarea>
-                <button onclick="adminBroadcast()" class="w-full py-4 btn-glow rounded-xl font-bold uppercase text-xs">Push Globally</button>
+                <h3 class="text-xs font-bold uppercase">Network Broadcast</h3>
+                <textarea id="admMsg" class="w-full p-4 bg-white/5 border border-white/10 rounded-2xl text-xs h-28 outline-none" placeholder="Broadcast to all users..."></textarea>
+                <button onclick="adminBroadcast()" class="w-full py-5 btn-glow rounded-xl font-bold uppercase text-xs">Execute Broadcast</button>
             </div>
             <div class="cyber-card p-6 space-y-4">
-                <h3 class="text-xs font-bold uppercase">User Manipulation</h3>
-                <input id="admUid" type="text" placeholder="Target UID" class="w-full p-4 bg-white/5 border border-white/10 rounded-xl text-xs outline-none">
-                <input id="admBal" type="number" placeholder="New Balance" class="w-full p-4 bg-white/5 border border-white/10 rounded-xl text-xs outline-none">
+                <h3 class="text-xs font-bold uppercase">Database Mutation</h3>
+                <input id="admUid" type="text" placeholder="Target UID (RIDA-XXXXX)" class="w-full p-4 bg-white/5 border border-white/10 rounded-xl text-xs outline-none">
+                <input id="admBal" type="number" placeholder="Override Balance" class="w-full p-4 bg-white/5 border border-white/10 rounded-xl text-xs outline-none">
                 <select id="admVerify" class="w-full p-4 bg-slate-900 border border-white/10 rounded-xl text-xs outline-none">
-                    <option value="">Set Verify Status</option>
+                    <option value="">Status Override</option>
                     <option value="TRUE">VERIFIED</option>
                     <option value="FALSE">UNVERIFIED</option>
                 </select>
-                <button onclick="adminUpdate()" class="w-full py-4 bg-emerald-500/20 text-emerald-400 border border-emerald-500/50 rounded-xl font-bold uppercase text-xs">Apply Change</button>
+                <button onclick="adminUpdate()" class="w-full py-5 bg-emerald-500/20 text-emerald-400 border border-emerald-500/50 rounded-xl font-bold uppercase text-xs">Commit Changes</button>
             </div>
         </div>
 
-        <div id="navBar" class="fixed bottom-0 left-0 w-full nav-blur flex justify-around p-4 z-50">
+        <div id="navBar" class="fixed bottom-0 left-0 w-full nav-blur flex justify-around p-5 z-50">
             <button onclick="switchTab('home', this)" class="text-center text-cyan-400"><span class="block text-2xl">⚡</span><span class="text-[9px] font-bold uppercase">Mining</span></button>
             <button onclick="switchTab('profile', this)" class="text-center text-gray-500"><span class="block text-2xl">👤</span><span class="text-[9px] font-bold uppercase">Profile</span></button>
             <button id="adminTab" onclick="switchTab('admin', this)" style="display:none;" class="text-center text-red-500"><span class="block text-2xl">⚙️</span><span class="text-[9px] font-bold uppercase">Admin</span></button>
@@ -133,27 +135,30 @@
     </div>
 
     <script>
-        const API = "https://script.google.com/macros/s/AKfycbyYAxsGl8_gYaZ9SIWnoJATA6tMpmc5EFfmi3VKjIci2o5sndHWjGeDqGEdiX-3BSrKhQ/exec";
-        let user = JSON.parse(localStorage.getItem('rida_dominion_52'));
+        const API = "https://script.google.com/macros/s/AKfycbySAcsZ_JMBM6mHnKpw_v9D8JMHMdnsyKZiwi57nakK_QYu_ysZYSiJ_eIuwAookW0OZQ/exec";
+        let user = JSON.parse(localStorage.getItem('rida_titanium_55'));
         let isReg = false;
         let sessionBal = 0;
 
         window.onload = () => { if(user) syncSession(); else hideLoader(); };
 
-        function hideLoader() { document.getElementById('loader-overlay').style.display = 'none'; document.getElementById('authArea').classList.remove('hidden'); }
+        function hideLoader() { 
+            document.getElementById('global-loader').style.display = 'none'; 
+            document.getElementById('authArea').classList.remove('hidden'); 
+        }
 
         function syncSession() {
             server('sync', { email: user.email }, (res) => {
                 if(res.success) {
                     user = res.user;
-                    localStorage.setItem('rida_dominion_52', JSON.stringify(user));
+                    localStorage.setItem('rida_titanium_55', JSON.stringify(user));
                     initApp(res.news);
                 } else logout();
             });
         }
 
         function initApp(news) {
-            document.getElementById('loader-overlay').style.display = 'none';
+            document.getElementById('global-loader').style.display = 'none';
             document.getElementById('authArea').classList.add('hidden');
             document.getElementById('appArea').classList.remove('hidden');
             
@@ -174,7 +179,7 @@
             document.getElementById('profRef').innerText = user.refCount || 0;
             document.getElementById('refLink').innerText = window.location.origin + window.location.pathname + "?ref=" + user.uid;
             
-            // STRICT ADMIN LOCK
+            // TITANIUM SECURITY LOCK: Physically verify Role before enabling Admin tab
             if(String(user.role).toUpperCase() === "ADMIN") {
                 document.getElementById('adminTab').style.display = "block";
             }
@@ -183,21 +188,21 @@
         function handleAuth() {
             const email = document.getElementById('uEmail').value;
             const pass = document.getElementById('uPass').value;
-            if(!email || !pass) return alert("Required fields missing");
+            if(!email || !pass) return alert("Security Error: Credentials Required");
 
             server(isReg ? 'register' : 'login', { email, pass, name: document.getElementById('uName').value, ref: new URLSearchParams(window.location.search).get('ref') || "none" }, (res) => {
                 if(res.success) {
-                    if(isReg) { alert("Registration complete! Login to access node."); toggleAuth(); }
-                    else { user = res.user; localStorage.setItem('rida_dominion_52', JSON.stringify(user)); location.reload(); }
-                } else alert(res.msg || "Error Connecting to Node");
+                    if(isReg) { alert("Registration Success. Authorizing Node..."); toggleAuth(); }
+                    else { user = res.user; localStorage.setItem('rida_titanium_55', JSON.stringify(user)); location.reload(); }
+                } else alert(res.msg || "Access Denied: Node Connection Failure");
             });
         }
 
         function startMining() {
             const btn = document.getElementById('mineBtn');
-            btn.disabled = true; btn.innerText = "EXTRACTION IN PROGRESS";
+            btn.disabled = true; btn.innerText = "MINING CORE ACTIVE";
             document.getElementById('mineCircle').style.borderColor = "#00f2ff";
-            document.getElementById('mineCircle').style.boxShadow = "0 0 30px rgba(0,242,255,0.2)";
+            document.getElementById('mineCircle').style.boxShadow = "0 0 50px rgba(0,242,255,0.15)";
             setInterval(() => {
                 sessionBal += (0.1 / 86400);
                 document.getElementById('topBal').innerText = sessionBal.toFixed(4);
@@ -207,25 +212,26 @@
 
         function checkVerify(type) {
             if(String(user.verified).toUpperCase() !== "TRUE") {
-                alert("🔴 NODE ACCESS RESTRICTED\n\nYou must be a verified user to use this service. Send a message to Support Chat to begin verification.");
-            } else { alert("Transfer System Initializing..."); }
+                alert("⚠️ NODE VERIFICATION REQUIRED\n\nYour account is currently restricted. Please message Admin via the Support Chat below to verify your node status.");
+            } else { alert("Secure Transfer Bridge Loading..."); }
         }
 
         function sendMsg() {
             const t = document.getElementById('chatInput').value;
             if(!t) return;
             server('sendMessage', { uid: user.uid, sender: user.name, text: t }, () => {
-                document.getElementById('chatBox').innerHTML += `<div class='text-right mb-2'><span class='bg-cyan-500/20 p-2 rounded-xl text-cyan-400'>${t}</span></div>`;
+                document.getElementById('chatBox').innerHTML += `<div class='text-right mb-3'><span class='bg-cyan-500/10 p-3 rounded-2xl text-cyan-400 border border-cyan-400/20'>${t}</span></div>`;
                 document.getElementById('chatInput').value = "";
+                document.getElementById('chatBox').scrollTop = document.getElementById('chatBox').scrollHeight;
             });
         }
 
-        function adminBroadcast() { server('broadcast', { text: document.getElementById('admMsg').value }, () => alert("Pushed Globally!")); }
+        function adminBroadcast() { server('broadcast', { text: document.getElementById('admMsg').value }, () => alert("Broadcast Commited to Node!")); }
 
         function adminUpdate() {
             server('adminUpdateUser', { targetUid: document.getElementById('admUid').value, newBal: document.getElementById('admBal').value, setVerify: document.getElementById('admVerify').value }, (res) => {
-                if(res.success) alert("User Database Updated!");
-                else alert(res.msg);
+                if(res.success) alert("Database Mutation Success!");
+                else alert("Target UID Not Found");
             });
         }
 
@@ -241,10 +247,10 @@
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active-page'));
             document.getElementById('page-' + t).classList.add('active-page');
             document.querySelectorAll('#navBar button').forEach(b => b.className = "text-center text-gray-500");
-            el.className = t === 'admin' ? "text-center text-red-500 font-bold" : "text-center text-cyan-400 font-bold";
+            el.className = t === 'admin' ? "text-center text-red-500 font-black" : "text-center text-cyan-400 font-black";
         }
 
-        function copyRef() { navigator.clipboard.writeText(document.getElementById('refLink').innerText); alert("Invite Link Copied!"); }
+        function copyRef() { navigator.clipboard.writeText(document.getElementById('refLink').innerText); alert("Invite Bridge Copied!"); }
         function toggleAuth() { isReg = !isReg; document.getElementById('regInputs').classList.toggle('hidden'); }
         function logout() { localStorage.clear(); location.reload(); }
     </script>
