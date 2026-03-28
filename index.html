@@ -1,105 +1,159 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RIDA Network | Official</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { background: #0f0c29; color: white; font-family: sans-serif; }
-        .glass { background: rgba(255,255,255,0.05); backdrop-filter: blur(10px); border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); }
-        .loader { border: 3px solid #f3f3f3; border-top: 3px solid #673ab7; border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; display: inline-block; vertical-align: middle; margin-right: 8px; }
+        :root { --p: #673ab7; --bg: #0f0c29; --c: #1a1a3a; --accent: #00ffa3; }
+        body { background: var(--bg); color: white; font-family: sans-serif; margin: 0; overflow-x: hidden; }
+        .glass { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(12px); border-radius: 24px; border: 1px solid rgba(255,255,255,0.1); }
+        .mining-circle { width: 220px; height: 220px; border: 8px solid #1a1a3a; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-direction: column; position: relative; }
+        .active-mine { border-color: var(--accent); box-shadow: 0 0 30px rgba(0, 255, 163, 0.3); animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.02); } 100% { transform: scale(1); } }
+        .loader { border: 3px solid transparent; border-top: 3px solid var(--accent); border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; display: inline-block; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        input { background: #1a1a3a !important; color: white !important; border: 1px solid rgba(255,255,255,0.1) !important; }
     </style>
 </head>
 <body class="p-6">
 
-    <div id="authBox" class="block space-y-6 pt-10">
-        <h1 class="text-3xl font-bold text-center italic">RIDA <span class="text-purple-500">NETWORK</span></h1>
+    <div id="authScreen" class="block pt-10 space-y-6">
+        <div class="text-center">
+            <h1 class="text-4xl font-black italic tracking-tighter">RIDA <span class="text-purple-500">NETWORK</span></h1>
+            <p class="text-gray-400 text-sm mt-2">Mobile Social Mining</p>
+        </div>
+
         <div class="glass p-6 space-y-4">
-            <div id="regOnly" class="hidden"><input id="uName" type="text" placeholder="Full Name" class="w-full p-4 bg-slate-800 rounded-xl outline-none"></div>
-            <input id="uEmail" type="email" placeholder="Email" class="w-full p-4 bg-slate-800 rounded-xl outline-none">
-            <input id="uPass" type="password" placeholder="Password" class="w-full p-4 bg-slate-800 rounded-xl outline-none">
-            <button onclick="runAuth()" id="btnText" class="w-full py-4 bg-purple-600 rounded-xl font-bold">LOGIN</button>
-            <p id="status" class="text-center text-xs text-red-400"></p>
-            <p onclick="toggleMode()" id="toggle" class="text-center text-sm text-cyan-400 cursor-pointer">Need an account? Register</p>
+            <div id="regOnly" class="hidden">
+                <input id="uName" type="text" placeholder="Full Name" class="w-full p-4 rounded-xl outline-none">
+            </div>
+            <input id="uEmail" type="email" placeholder="Email Address" class="w-full p-4 rounded-xl outline-none">
+            <input id="uPass" type="password" placeholder="Password" class="w-full p-4 rounded-xl outline-none">
+            
+            <button onclick="handleAuth()" id="authBtn" class="w-full py-4 bg-purple-600 rounded-xl font-bold shadow-lg active:scale-95 transition">LOGIN</button>
+            
+            <div id="statusMsg" class="text-center text-xs h-4"></div>
+            <p onclick="toggleAuth()" id="toggleLabel" class="text-center text-sm text-cyan-400 cursor-pointer">New user? Create an account</p>
         </div>
     </div>
 
-    <div id="mainApp" class="hidden space-y-6">
+    <div id="appScreen" class="hidden space-y-6">
         <div class="flex justify-between items-center">
-            <h2 id="hello" class="font-bold">Miner</h2>
-            <div class="text-right text-emerald-400 font-bold"><span id="bal">0.00</span> RIDA</div>
+            <div>
+                <h2 id="dispName" class="font-bold">Miner</h2>
+                <p id="dispRole" class="text-[10px] text-purple-400 uppercase font-bold tracking-widest">USER</p>
+            </div>
+            <div class="text-right">
+                <p class="text-[10px] opacity-50 uppercase">Balance</p>
+                <p class="text-lg font-bold text-emerald-400"><span id="dispBal">0.00</span> RIDA</p>
+            </div>
         </div>
-        <div class="glass p-10 text-center space-y-6">
-            <div class="text-4xl font-mono text-emerald-400" id="counter">0.00000000</div>
-            <button id="mineBtn" onclick="mine()" class="px-10 py-4 bg-purple-600 rounded-full font-bold">START MINING</button>
+
+        <div class="glass p-10 flex flex-col items-center space-y-6">
+            <div id="mineCircle" class="mining-circle">
+                <span id="liveCounter" class="text-3xl font-mono font-bold text-emerald-400">0.00000000</span>
+                <span class="text-[10px] opacity-40 tracking-widest mt-1">RIDA / SESSION</span>
+            </div>
+            <button id="mineBtn" onclick="startMiningSession()" class="px-12 py-4 bg-purple-600 rounded-full font-bold shadow-xl active:scale-90 transition">START MINING</button>
+        </div>
+
+        <div id="adminPanel" class="hidden glass p-5 space-y-4 border-l-4 border-red-500">
+            <h3 class="text-sm font-bold uppercase text-red-400">Admin Control</h3>
+            <textarea id="newsInput" placeholder="Post global announcement..." class="w-full p-3 bg-slate-800 rounded-xl text-xs h-20 outline-none"></textarea>
+            <button onclick="postNews()" class="w-full py-2 bg-red-600 rounded-lg text-xs font-bold">PUBLISH NEWS</button>
         </div>
     </div>
 
     <script>
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwZbBQejZauENymXM1JIY7dEyo0qVgWh6dQ2nSwY-H-E-UYhV23l1bTYsczIE73k3JFgA/exec";
-        let isReg = false;
-        let user = null;
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz26_-wW278VShQVzGkG1WDINW5DyeggqEdE80JXVm13HxWgEAbXzUvMKcg_5IIKQnymA/exec";
+        let isRegister = false;
+        let currentUser = null;
+        let sessionBalance = 0;
 
-        function toggleMode() {
-            isReg = !isReg;
-            document.getElementById('regOnly').style.display = isReg ? 'block' : 'none';
-            document.getElementById('btnText').innerText = isReg ? 'CREATE ACCOUNT' : 'LOGIN';
+        function toggleAuth() {
+            isRegister = !isRegister;
+            document.getElementById('regOnly').classList.toggle('hidden');
+            document.getElementById('authBtn').innerText = isRegister ? "REGISTER" : "LOGIN";
+            document.getElementById('toggleLabel').innerText = isRegister ? "Already have an account? Login" : "New user? Create an account";
         }
 
-        // THE ENGINE: This reaches out to your Google Sheet and WAITS for an answer
-        function serverRequest(action, payload, callback) {
-            const loader = '<span class="loader"></span> Connecting...';
-            document.getElementById('status').innerHTML = loader;
+        // The Engine: JSONP Bridge for Organic Data
+        function callBackend(action, payload, callback) {
+            document.getElementById('statusMsg').innerHTML = '<div class="loader"></div>';
             
-            const script = document.createElement('script');
-            const funcName = 'jsonp_' + Math.round(Math.random() * 1000000);
-            
-            window[funcName] = (data) => {
-                delete window[funcName];
+            const callbackName = 'jsonp_' + Math.round(Math.random() * 1000000);
+            window[callbackName] = function(data) {
+                delete window[callbackName];
                 document.body.removeChild(script);
+                document.getElementById('statusMsg').innerHTML = '';
                 callback(data);
             };
 
-            script.src = `${SCRIPT_URL}?callback=${funcName}&action=${action}&payload=${encodeURIComponent(JSON.stringify(payload))}`;
+            const script = document.createElement('script');
+            const encodedPayload = encodeURIComponent(JSON.stringify(payload));
+            script.src = `${SCRIPT_URL}?callback=${callbackName}&action=${action}&payload=${encodedPayload}`;
             document.body.appendChild(script);
         }
 
-        function runAuth() {
+        function handleAuth() {
             const email = document.getElementById('uEmail').value;
             const pass = document.getElementById('uPass').value;
             const name = document.getElementById('uName').value;
-            const action = isReg ? 'register' : 'login';
+            const action = isRegister ? 'register' : 'login';
 
-            serverRequest(action, { email, pass, name }, (res) => {
+            if(!email || !pass) return alert("Fill all fields");
+
+            callBackend(action, { email, pass, name }, (res) => {
                 if (res.success) {
-                    if(isReg) {
+                    if (isRegister) {
                         alert("Account Created! You can now login.");
-                        toggleMode();
-                        document.getElementById('status').innerText = "";
+                        toggleAuth();
                     } else {
-                        user = res.user;
-                        document.getElementById('hello').innerText = user.name;
-                        document.getElementById('bal').innerText = parseFloat(user.bal).toFixed(2);
-                        document.getElementById('authBox').classList.add('hidden');
-                        document.getElementById('mainApp').classList.remove('hidden');
+                        currentUser = res.user;
+                        document.getElementById('dispName').innerText = currentUser.name;
+                        document.getElementById('dispRole').innerText = currentUser.role;
+                        sessionBalance = parseFloat(currentUser.bal);
+                        document.getElementById('dispBal').innerText = sessionBalance.toFixed(2);
+                        
+                        if(currentUser.role === "ADMIN") document.getElementById('adminPanel').classList.remove('hidden');
+                        
+                        document.getElementById('authScreen').classList.add('hidden');
+                        document.getElementById('appScreen').classList.remove('hidden');
                     }
                 } else {
-                    document.getElementById('status').innerText = res.msg || "Error!";
+                    document.getElementById('statusMsg').innerText = res.msg || "Error!";
+                    document.getElementById('statusMsg').className = "text-center text-xs text-red-500";
                 }
             });
         }
 
-        function mine() {
+        function startMiningSession() {
             const btn = document.getElementById('mineBtn');
             btn.disabled = true;
             btn.innerText = "MINING...";
             
-            serverRequest('startMining', { uid: user.uid }, (res) => {
-                let current = 0;
+            callBackend('startMining', { uid: currentUser.uid }, (res) => {
+                btn.innerText = "MINING ACTIVE";
+                btn.classList.add('opacity-50');
+                document.getElementById('mineCircle').classList.add('active-mine');
+                
+                // Organic 0.1 RIDA / 24h gain
+                const rate = 0.1 / 86400;
                 setInterval(() => {
-                    current += (0.1 / 86400);
-                    document.getElementById('counter').innerText = current.toFixed(8);
+                    sessionBalance += rate;
+                    document.getElementById('liveCounter').innerText = (sessionBalance - parseFloat(currentUser.bal)).toFixed(8);
+                    document.getElementById('dispBal').innerText = sessionBalance.toFixed(4);
                 }, 1000);
+            });
+        }
+
+        function postNews() {
+            const text = document.getElementById('newsInput').value;
+            callBackend('postAnnouncement', { text: text }, (res) => {
+                alert("Announcement Published!");
+                document.getElementById('newsInput').value = "";
             });
         }
     </script>
