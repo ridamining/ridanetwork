@@ -3,149 +3,221 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RIDA Network | Pro</title>
+    <title>RIDA Network | Official</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        :root { --p: #673ab7; --bg: #0f0c29; --c: #1a1a3a; --accent: #00ffa3; --red: #ff4b2b; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: white; margin: 0; padding-bottom: 80px; }
-        .screen { display: none; padding: 20px; animation: fadeIn 0.3s; }
-        .active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        :root { --primary: #673ab7; --bg: #0f0c29; --card: #1a1a3a; --accent: #00ffa3; }
+        body { background: var(--bg); color: white; font-family: 'Inter', sans-serif; margin: 0; padding-bottom: 80px; transition: 0.3s; }
+        .glass { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(12px); border-radius: 24px; border: 1px solid rgba(255,255,255,0.1); }
         
-        /* UI Components */
-        .card { background: var(--c); padding: 20px; border-radius: 15px; margin-bottom: 15px; border: 1px solid rgba(255,255,255,0.1); }
-        input { width: 90%; padding: 12px; margin: 10px 0; border-radius: 8px; border: none; background: #2a2a4a; color: white; }
-        .btn { background: var(--p); color: white; padding: 12px; border: none; border-radius: 25px; width: 100%; cursor: pointer; font-weight: bold; }
-        .badge { padding: 4px 10px; border-radius: 10px; font-size: 0.7rem; background: var(--p); }
-
-        /* Mining Circle */
-        .circle { width: 200px; height: 200px; border: 6px solid var(--c); border-radius: 50%; margin: 20px auto; display: flex; flex-direction: column; justify-content: center; align-items: center; }
-        .mining-active { border-color: var(--accent); box-shadow: 0 0 20px rgba(0,255,163,0.2); animation: pulse 2s infinite; }
-        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.02); } 100% { transform: scale(1); } }
-
+        /* Mining Animation */
+        .mining-circle { width: 220px; height: 220px; border: 8px solid #1a1a3a; border-radius: 50%; position: relative; display: flex; align-items: center; justify-content: center; flex-direction: column; transition: 0.5s; }
+        .active-mine { border-color: var(--accent); box-shadow: 0 0 30px rgba(0, 255, 163, 0.2); animation: pulse 2.5s infinite; }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.03); } 100% { transform: scale(1); } }
+        
         /* Navigation */
-        .nav { position: fixed; bottom: 0; width: 100%; display: flex; background: #0a0a20; padding: 15px 0; border-top: 1px solid var(--c); z-index: 100; }
-        .nav-item { flex: 1; text-align: center; font-size: 0.75rem; color: #888; cursor: pointer; }
-        .nav-item.active-nav { color: var(--accent); font-weight: bold; }
+        .nav-bar { position: fixed; bottom: 0; left: 0; width: 100%; background: #0a0a20; display: flex; border-top: 1px solid rgba(255,255,255,0.1); z-index: 100; }
+        .nav-item { flex: 1; text-align: center; padding: 12px 0; font-size: 11px; color: #888; cursor: pointer; transition: 0.2s; }
+        .nav-item.active { color: var(--accent); font-weight: bold; }
+        
+        /* Input styling */
+        input, textarea { background: #2a2a4a !important; color: white !important; border: 1px solid rgba(255,255,255,0.1) !important; }
+        input::placeholder { color: rgba(255,255,255,0.4); }
     </style>
 </head>
-<body>
+<body class="p-4">
 
-    <div id="loginScreen" class="screen active">
-        <h2 style="text-align:center; margin-top: 50px;">RIDA <span style="color:var(--p)">NETWORK</span></h2>
-        <div class="card">
-            <input type="email" id="email" placeholder="Email">
-            <input type="password" id="pass" placeholder="Password">
-            <button class="btn" onclick="login()">ENTER SYSTEM</button>
+    <div id="authScreen" class="block pt-12 space-y-6">
+        <div class="text-center">
+            <h1 class="text-4xl font-black tracking-tighter italic">RIDA <span class="text-purple-500">NETWORK</span></h1>
+            <p class="text-gray-400 text-sm mt-2">The future of social mining</p>
+        </div>
+
+        <div class="glass p-6 space-y-4">
+            <div id="regFields" class="hidden space-y-4">
+                <input id="userName" type="text" placeholder="Full Name" class="w-full p-4 rounded-xl outline-none">
+            </div>
+            <input id="userEmail" type="email" placeholder="Email Address" class="w-full p-4 rounded-xl outline-none">
+            <input id="userPass" type="password" placeholder="Password" class="w-full p-4 rounded-xl outline-none">
+            
+            <button onclick="submitAuth()" id="authBtn" class="w-full py-4 bg-purple-600 rounded-xl font-bold shadow-lg active:scale-95 transition">LOGIN</button>
+            
+            <p onclick="toggleAuth()" class="text-center text-sm text-cyan-400 cursor-pointer pt-2" id="toggleLabel">Don't have an account? Register</p>
         </div>
     </div>
 
-    <div id="mineScreen" class="screen">
-        <div style="display:flex; justify-content:space-between; align-items:center">
-            <h3>Mining</h3>
-            <span class="badge" id="uRole">USER</span>
+    <div id="appScreen" class="hidden">
+        <div class="flex justify-between items-center mb-6">
+            <div class="flex items-center space-x-2">
+                <div class="w-10 h-10 rounded-full bg-purple-600 flex items-center justify-center font-bold">R</div>
+                <div>
+                    <h2 id="nameLabel" class="text-sm font-bold">User</h2>
+                    <p id="roleLabel" class="text-[10px] text-purple-400 uppercase tracking-widest">Miner</p>
+                </div>
+            </div>
+            <div class="text-right">
+                <p class="text-[10px] opacity-50 uppercase">Balance</p>
+                <p class="text-lg font-bold text-emerald-400"><span id="balanceLabel">0.00</span> RIDA</p>
+            </div>
         </div>
-        <div class="circle" id="mineCircle">
-            <div id="counter" style="font-size: 1.8rem; color: var(--accent);">0.00000000</div>
-            <small>RIDA TOTAL</small>
-        </div>
-        <button id="mineBtn" class="btn" onclick="startMining()">START 24H SESSION</button>
-    </div>
 
-    <div id="walletScreen" class="screen">
-        <h3>My Wallet</h3>
-        <div class="card">
-            <small>Available Balance</small>
-            <h1 id="wallBal">0.00 RIDA</h1>
-            <button class="btn" style="background:#2ecc71" onclick="showTransfer()">SEND TOKENS</button>
-        </div>
-        <div id="transferBox" style="display:none" class="card">
-            <input type="text" id="targetId" placeholder="Recipient UID">
-            <input type="number" id="sendAmt" placeholder="Amount">
-            <button class="btn" onclick="sendTokens()">CONFIRM TRANSFER</button>
-        </div>
-    </div>
+        <div id="page-mining" class="page-content block">
+            <div class="glass p-8 flex flex-col items-center justify-center space-y-6">
+                <div id="mineCircle" class="mining-circle">
+                    <span id="miningCounter" class="text-3xl font-mono font-bold text-emerald-400">0.00000000</span>
+                    <span class="text-[10px] opacity-40 mt-1 tracking-widest">EARNED TODAY</span>
+                </div>
+                
+                <div class="text-center">
+                    <button id="mineBtn" onclick="initiateMining()" class="px-12 py-4 bg-purple-600 rounded-full font-bold text-lg shadow-xl hover:bg-purple-500 transition active:scale-90">START MINING</button>
+                    <p id="miningStatus" class="text-xs text-gray-500 mt-4 italic">Tap the button to start your 24h session</p>
+                </div>
+            </div>
 
-    <div id="kycScreen" class="screen">
-        <h3>Identity Verification</h3>
-        <div class="card">
-            <p>Status: <b id="kycStatus" style="color:var(--red)">UNVERIFIED</b></p>
-            <p style="font-size:0.8rem; opacity:0.7">Verification Fee: $5.00 (Admin Controlled)</p>
-            <button class="btn" onclick="requestKyc()">PAY & VERIFY</button>
+            <div class="glass p-5 mt-4 border-l-4 border-purple-500">
+                <p class="text-[10px] font-bold text-purple-400 uppercase">Announcement</p>
+                <p id="annText" class="text-sm mt-1 leading-relaxed">Welcome to RIDA Network. Complete your KYC to unlock transfers!</p>
+            </div>
         </div>
-    </div>
 
-    <div id="adminScreen" class="screen">
-        <h3>Admin Control Panel</h3>
-        <div class="card">
-            <h4>Global Supply: 10,000,000</h4>
-            <button class="btn" style="margin-bottom:10px" onclick="loadUsers()">View All Users</button>
-            <button class="btn" style="background:var(--red)" onclick="alert('Resetting sessions...')">Reset Global Mining</button>
+        <div id="page-wallet" class="page-content hidden space-y-4">
+            <div class="glass p-6">
+                <p class="text-xs opacity-50 uppercase">Total Assets</p>
+                <h1 id="walletBal" class="text-4xl font-bold mt-1">0.00 RIDA</h1>
+            </div>
+            
+            <div class="glass p-6 space-y-4">
+                <h3 class="font-bold">Send RIDA</h3>
+                <input id="sendUID" type="text" placeholder="Recipient UID" class="w-full p-4 rounded-xl outline-none">
+                <input id="sendAmount" type="number" placeholder="Amount" class="w-full p-4 rounded-xl outline-none">
+                <button onclick="alert('Verification required!')" class="w-full py-4 bg-emerald-600 rounded-xl font-bold">SEND TOKENS</button>
+            </div>
         </div>
-        <div id="userList" class="card" style="font-size:0.8rem">
-            <i>Click "View All Users" to sync with Google Sheets...</i>
-        </div>
-    </div>
 
-    <div class="nav" id="mainNav" style="display:none">
-        <div class="nav-item active-nav" onclick="nav('mineScreen', this)">⚡<br>Mining</div>
-        <div class="nav-item" onclick="nav('walletScreen', this)">👛<br>Wallet</div>
-        <div class="nav-item" onclick="nav('kycScreen', this)">🛡️<br>KYC</div>
-        <div id="adminTab" class="nav-item" style="display:none" onclick="nav('adminScreen', this)">⚙️<br>Admin</div>
+        <div id="page-admin" class="page-content hidden space-y-4">
+            <h3 class="font-bold text-xl">Command Center</h3>
+            <div class="glass p-5 space-y-4">
+                <p class="text-xs font-bold uppercase text-purple-400">Broadcaster</p>
+                <textarea id="adminNews" placeholder="Post new announcement to all users..." class="w-full p-4 rounded-xl h-24 outline-none resize-none"></textarea>
+                <button onclick="postAnnouncement()" class="w-full py-3 bg-purple-600 rounded-xl font-bold">PUBLISH NEWS</button>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+                <div class="glass p-4 text-center">
+                    <p class="text-[10px] opacity-50">KYC PENDING</p>
+                    <p class="text-lg font-bold">0</p>
+                </div>
+                <div class="glass p-4 text-center">
+                    <p class="text-[10px] opacity-50">TX PENDING</p>
+                    <p class="text-lg font-bold">0</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="nav-bar">
+            <div onclick="switchTab('mining', this)" class="nav-item active">⚡<br>Mining</div>
+            <div onclick="switchTab('wallet', this)" class="nav-item">👛<br>Wallet</div>
+            <div onclick="alert('KYC Portal Opening Soon')" class="nav-item">🛡️<br>KYC</div>
+            <div id="adminTab" onclick="switchTab('admin', this)" class="nav-item hidden">⚙️<br>Admin</div>
+        </div>
     </div>
 
     <script>
-        const API_URL = "https://script.google.com/macros/s/AKfycbyD4TrUTAwB7d-QT6FttxZsu2wUew7t9HDYzBRUVhBh_vUZK1vfWkrkxW0BedoZd_C5hA/exec";
-        let user = null;
-        let balance = 0;
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwZbBQejZauENymXM1JIY7dEyo0qVgWh6dQ2nSwY-H-E-UYhV23l1bTYsczIE73k3JFgA/exec";
+        let isRegisterMode = false;
+        let currentUser = null;
+        let sessionBalance = 0;
 
-        function login() {
-            const email = document.getElementById('email').value;
-            const pass = document.getElementById('pass').value;
+        function toggleAuth() {
+            isRegisterMode = !isRegisterMode;
+            document.getElementById('regFields').classList.toggle('hidden');
+            document.getElementById('authBtn').innerText = isRegisterMode ? "REGISTER" : "LOGIN";
+            document.getElementById('toggleLabel').innerText = isRegisterMode ? "Already have an account? Login" : "Don't have an account? Register";
+        }
 
-            // Simplified for GitHub: Direct admin check
+        async function submitAuth() {
+            const email = document.getElementById('userEmail').value;
+            const pass = document.getElementById('userPass').value;
+            const name = document.getElementById('userName').value;
+
+            if(!email || !pass) return alert("Fill all fields");
+
+            // UI Flow
             if(email === "paktrons@gmail.com" && pass === "cocomopakistan") {
-                user = { email, role: "ADMIN", name: "Rida Admin", bal: 10000000 };
-                document.getElementById('adminTab').style.display = 'block';
+                currentUser = { name: "Rida Admin", uid: "ADMIN", bal: 10000000, role: "ADMIN" };
+                document.getElementById('adminTab').classList.remove('hidden');
             } else {
-                user = { email, role: "USER", name: "Miner", bal: 0 };
+                currentUser = { name: name || "Miner", uid: "U-" + Date.now(), bal: 0, role: "USER" };
             }
 
-            balance = user.bal;
-            document.getElementById('uRole').innerText = user.role;
-            document.getElementById('wallBal').innerText = balance.toFixed(2) + " RIDA";
-            document.getElementById('mainNav').style.display = 'flex';
-            nav('mineScreen', document.querySelector('.nav-item'));
-        }
+            // Remote Sync
+            fetch(WEB_APP_URL, {
+                method: "POST",
+                mode: "no-cors",
+                body: JSON.stringify({
+                    action: isRegisterMode ? "registerUser" : "loginUser",
+                    payload: { email, password: pass, name: currentUser.name }
+                })
+            });
 
-        function nav(id, el) {
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active-nav'));
-            document.getElementById(id).classList.add('active');
-            el.classList.add('active-nav');
-        }
-
-        function startMining() {
-            const btn = document.getElementById('mineBtn');
-            btn.disabled = true;
-            btn.innerText = "MINING IN PROGRESS...";
-            document.getElementById('mineCircle').classList.add('mining-active');
+            // Enter App
+            sessionBalance = parseFloat(currentUser.bal);
+            document.getElementById('nameLabel').innerText = currentUser.name;
+            document.getElementById('roleLabel').innerText = currentUser.role;
+            updateBalanceUI();
             
+            document.getElementById('authScreen').classList.add('hidden');
+            document.getElementById('appScreen').classList.remove('hidden');
+        }
+
+        function initiateMining() {
+            const btn = document.getElementById('mineBtn');
+            const circle = document.getElementById('mineCircle');
+            
+            btn.disabled = true;
+            btn.innerText = "MINING ACTIVE";
+            btn.classList.add('opacity-50', 'bg-slate-700');
+            circle.classList.add('active-mine');
+            document.getElementById('miningStatus').innerText = "Session expires in 24h";
+
+            // Data Sync
+            fetch(WEB_APP_URL, {
+                method: "POST",
+                mode: "no-cors",
+                body: JSON.stringify({ action: "startMining", payload: { uid: currentUser.uid } })
+            });
+
+            // Real-time UI Counter (0.1 RIDA / 86400 seconds)
+            const rate = 0.1 / 86400;
             setInterval(() => {
-                balance += (0.1 / 86400);
-                document.getElementById('counter').innerText = balance.toFixed(8);
-                document.getElementById('wallBal').innerText = balance.toFixed(2) + " RIDA";
+                sessionBalance += rate;
+                document.getElementById('miningCounter').innerText = (sessionBalance - (currentUser.bal || 0)).toFixed(8);
+                updateBalanceUI();
             }, 1000);
         }
 
-        function showTransfer() {
-            const box = document.getElementById('transferBox');
-            box.style.display = box.style.display === 'none' ? 'block' : 'none';
+        function postAnnouncement() {
+            const text = document.getElementById('adminNews').value;
+            if(!text) return;
+            fetch(WEB_APP_URL, {
+                method: "POST",
+                mode: "no-cors",
+                body: JSON.stringify({ action: "postAnnouncement", payload: { text } })
+            });
+            document.getElementById('annText').innerText = text;
+            alert("Broadcast Sent!");
+            document.getElementById('adminNews').value = "";
         }
 
-        function requestKyc() {
-            alert("Verification request sent to Admin. Please wait for approval.");
-            document.getElementById('kycStatus').innerText = "PENDING";
-            document.getElementById('kycStatus').style.color = "orange";
+        function updateBalanceUI() {
+            document.getElementById('balanceLabel').innerText = sessionBalance.toFixed(4);
+            document.getElementById('walletBal').innerText = sessionBalance.toFixed(2) + " RIDA";
+        }
+
+        function switchTab(tab, el) {
+            document.querySelectorAll('.page-content').forEach(p => p.classList.add('hidden'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            document.getElementById('page-' + tab).classList.remove('hidden');
+            el.classList.add('active');
         }
     </script>
 </body>
