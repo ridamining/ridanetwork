@@ -2,171 +2,206 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RIDA Network | Mining</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>RIDA NETWORK | TITAN</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;700;900&display=swap" rel="stylesheet">
     <style>
-        :root { --accent: #00ffa3; --bg: #0f0c29; }
-        body { background: var(--bg); color: white; font-family: 'Inter', sans-serif; margin: 0; }
-        .glass { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(12px); border-radius: 24px; border: 1px solid rgba(255,255,255,0.1); }
-        .mining-circle { width: 220px; height: 220px; border: 8px solid #1a1a3a; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-direction: column; position: relative; }
-        .active-mine { border-color: var(--accent); box-shadow: 0 0 30px rgba(0, 255, 163, 0.3); animation: pulse 2.5s infinite; }
-        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.03); } 100% { transform: scale(1); } }
-        .loader { border: 3px solid transparent; border-top: 3px solid var(--accent); border-radius: 50%; width: 18px; height: 18px; animation: spin 1s linear infinite; display: inline-block; vertical-align: middle; }
+        body { background: #050510; color: #fff; font-family: 'Outfit', sans-serif; overflow-x: hidden; }
+        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.08); border-radius: 28px; }
+        .accent-gradient { background: linear-gradient(135deg, #6d28d9 0%, #a855f7 100%); }
+        .mining-glow { box-shadow: 0 0 40px rgba(168, 85, 247, 0.2); border: 4px solid #a855f7; }
+        .nav-blur { background: rgba(5, 5, 16, 0.8); backdrop-filter: saturate(180%) blur(10px); }
+        input { background: rgba(255,255,255,0.05) !important; border: 1px solid rgba(255,255,255,0.1) !important; color: white !important; outline: none; }
+        .loader { border: 2px solid #f3f3f3; border-top: 2px solid #a855f7; border-radius: 50%; width: 14px; height: 14px; animation: spin 1s linear infinite; display: inline-block; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        input { background: #1a1a3a !important; color: white !important; border: 1px solid rgba(255,255,255,0.1) !important; outline: none; }
-        .nav-bar { position: fixed; bottom: 0; left: 0; width: 100%; background: #0a0a20; display: flex; border-top: 1px solid rgba(255,255,255,0.1); }
-        .nav-item { flex: 1; text-align: center; padding: 15px 0; font-size: 11px; color: #888; cursor: pointer; }
-        .nav-item.active { color: var(--accent); font-weight: bold; }
     </style>
 </head>
-<body class="p-6 pb-24">
+<body class="p-5">
 
-    <div id="authScreen" class="block pt-10 space-y-6">
-        <div class="text-center">
-            <h1 class="text-4xl font-black italic tracking-tighter">RIDA <span class="text-purple-500">NETWORK</span></h1>
-            <p class="text-gray-400 text-[10px] mt-2 uppercase tracking-widest">Mobile Mining Ecosystem</p>
+    <div id="authArea" class="block space-y-8 pt-12">
+        <div class="text-center space-y-2">
+            <h1 class="text-5xl font-black italic tracking-tighter text-white">RIDA<span class="text-purple-500">.</span></h1>
+            <p class="text-gray-500 text-xs tracking-[0.3em] uppercase font-bold">Titan Ecosystem v3.0</p>
         </div>
-
-        <div class="glass p-6 space-y-4">
-            <div id="regOnly" class="hidden"><input id="uName" type="text" placeholder="Full Name" class="w-full p-4 rounded-xl"></div>
-            <input id="uEmail" type="email" placeholder="Email Address" class="w-full p-4 rounded-xl">
-            <input id="uPass" type="password" placeholder="Password" class="w-full p-4 rounded-xl">
-            
-            <button onclick="handleAuth()" id="authBtn" class="w-full py-4 bg-purple-600 rounded-xl font-bold shadow-lg active:scale-95 transition flex items-center justify-center">
-                <span id="btnLabel">LOGIN</span>
-            </button>
-            
-            <div id="statusMsg" class="text-center text-xs min-h-[1rem]"></div>
-            <p onclick="toggleAuth()" id="toggleLabel" class="text-center text-sm text-cyan-400 cursor-pointer">New user? Create an account</p>
+        <div class="glass p-8 space-y-5">
+            <div id="regInputs" class="hidden"><input id="uName" type="text" placeholder="Full Name" class="w-full p-4 rounded-2xl"></div>
+            <input id="uEmail" type="email" placeholder="Email Address" class="w-full p-4 rounded-2xl">
+            <input id="uPass" type="password" placeholder="Account Password" class="w-full p-4 rounded-2xl">
+            <button onclick="executeAuth()" id="mainAuthBtn" class="w-full py-4 accent-gradient rounded-2xl font-bold text-lg shadow-2xl active:scale-95 transition-all">SIGN IN</button>
+            <div id="status" class="text-center text-[11px] text-purple-400 font-bold min-h-[16px]"></div>
+            <p onclick="toggleAuth()" id="toggleTxt" class="text-center text-sm text-gray-400 cursor-pointer pt-2">Don't have an account? <span class="text-purple-400 font-bold">Register</span></p>
         </div>
     </div>
 
-    <div id="appScreen" class="hidden space-y-6">
-        <div class="flex justify-between items-center">
-            <div>
-                <h2 id="dispName" class="font-bold">Miner</h2>
-                <p id="dispRole" class="text-[10px] text-purple-400 font-bold tracking-widest">USER</p>
+    <div id="appArea" class="hidden animate-in fade-in duration-700">
+        <div class="flex justify-between items-start mb-8">
+            <div class="flex items-center space-x-3">
+                <div class="w-12 h-12 rounded-2xl accent-gradient flex items-center justify-center font-black text-xl shadow-lg">R</div>
+                <div>
+                    <h2 id="userName" class="text-lg font-bold">Miner</h2>
+                    <div id="verifyBadge" class="text-[9px] px-2 py-0.5 bg-red-500/20 text-red-400 rounded-full font-black tracking-widest uppercase border border-red-500/30">Unverified</div>
+                </div>
             </div>
             <div class="text-right">
-                <p class="text-[10px] opacity-50 uppercase">Balance</p>
-                <p class="text-lg font-bold text-emerald-400"><span id="dispBal">0.00</span> RIDA</p>
+                <p class="text-[10px] text-gray-500 uppercase font-bold">Balance</p>
+                <p class="text-2xl font-black text-white"><span id="userBal">0.00</span> <span class="text-purple-500 text-sm">RIDA</span></p>
             </div>
         </div>
 
-        <div id="tab-mining" class="tab-content block">
-            <div class="glass p-8 flex flex-col items-center space-y-6 text-center">
-                <div id="mineCircle" class="mining-circle">
-                    <span id="liveCounter" class="text-3xl font-mono font-bold text-emerald-400">0.00000000</span>
-                    <span class="text-[10px] opacity-40 tracking-widest mt-1">EARNED TODAY</span>
+        <div id="page-home" class="page space-y-6">
+            <div class="glass p-10 flex flex-col items-center justify-center space-y-8">
+                <div id="mineDisk" class="w-56 h-56 rounded-full flex flex-col items-center justify-center bg-black/40 border-8 border-purple-900/30 transition-all duration-700">
+                    <span id="liveCounter" class="text-3xl font-black text-purple-400">0.00000000</span>
+                    <span class="text-[10px] text-gray-500 mt-2 font-bold uppercase tracking-widest">Mining Progress</span>
                 </div>
-                <button id="mineBtn" onclick="startMining()" class="px-12 py-4 bg-purple-600 rounded-full font-bold shadow-xl active:scale-90 transition">START MINING</button>
-                <p class="text-[10px] text-gray-500 uppercase">24-Hour Mining Cycle</p>
+                <button id="mineBtn" onclick="startRidaMining()" class="w-full py-5 accent-gradient rounded-3xl font-black text-lg shadow-xl active:scale-90 transition-all">INITIALIZE MINING</button>
+            </div>
+            <div class="glass p-5 border-l-4 border-purple-500 flex items-start space-x-4">
+                <div class="text-2xl">📢</div>
+                <div>
+                    <p class="text-[10px] font-black text-purple-400 uppercase">Broadcast</p>
+                    <p id="newsBox" class="text-sm text-gray-300 mt-1 leading-relaxed italic">Synchronizing...</p>
+                </div>
             </div>
         </div>
 
-        <div id="tab-wallet" class="tab-content hidden space-y-4">
-            <div class="glass p-6 text-center">
-                <p class="text-xs opacity-50 uppercase mb-1">Total Assets</p>
-                <h1 class="text-4xl font-bold" id="wallBal">0.00 RIDA</h1>
+        <div id="page-profile" class="page hidden space-y-6">
+            <div class="glass p-6 space-y-4">
+                <h3 class="font-bold text-purple-400 uppercase text-xs">Invite Link</h3>
+                <div class="bg-black/40 p-4 rounded-xl text-xs font-mono break-all text-gray-400 border border-white/5" id="refLink">Loading...</div>
+                <button onclick="copyRef()" class="w-full py-3 bg-white text-black font-bold rounded-xl text-sm">COPY LINK</button>
             </div>
             <div class="glass p-6 space-y-4">
-                <button onclick="alert('Verification required to unlock transfers.')" class="w-full py-4 bg-emerald-600 rounded-xl font-bold">SEND RIDA</button>
+                <h3 class="font-bold text-purple-400 uppercase text-xs">KYC Identity</h3>
+                <div class="flex justify-between items-center bg-white/5 p-4 rounded-xl">
+                    <span class="text-sm">Account Status</span>
+                    <button onclick="alert('Verification Fee Required. Contact Support.')" class="px-4 py-2 bg-purple-600 rounded-lg text-xs font-bold">GET VERIFIED</button>
+                </div>
             </div>
         </div>
 
-        <div class="nav-bar">
-            <div onclick="switchTab('mining', this)" class="nav-item active">⚡<br>Mining</div>
-            <div onclick="switchTab('wallet', this)" class="nav-item">👛<br>Wallet</div>
+        <div id="page-admin" class="page hidden space-y-6 pb-24">
+            <h1 class="text-2xl font-black text-purple-400">COMMAND CENTER</h1>
+            <div class="glass p-6 space-y-4">
+                <h3 class="text-xs font-bold uppercase">Update Announcements</h3>
+                <textarea id="admMsg" class="w-full p-4 rounded-2xl text-sm h-24" placeholder="Type news here..."></textarea>
+                <button onclick="adminBroadcast()" class="w-full py-4 accent-gradient rounded-xl font-bold">PUBLISH GLOBALLY</button>
+            </div>
+            <div class="glass p-6 space-y-4">
+                <h3 class="text-xs font-bold uppercase">Manual Overrides</h3>
+                <input id="admUid" type="text" placeholder="Target User UID" class="w-full p-4 rounded-xl text-sm">
+                <input id="admNewBal" type="number" placeholder="New Balance" class="w-full p-4 rounded-xl text-sm">
+                <select id="admVerify" class="w-full p-4 bg-slate-900 rounded-xl text-sm border border-white/10 outline-none">
+                    <option value="">Verify Status</option>
+                    <option value="TRUE">VERIFIED</option>
+                    <option value="FALSE">UNVERIFIED</option>
+                </select>
+                <button onclick="adminUpdate()" class="w-full py-4 bg-emerald-600 rounded-xl font-bold">APPLY SYNC</button>
+            </div>
+        </div>
+
+        <div class="nav-bar nav-blur fixed bottom-0 left-0 w-full flex border-t border-white/10 px-4 py-3 justify-around z-50">
+            <div onclick="switchTab('home', this)" class="text-center text-purple-500 font-bold text-[10px] cursor-pointer"><span class="text-xl block">⚡</span>Mining</div>
+            <div onclick="switchTab('profile', this)" class="text-center text-gray-500 text-[10px] cursor-pointer"><span class="text-xl block">👤</span>Profile</div>
+            <div id="adminTab" onclick="switchTab('admin', this)" class="hidden text-center text-red-500 text-[10px] cursor-pointer"><span class="text-xl block">⚙️</span>Admin</div>
         </div>
     </div>
 
     <script>
-        const API_URL = "https://script.google.com/macros/s/AKfycbxmYYG0y6OLqydpfXuiHPBqj0OuAsnsJQ2aUdn7IlvQJQBHySvpo8tOy8gpOoA7eBYa_A/exec";
-        let isRegister = false;
-        let user = null;
-        let sessionBal = 0;
+        const API = "https://script.google.com/macros/s/AKfycbzGT-z--jElveqdop091VHNs02WqrKn4LrWNoxQ9lawPGCCtvXtAn1YyxfTojyGwVhzkw/exec";
+        let isReg = false;
+        let currentUser = null;
+        let visualBal = 0;
+
+        // Grab Referrer from URL
+        const refCode = new URLSearchParams(window.location.search).get('ref') || "none";
 
         function toggleAuth() {
-            isRegister = !isRegister;
-            document.getElementById('regOnly').classList.toggle('hidden');
-            document.getElementById('authBtn').querySelector('#btnLabel').innerText = isRegister ? "REGISTER" : "LOGIN";
-            document.getElementById('toggleLabel').innerText = isRegister ? "Already have an account? Login" : "New user? Create an account";
+            isReg = !isReg;
+            document.getElementById('regInputs').classList.toggle('hidden');
+            document.getElementById('mainAuthBtn').innerText = isReg ? "CREATE ACCOUNT" : "SIGN IN";
+            document.getElementById('toggleTxt').innerHTML = isReg ? "Member? <span class='text-purple-400'>Login</span>" : "New? <span class='text-purple-400'>Register</span>";
         }
 
-        function callBackend(action, payload, callback) {
-            const status = document.getElementById('statusMsg');
-            const btnLabel = document.getElementById('btnLabel');
-            const originalLabel = btnLabel.innerText;
-            
-            btnLabel.innerHTML = '<div class="loader"></div>';
-            status.innerText = "Connecting to Network...";
-
-            const callbackName = 'rida_' + Math.round(Math.random() * 1000000);
-            window[callbackName] = function(data) {
-                delete window[callbackName];
-                document.body.removeChild(script);
-                status.innerText = "";
-                btnLabel.innerText = originalLabel;
-                callback(data);
-            };
-
-            const script = document.createElement('script');
-            script.src = `${API_URL}?callback=${callbackName}&action=${action}&payload=${encodeURIComponent(JSON.stringify(payload))}`;
-            document.body.appendChild(script);
+        function server(action, payload, callback) {
+            document.getElementById('status').innerHTML = '<span class="loader"></span> Processing...';
+            const cb = 'rida_' + Math.round(Math.random() * 1000000);
+            window[cb] = (d) => { delete window[cb]; document.body.removeChild(s); document.getElementById('status').innerText = ""; callback(d); };
+            const s = document.createElement('script');
+            s.src = `${API}?callback=${cb}&action=${action}&payload=${encodeURIComponent(JSON.stringify(payload))}`;
+            document.body.appendChild(s);
         }
 
-        function handleAuth() {
+        function executeAuth() {
             const email = document.getElementById('uEmail').value;
             const pass = document.getElementById('uPass').value;
             const name = document.getElementById('uName').value;
-            const action = isRegister ? 'register' : 'login';
+            if(!email || !pass) return alert("All fields required");
 
-            if(!email || !pass) return alert("Fill all fields");
-
-            callBackend(action, { email, pass, name }, (res) => {
-                if (res.success) {
-                    if (isRegister) {
-                        alert("Account Created! You can now login.");
-                        toggleAuth();
-                    } else {
-                        user = res.user;
-                        document.getElementById('dispName').innerText = user.name;
-                        sessionBal = parseFloat(user.bal || 0);
-                        document.getElementById('dispBal').innerText = sessionBal.toFixed(2);
-                        document.getElementById('wallBal').innerText = sessionBal.toFixed(2) + " RIDA";
-                        document.getElementById('authScreen').classList.add('hidden');
-                        document.getElementById('appScreen').classList.remove('hidden');
-                    }
-                } else {
-                    document.getElementById('statusMsg').innerHTML = `<span class="text-red-500">${res.msg}</span>`;
-                }
+            server(isReg ? 'register' : 'login', { email, pass, name, ref: refCode }, (res) => {
+                if(res.success) {
+                    if(isReg) { alert("Done! Now Login."); toggleAuth(); }
+                    else { currentUser = res.user; initApp(); }
+                } else alert(res.msg || "Error");
             });
         }
 
-        function startMining() {
-            const btn = document.getElementById('mineBtn');
-            btn.disabled = true;
-            btn.innerText = "MINING ACTIVE";
-            btn.classList.add('opacity-50');
-            document.getElementById('mineCircle').classList.add('active-mine');
+        function initApp() {
+            document.getElementById('userName').innerText = currentUser.name;
+            visualBal = parseFloat(currentUser.bal || 0);
+            document.getElementById('userBal').innerText = visualBal.toFixed(2);
+            document.getElementById('refLink').innerText = window.location.origin + window.location.pathname + "?ref=" + currentUser.uid;
             
-            callBackend('startMining', { uid: user.uid }, (res) => {
-                const step = 0.1 / 86400;
+            if(currentUser.verified === "TRUE") {
+                const b = document.getElementById('verifyBadge');
+                b.innerText = "Verified Miner"; b.className = "text-[9px] px-2 py-0.5 bg-emerald-500/20 text-emerald-400 rounded-full font-black uppercase border border-emerald-500/30";
+            }
+
+            if(currentUser.role === "ADMIN") document.getElementById('adminTab').classList.remove('hidden');
+
+            server('getGlobalData', {}, (res) => { if(res.success) document.getElementById('newsBox').innerText = res.news; });
+
+            document.getElementById('authArea').classList.add('hidden');
+            document.getElementById('appArea').classList.remove('hidden');
+        }
+
+        function startRidaMining() {
+            const btn = document.getElementById('mineBtn');
+            btn.disabled = true; btn.innerText = "MINING...";
+            server('startMining', { uid: currentUser.uid }, (res) => {
+                btn.className = "w-full py-5 bg-slate-800 text-gray-500 rounded-3xl font-black";
+                document.getElementById('mineDisk').classList.add('mining-glow');
                 setInterval(() => {
-                    sessionBal += step;
-                    document.getElementById('liveCounter').innerText = (sessionBal - parseFloat(user.bal || 0)).toFixed(8);
-                    document.getElementById('dispBal').innerText = sessionBal.toFixed(4);
+                    visualBal += (0.1 / 86400);
+                    document.getElementById('liveCounter').innerText = (visualBal - parseFloat(currentUser.bal)).toFixed(8);
+                    document.getElementById('userBal').innerText = visualBal.toFixed(4);
                 }, 1000);
             });
         }
 
-        function switchTab(tab, el) {
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            document.getElementById('tab-' + tab).classList.remove('hidden');
-            el.classList.add('active');
+        function adminBroadcast() {
+            const text = document.getElementById('admMsg').value;
+            server('broadcast', { text }, () => { alert("Sent!"); document.getElementById('newsBox').innerText = text; });
+        }
+
+        function adminUpdate() {
+            const payload = { targetUid: document.getElementById('admUid').value, newBal: document.getElementById('admNewBal').value, setVerify: document.getElementById('admVerify').value };
+            server('adminUpdateUser', payload, () => alert("Success!"));
+        }
+
+        function switchTab(t, el) {
+            document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
+            document.getElementById('page-' + t).classList.remove('hidden');
+            document.querySelectorAll('.nav-bar div').forEach(n => { n.classList.remove('text-purple-500', 'font-bold'); n.classList.add('text-gray-500'); });
+            el.classList.add('text-purple-500', 'font-bold');
+        }
+
+        function copyRef() {
+            navigator.clipboard.writeText(document.getElementById('refLink').innerText);
+            alert("Link copied!");
         }
     </script>
 </body>
-</html>
+    </html>
+    
