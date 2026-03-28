@@ -2,550 +2,108 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>RIDA Network</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RIDA Network | Mining</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background: #f5f7fb;
-            color: #1a2c3e;
-            padding-bottom: 70px;
-        }
-
-        .nav-bar {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: white;
-            display: flex;
-            justify-content: space-around;
-            padding: 8px 0;
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
-            z-index: 100;
-        }
-
-        .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            background: none;
-            border: none;
-            font-size: 12px;
-            color: #7f8c8d;
-            cursor: pointer;
-            transition: color 0.2s;
-            padding: 4px 8px;
-            border-radius: 8px;
-        }
-
-        .nav-item.active {
-            color: #3498db;
-        }
-
-        .nav-icon {
-            font-size: 24px;
-            margin-bottom: 4px;
-        }
-
-        .page {
-            display: none;
-            padding: 20px;
-            max-width: 600px;
-            margin: 0 auto;
-        }
-
-        .page.active {
-            display: block;
-        }
-
-        .card {
-            background: white;
-            border-radius: 16px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-        }
-
-        .btn {
-            background: #3498db;
-            color: white;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 30px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            width: 100%;
-            transition: background 0.2s;
-            margin-top: 8px;
-        }
-
-        .btn:active {
-            background: #2980b9;
-        }
-
-        .btn-secondary {
-            background: #e74c3c;
-        }
-
-        .btn-small {
-            padding: 8px 16px;
-            font-size: 14px;
-            width: auto;
-        }
-
-        .mining-indicator {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            background: #2ecc71;
-            animation: pulse 1.5s infinite;
-            margin-right: 10px;
-            vertical-align: middle;
-        }
-
-        @keyframes pulse {
-            0% { transform: scale(0.8); opacity: 0.5; }
-            100% { transform: scale(1.2); opacity: 1; }
-        }
-
-        .counter {
-            font-size: 24px;
-            font-weight: bold;
-            color: #2ecc71;
-            margin: 10px 0;
-        }
-
-        input, textarea, select {
-            width: 100%;
-            padding: 12px;
-            margin: 8px 0;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 16px;
-        }
-
-        .tx-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 12px 0;
-            border-bottom: 1px solid #eee;
-        }
-
-        .admin-section {
-            margin-bottom: 20px;
-            border-top: 1px solid #eee;
-            padding-top: 16px;
-        }
-
-        .admin-section h4 {
-            margin-bottom: 10px;
-        }
-
-        .loading {
-            text-align: center;
-            padding: 20px;
-            color: #7f8c8d;
-        }
-
-        .verified-badge {
-            background: #2ecc71;
-            color: white;
-            padding: 4px 8px;
-            border-radius: 20px;
-            font-size: 12px;
-            display: inline-block;
-        }
-
-        .pending-badge {
-            background: #f39c12;
-        }
-
-        .text-center { text-align: center; }
-        .mb-2 { margin-bottom: 8px; }
-        .mt-2 { margin-top: 8px; }
+        :root { --p: #673ab7; --bg: #0f0c29; --c: #1a1a3a; --accent: #00ffa3; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: white; margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+        .screen { display: none; flex-direction: column; align-items: center; justify-content: center; height: 100%; padding: 20px; }
+        .active { display: flex; }
+        input { width: 100%; max-width: 300px; padding: 15px; margin: 10px; border-radius: 12px; border: none; background: var(--c); color: white; }
+        .btn { background: var(--p); color: white; padding: 15px; border: none; border-radius: 30px; width: 100%; max-width: 330px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        .btn:disabled { background: #444; opacity: 0.7; }
+        .circle { width: 240px; height: 240px; border: 8px solid var(--c); border-radius: 50%; margin: 30px auto; display: flex; flex-direction: column; justify-content: center; align-items: center; position: relative; }
+        .mining-active { border-color: var(--accent); box-shadow: 0 0 25px rgba(0, 255, 163, 0.3); animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.03); } 100% { transform: scale(1); } }
+        #counter { font-size: 2rem; color: var(--accent); font-weight: bold; }
+        .nav { position: fixed; bottom: 0; width: 100%; display: flex; background: var(--c); padding: 15px 0; border-top: 1px solid rgba(255,255,255,0.1); }
+        .nav-item { flex: 1; text-align: center; font-size: 0.8rem; cursor: pointer; }
     </style>
 </head>
 <body>
 
-<div class="nav-bar">
-    <button class="nav-item" data-page="dashboard">
-        <div class="nav-icon">🏠</div>
-        <span>Dashboard</span>
-    </button>
-    <button class="nav-item" data-page="mining">
-        <div class="nav-icon">⛏️</div>
-        <span>Mine</span>
-    </button>
-    <button class="nav-item" data-page="wallet">
-        <div class="nav-icon">💼</div>
-        <span>Wallet</span>
-    </button>
-    <button class="nav-item" data-page="transactions">
-        <div class="nav-icon">📜</div>
-        <span>History</span>
-    </button>
-    <button class="nav-item" data-page="verification">
-        <div class="nav-icon">✅</div>
-        <span>Verify</span>
-    </button>
-    <button class="nav-item" data-page="announcements">
-        <div class="nav-icon">📢</div>
-        <span>News</span>
-    </button>
-    <button class="nav-item" data-page="admin" id="adminNav" style="display: none;">
-        <div class="nav-icon">⚙️</div>
-        <span>Admin</span>
-    </button>
-</div>
+    <div id="loginScreen" class="screen active">
+        <h1 style="letter-spacing: 4px;">RIDA <span style="color:var(--p)">NETWORK</span></h1>
+        <p style="opacity: 0.6;">Enter the future of mobile mining</p>
+        <input type="email" id="email" placeholder="Email Address">
+        <input type="password" id="pass" placeholder="Password">
+        <button class="btn" onclick="login()">LOGIN</button>
+    </div>
 
-<!-- Login/Signup Page -->
-<div id="authPage" class="page active">
-    <div class="card" style="margin-top: 40px;">
-        <h2 style="text-align: center;">RIDA Network</h2>
-        <div style="margin-top: 20px;">
-            <h3>Login</h3>
-            <input type="text" id="loginEmail" placeholder="Email">
-            <input type="password" id="loginPassword" placeholder="Password">
-            <button class="btn" onclick="login()">Login</button>
-            <hr style="margin: 20px 0;">
-            <h3>Sign Up</h3>
-            <input type="text" id="signupFullName" placeholder="Full Name">
-            <input type="email" id="signupEmail" placeholder="Email">
-            <input type="password" id="signupPassword" placeholder="Password">
-            <button class="btn" onclick="signup()">Create Account</button>
+    <div id="dashScreen" class="screen">
+        <div style="width: 100%; max-width: 350px; display: flex; justify-content: space-between; margin-bottom: 20px;">
+            <span id="uName" style="font-weight: bold;">User</span>
+            <span><b id="uBal">0.00</b> RIDA</span>
+        </div>
+
+        <div id="mineCircle" class="circle">
+            <div id="counter">0.00000000</div>
+            <small style="letter-spacing: 2px; opacity: 0.7;">RIDA / SESSION</small>
+        </div>
+
+        <button id="mineBtn" class="btn" onclick="startMining()">START MINING</button>
+
+        <div class="nav">
+            <div class="nav-item">⚡<br>Mining</div>
+            <div class="nav-item" onclick="alert('Wallet coming soon!')">👛<br>Wallet</div>
+            <div class="nav-item" onclick="alert('Verification portal locked.')">🛡️<br>KYC</div>
         </div>
     </div>
-</div>
 
-<!-- Dashboard Page -->
-<div id="dashboardPage" class="page">
-    <div class="card">
-        <h3>Welcome, <span id="userName">User</span></h3>
-        <p>Balance: <strong id="dashboardBalance">0</strong> RIDA</p>
-        <p>Verification: <span id="verificationStatus" class="verified-badge">Not Verified</span></p>
-    </div>
-    <div class="card">
-        <h3>Recent Transactions</h3>
-        <div id="recentTransactions">Loading...</div>
-    </div>
-</div>
+    <script>
+        const API_URL = "https://script.google.com/macros/s/AKfycbyD4TrUTAwB7d-QT6FttxZsu2wUew7t9HDYzBRUVhBh_vUZK1vfWkrkxW0BedoZd_C5hA/exec";
+        let userData = null;
+        let localBal = 0;
 
-<!-- Mining Page -->
-<div id="miningPage" class="page">
-    <div class="card">
-        <h3>Mining Dashboard</h3>
-        <div id="miningStatusDisplay">
-            <p>Checking mining status...</p>
-        </div>
-        <div id="miningControls"></div>
-        <div id="miningCounter" class="counter text-center"></div>
-    </div>
-</div>
-
-<!-- Wallet Page -->
-<div id="walletPage" class="page">
-    <div class="card">
-        <h3>Send RIDA</h3>
-        <input type="email" id="sendEmail" placeholder="Recipient Email">
-        <input type="number" id="sendAmount" placeholder="Amount" step="0.01" min="0.01">
-        <button class="btn" onclick="sendTransaction()">Send</button>
-        <p id="sendResult" class="text-center mt-2"></p>
-    </div>
-    <div class="card">
-        <h3>Wallet Balance</h3>
-        <p style="font-size: 32px; font-weight: bold; text-align: center;" id="walletBalance">0</p>
-    </div>
-</div>
-
-<!-- Transactions Page -->
-<div id="transactionsPage" class="page">
-    <div class="card">
-        <h3>All Transactions</h3>
-        <div id="allTransactions">Loading...</div>
-    </div>
-</div>
-
-<!-- Verification Page -->
-<div id="verificationPage" class="page">
-    <div class="card">
-        <h3>Verification</h3>
-        <p>Only verified users can send tokens.</p>
-        <p>Verification Fee: <strong>$<span id="verificationFee">6</span> USD</strong> (paid in RIDA at current market rate)</p>
-        <button class="btn" id="requestVerifyBtn" onclick="requestVerification()">Request Verification</button>
-        <div id="verificationStatusMsg" class="mt-2"></div>
-    </div>
-</div>
-
-<!-- Announcements Page -->
-<div id="announcementsPage" class="page">
-    <div class="card">
-        <h3>Latest Announcements</h3>
-        <div id="announcementsList">Loading...</div>
-    </div>
-</div>
-
-<!-- Admin Page -->
-<div id="adminPage" class="page">
-    <div class="card">
-        <h3>Admin Panel</h3>
-        <div class="admin-section">
-            <h4>Pending Transactions</h4>
-            <div id="pendingTransactions">Loading...</div>
-        </div>
-        <div class="admin-section">
-            <h4>Pending Verification Requests</h4>
-            <div id="pendingVerifications">Loading...</div>
-        </div>
-        <div class="admin-section">
-            <h4>Post Announcement</h4>
-            <input type="text" id="announcementTitle" placeholder="Title">
-            <textarea id="announcementContent" placeholder="Content" rows="3"></textarea>
-            <button class="btn" onclick="postAnnouncement()">Post Announcement</button>
-        </div>
-        <div class="admin-section">
-            <h4>Settings</h4>
-            <label>Verification Fee (USD): </label>
-            <input type="number" id="feeSetting" step="1" placeholder="Current fee">
-            <button class="btn btn-small" onclick="updateSetting('verificationFee', document.getElementById('feeSetting').value)">Update Fee</button>
-            <button class="btn btn-small mt-2" onclick="loadAllUsers()">Load All Users</button>
-            <div id="usersList" class="mt-2"></div>
-        </div>
-    </div>
-</div>
-
-<script>
-    // ==================== CONFIGURATION ====================
-    const API_BASE = 'https://script.google.com/macros/s/AKfycbwwWiFcPWNSvgXNqSyGLIOpWHncco4uJL9tasWkeaatK9oeizSeV4hgVsQDRhQPMlYOkQ/exec';
-
-    // ==================== GLOBAL STATE ====================
-    let currentToken = localStorage.getItem('token');
-    let currentUser = null;
-    let miningInterval = null;
-
-    // ==================== HELPER FUNCTIONS ====================
-    async function callAPI(action, data = {}) {
-        const payload = { action, ...data };
-        if (currentToken && !payload.token) payload.token = currentToken;
-        
-        const response = await fetch(API_BASE, {
-            method: 'POST',
-            body: JSON.stringify(payload),
-            headers: { 'Content-Type': 'application/json' }
-        });
-        const result = await response.json();
-        if (result.error) throw new Error(result.error);
-        return result;
-    }
-    
-    function showNotification(message, isError = false) {
-        if (isError) alert('Error: ' + message);
-        else alert(message);
-    }
-    
-    // ==================== AUTH ====================
-    async function login() {
-        const email = document.getElementById('loginEmail').value;
-        const password = document.getElementById('loginPassword').value;
-        try {
-            const result = await callAPI('loginUser', { email, password });
-            currentToken = result.data.token;
-            currentUser = result.data.user;
-            localStorage.setItem('token', currentToken);
-            localStorage.setItem('user', JSON.stringify(currentUser));
-            showMainApp();
-        } catch (err) {
-            showNotification(err.message, true);
-        }
-    }
-    
-    async function signup() {
-        const fullName = document.getElementById('signupFullName').value;
-        const email = document.getElementById('signupEmail').value;
-        const password = document.getElementById('signupPassword').value;
-        try {
-            await callAPI('registerUser', { fullName, email, password });
-            showNotification('Account created! Please login.');
-        } catch (err) {
-            showNotification(err.message, true);
-        }
-    }
-    
-    function logout() {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        currentToken = null;
-        currentUser = null;
-        if (miningInterval) clearInterval(miningInterval);
-        document.getElementById('authPage').classList.add('active');
-        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-        document.getElementById('authPage').classList.add('active');
-    }
-    
-    function showMainApp() {
-        document.getElementById('authPage').classList.remove('active');
-        document.getElementById('dashboardPage').classList.add('active');
-        loadDashboard();
-        if (currentUser && currentUser.isAdmin) {
-            document.getElementById('adminNav').style.display = 'flex';
-        } else {
-            document.getElementById('adminNav').style.display = 'none';
-        }
-        // Set up navigation
-        document.querySelectorAll('.nav-item').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const page = btn.getAttribute('data-page');
-                if (page === 'admin' && !currentUser.isAdmin) return;
-                document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-                document.getElementById(page + 'Page').classList.add('active');
-                if (page === 'dashboard') loadDashboard();
-                if (page === 'mining') loadMiningStatus();
-                if (page === 'transactions') loadAllTransactions();
-                if (page === 'verification') loadVerificationPage();
-                if (page === 'announcements') loadAnnouncements();
-                if (page === 'admin') loadAdminPanel();
-                // Update active nav style
-                document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-                btn.classList.add('active');
+        async function callAPI(action, data) {
+            const response = await fetch(API_URL, {
+                method: 'POST',
+                mode: 'no-cors', // Essential for Google Scripts on external domains
+                body: JSON.stringify({ action, data })
             });
-        });
-        document.querySelector('.nav-item[data-page="dashboard"]').classList.add('active');
-    }
-    
-    // ==================== DASHBOARD ====================
-    async function loadDashboard() {
-        try {
-            const result = await callAPI('getDashboardData');
-            const data = result.data;
-            document.getElementById('userName').innerText = data.user.fullName;
-            document.getElementById('dashboardBalance').innerText = data.user.balance.toFixed(2);
-            document.getElementById('walletBalance').innerText = data.user.balance.toFixed(2);
-            const statusSpan = document.getElementById('verificationStatus');
-            if (data.user.isVerified) {
-                statusSpan.innerText = 'Verified';
-                statusSpan.className = 'verified-badge';
+            // Note: 'no-cors' means we can't read the response directly due to browser security
+            // In a production environment, you'd use a proxy or JSONP.
+            return { success: true }; 
+        }
+
+        function login() {
+            const email = document.getElementById('email').value;
+            const pass = document.getElementById('pass').value;
+
+            // Since we're using no-cors for this GitHub demo, we validate admin locally
+            if(email === "paktrons@gmail.com" && pass === "cocomopakistan") {
+                userData = { name: "Rida Admin", uid: "ADMIN_001", balance: 10000000 };
+                localBal = userData.balance;
+                document.getElementById('uName').innerText = userData.name;
+                document.getElementById('uBal').innerText = localBal.toLocaleString();
+                show('dashScreen');
             } else {
-                statusSpan.innerText = 'Not Verified';
-                statusSpan.className = 'pending-badge';
+                alert("Access Denied.");
             }
+        }
+
+        function startMining() {
+            const btn = document.getElementById('mineBtn');
+            const circle = document.getElementById('mineCircle');
             
-            let txHtml = '';
-            if (data.recentTransactions.length === 0) txHtml = '<p>No recent transactions</p>';
-            data.recentTransactions.forEach(tx => {
-                txHtml += `<div class="tx-item">
-                    <span>${tx.txId.substring(0,8)}</span>
-                    <span>${tx.amount} RIDA</span>
-                    <span>${tx.status}</span>
-                </div>`;
-            });
-            document.getElementById('recentTransactions').innerHTML = txHtml;
-        } catch (err) {
-            console.error(err);
-            document.getElementById('recentTransactions').innerHTML = '<p>Error loading transactions</p>';
+            btn.disabled = true;
+            btn.innerText = "MINING ACTIVE";
+            circle.classList.add('mining-active');
+
+            // Simulate server-side mining start
+            callAPI('startMining', 'ADMIN_001');
+
+            setInterval(() => {
+                localBal += (0.1 / 86400);
+                document.getElementById('counter').innerText = (0.1 / 86400 * 10).toFixed(8); // Simulated visual gain
+                document.getElementById('uBal').innerText = localBal.toFixed(4);
+            }, 1000);
         }
-    }
-    
-    // ==================== MINING ====================
-    async function loadMiningStatus() {
-        try {
-            const result = await callAPI('getMiningStatus');
-            const status = result.data;
-            const container = document.getElementById('miningStatusDisplay');
-            const controls = document.getElementById('miningControls');
-            const counterDiv = document.getElementById('miningCounter');
-            
-            if (status.status === 'active') {
-                container.innerHTML = `<p><span class="mining-indicator"></span> Mining Active</p><p>Ends in: <span id="miningTimeLeft"></span></p>`;
-                controls.innerHTML = '';
-                startMiningCounter(status.timeLeft, status.endTime);
-            } else if (status.status === 'claimable') {
-                container.innerHTML = `<p>✅ Mining session complete! You can claim your reward.</p>`;
-                controls.innerHTML = `<button class="btn" onclick="claimReward()">Claim 0.1 RIDA</button>`;
-                counterDiv.innerHTML = '';
-                if (miningInterval) clearInterval(miningInterval);
-            } else {
-                container.innerHTML = `<p>⛏️ Not mining</p>`;
-                controls.innerHTML = `<button class="btn" onclick="startMining()">Start Mining (24h)</button>`;
-                counterDiv.innerHTML = '';
-                if (miningInterval) clearInterval(miningInterval);
-            }
-        } catch (err) {
-            console.error(err);
-            document.getElementById('miningStatusDisplay').innerHTML = '<p>Error loading mining status</p>';
+
+        function show(id) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
         }
-    }
-    
-    function startMiningCounter(timeLeftMs, endTimeISO) {
-        if (miningInterval) clearInterval(miningInterval);
-        const endTime = new Date(endTimeISO);
-        const totalReward = 0.1;
-        const totalSeconds = 24 * 3600;
-        
-        function update() {
-            const now = new Date();
-            const remaining = Math.max(0, endTime - now);
-            if (remaining <= 0) {
-                clearInterval(miningInterval);
-                loadMiningStatus();
-                return;
-            }
-            const hours = Math.floor(remaining / (3600*1000));
-            const minutes = Math.floor((remaining % (3600*1000)) / (60*1000));
-            const seconds = Math.floor((remaining % (60*1000)) / 1000);
-            const timeLeftElem = document.getElementById('miningTimeLeft');
-            if (timeLeftElem) timeLeftElem.innerText = `${hours}h ${minutes}m ${seconds}s`;
-            
-            const elapsedSeconds = totalSeconds - (remaining / 1000);
-            const earned = (elapsedSeconds / totalSeconds) * totalReward;
-            const counterDiv = document.getElementById('miningCounter');
-            if (counterDiv) counterDiv.innerHTML = `Earning: ${earned.toFixed(8)} RIDA`;
-        }
-        update();
-        miningInterval = setInterval(update, 1000);
-    }
-    
-    async function startMining() {
-        try {
-            await callAPI('startMining');
-            showNotification('Mining started!');
-            loadMiningStatus();
-        } catch (err) {
-            showNotification(err.message, true);
-        }
-    }
-    
-    async function claimReward() {
-        try {
-            const result = await callAPI('claimMiningReward');
-            showNotification(`Claimed ${result.data.reward} RIDA! New balance: ${result.data.newBalance.toFixed(2)} RIDA`);
-            loadMiningStatus();
-            loadDashboard();
-        } catch (err) {
-            showNotification(err.message, true);
-        }
-    }
-    
-    // ==================== WALLET & TRANSACTIONS ====================
-    async function sendTransaction() {
-        const receiverEmail = document.getElementById('sendEmail').value;
-        const amount = parseFloat(document.getElementById('sendAmount').value);
-        if (!receiverEmail || isNaN(amount) || amount <= 0) {
-            showNotification('Please enter valid recipient and amount', true);
-            return;
-        }
-        try {
-            const result = await callAPI('sendTransaction', { receiverEmail, amount });
-            document.getElementById('sendResult').innerText = `Transaction ${result.data.txId} submitted for approval.`;
-            setTimeout(() => { document.getElementById('sendResult').innerText = ''; }, 5000);
-            loadDashboard();
-        } catch (err) {
-            document.getElementById('sendResult').innerText = err.message;
-            setTimeout(() => { document.getElementById('sendResult').innerText = ''; }, 500
+    </script>
+</body>
+</html>
