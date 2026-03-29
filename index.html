@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>RIDA NETWORK v11</title>
+    <title>RIDA NETWORK v11.1</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
@@ -107,7 +107,6 @@
                 <textarea id="adminAnnInp" placeholder="Type global update..." class="w-full bg-black/30 p-4 rounded-xl text-xs outline-none border border-white/10 h-24"></textarea>
                 <button onclick="postAnnouncement()" class="w-full py-3 btn-primary text-[10px] uppercase font-bold">Broadcast Update</button>
             </div>
-
             <h2 class="text-xs font-black text-red-500 px-2 uppercase tracking-widest">Node Verification</h2>
             <div id="adminChatHub" class="space-y-4"></div>
         </div>
@@ -140,7 +139,14 @@
         let user = JSON.parse(localStorage.getItem('rida_v11'));
         let allAnnouncements = [];
 
-        window.onload = () => { if(user) { sync(); setInterval(sync, 30000); } };
+        window.onload = () => { 
+            // Automatic referral capture from URL
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.has('ref')) {
+                sessionStorage.setItem('pendingRef', urlParams.get('ref'));
+            }
+            if(user) { sync(); setInterval(sync, 30000); } 
+        };
 
         function sync() {
             call('sync', { email: user.email }, (res) => {
@@ -161,17 +167,17 @@
             document.getElementById('viewUid').innerText = user.uid;
             document.getElementById('viewBal').innerText = parseFloat(user.bal).toFixed(2);
             document.getElementById('viewRefCount').innerText = user.refCount;
-            document.getElementById('refLink').value = `https://earningpoint.github.io/rida/?ref=${user.uid}`;
+            
+            // AUTOMATIC LINK GENERATION
+            const currentUrl = window.location.origin + window.location.pathname;
+            document.getElementById('refLink').value = `${currentUrl}?ref=${user.uid}`;
             
             const badge = document.getElementById('viewStatus');
             if(String(user.verified).toUpperCase() === "TRUE") { badge.className = "badge-v"; badge.innerText = "Verified"; }
             else { badge.className = "badge-u"; badge.innerText = "Unverified"; }
             
             if(user.role === "ADMIN") document.getElementById('adminTab').classList.remove('hidden');
-
-            if(allAnnouncements.length > 0) {
-                document.getElementById('annText').innerText = allAnnouncements[0][1];
-            }
+            if(allAnnouncements.length > 0) document.getElementById('annText').innerText = allAnnouncements[0][1];
             
             checkMiningStatus();
             loadChat();
@@ -267,7 +273,7 @@
                 res.history.forEach(m => { if(!groups[m.uid]) groups[m.uid] = []; groups[m.uid].push(m); });
                 document.getElementById('adminChatHub').innerHTML = Object.entries(groups).map(([uid, msgs]) => `
                     <div class="glass p-5 space-y-3">
-                        <p class="text-[10px] font-bold text-indigo-400 tracking-widest uppercase">Node: ${uid}</p>
+                        <p class="text-[10px] font-bold text-indigo-400 uppercase tracking-widest">Node: ${uid}</p>
                         <div class="max-h-32 overflow-y-auto space-y-2 text-[10px] opacity-70">${msgs.map(m => `<div><b class="text-white">${m.sender}:</b> ${m.text}</div>`).join('')}</div>
                         <div class="flex gap-2">
                             <input id="reply-${uid}" placeholder="..." class="w-full bg-black/30 p-2 rounded-lg text-xs border border-white/5 outline-none">
@@ -292,7 +298,8 @@
         function handleAuth() {
             let isR = !document.getElementById('regInputs').classList.contains('hidden');
             const e = document.getElementById('uEmail').value, p = document.getElementById('uPass').value;
-            const pay = { email: e, pass: p, name: document.getElementById('uName').value, ref: document.getElementById('uRef').value || "none" };
+            const refCode = sessionStorage.getItem('pendingRef') || document.getElementById('uRef').value || "none";
+            const pay = { email: e, pass: p, name: document.getElementById('uName').value, ref: refCode };
             call(isR ? 'register' : 'login', pay, (res) => {
                 if(res.success) {
                     if(isR) { alert("Registered!"); toggleAuth(); }
@@ -305,6 +312,10 @@
             const ri = document.getElementById('regInputs');
             const hidden = ri.classList.toggle('hidden');
             document.getElementById('toggleText').innerText = hidden ? "New user? Register account" : "Existing node? Login";
+            // Pre-fill referral if exists
+            if(!hidden && sessionStorage.getItem('pendingRef')) {
+                document.getElementById('uRef').value = sessionStorage.getItem('pendingRef');
+            }
         }
 
         function switchTab(t, el) {
@@ -332,4 +343,5 @@
         function logout() { localStorage.clear(); location.reload(); }
     </script>
 </body>
-</html>
+                            </html>
+                    
