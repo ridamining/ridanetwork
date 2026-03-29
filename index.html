@@ -3,251 +3,245 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>RIDA NETWORK | CHRONOS v6.0</title>
+    <title>RIDA NETWORK | NEXUS v8.0</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
     <style>
-        :root { --accent: #00f2ff; --bg: #03030b; --card: rgba(10, 10, 26, 0.85); }
-        body { background: var(--bg); color: #fff; font-family: 'Space Grotesk', sans-serif; overflow-x: hidden; -webkit-tap-highlight-color: transparent; }
-        .cyber-card { background: var(--card); backdrop-filter: blur(15px); border: 1px solid rgba(0, 242, 255, 0.1); border-radius: 30px; }
-        .btn-glow { background: linear-gradient(135deg, #7000ff, #00f2ff); box-shadow: 0 0 20px rgba(0, 242, 255, 0.3); transition: 0.3s; }
-        .btn-glow:disabled { background: #1a1a2e; box-shadow: none; color: #666; opacity: 0.7; }
-        .page { display: none; padding-bottom: 110px; animation: slideUp 0.35s ease-out; }
+        :root { --accent: #00f2ff; --bg: #03030b; --card: rgba(10, 10, 26, 0.95); }
+        body { background: var(--bg); color: #fff; font-family: 'Space Grotesk', sans-serif; -webkit-tap-highlight-color: transparent; }
+        .cyber-card { background: var(--card); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.05); border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .btn-glow { background: linear-gradient(135deg, #7000ff, #00f2ff); border-radius: 18px; transition: 0.3s; box-shadow: 0 0 15px rgba(0,242,255,0.2); }
+        .btn-glow:active { transform: scale(0.97); }
+        .page { display: none; padding-bottom: 120px; animation: slideUp 0.4s ease-out; }
         .active-page { display: block; }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
-        .status-tag { font-size: 8px; padding: 2px 10px; border-radius: 100px; text-transform: uppercase; font-weight: 900; letter-spacing: 1px; }
-        .nav-blur { background: rgba(3, 3, 11, 0.96); backdrop-filter: blur(20px); border-top: 1px solid rgba(255,255,255,0.05); }
-        #global-loader { background: var(--bg); z-index: 10000; position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .chat-msg { margin-bottom: 8px; padding: 8px 12px; border-radius: 15px; font-size: 11px; max-width: 85%; }
-        .msg-user { background: rgba(0, 242, 255, 0.1); border: 1px solid rgba(0, 242, 255, 0.2); align-self: flex-end; color: #00f2ff; }
-        .msg-admin { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); align-self: flex-start; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .nav-blur { background: rgba(3, 3, 11, 0.85); backdrop-filter: blur(25px); border-top: 1px solid rgba(255,255,255,0.1); }
+        .chat-msg { margin-bottom: 12px; padding: 12px; border-radius: 16px; font-size: 13px; max-width: 85%; }
+        .user-msg { background: rgba(0, 242, 255, 0.1); color: #00f2ff; align-self: flex-end; border: 1px solid rgba(0, 242, 255, 0.2); }
+        .admin-msg { background: rgba(255, 255, 255, 0.05); align-self: flex-start; border: 1px solid rgba(255,255,255,0.1); }
     </style>
 </head>
-<body class="p-5">
+<body class="p-4">
 
-    <div id="global-loader">
-        <div class="w-14 h-14 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin"></div>
-        <p class="mt-5 text-[9px] font-black tracking-[0.5em] text-cyan-400 uppercase">Synchronizing Blockchain</p>
-    </div>
-
-    <div id="authArea" class="hidden min-h-screen flex flex-col justify-center space-y-12">
-        <div class="text-center">
-            <h1 class="text-7xl font-black italic tracking-tighter">RIDA<span class="text-cyan-400">.</span></h1>
-            <p class="text-cyan-400/40 text-[9px] uppercase tracking-[0.6em] font-bold mt-2">Dominion Chronos v6.0</p>
-        </div>
-        <div class="cyber-card p-10 space-y-5">
-            <div id="regInputs" class="hidden"><input id="uName" type="text" placeholder="Full Name" class="w-full p-4 bg-white/5 border border-white/10 rounded-2xl outline-none"></div>
-            <input id="uEmail" type="email" placeholder="Email Address" class="w-full p-4 bg-white/5 border border-white/10 rounded-2xl outline-none">
-            <input id="uPass" type="password" placeholder="Access Key" class="w-full p-4 bg-white/5 border border-white/10 rounded-2xl outline-none">
-            <button onclick="handleAuth()" class="w-full py-4 btn-glow rounded-2xl font-bold uppercase tracking-widest text-xs">Authorize</button>
-            <p onclick="toggleAuth()" class="text-center text-xs text-gray-500 cursor-pointer pt-3">Switch to <span class="text-cyan-400" id="toggleLabel">Register</span></p>
+    <div id="authArea" class="min-h-screen flex flex-col justify-center space-y-8">
+        <h1 class="text-6xl font-black text-center italic tracking-tighter">RIDA<span class="text-cyan-400">.</span></h1>
+        <div class="cyber-card p-8 space-y-4">
+            <div id="regFields" class="hidden"><input id="uName" type="text" placeholder="Full Name" class="w-full p-4 bg-white/5 border border-white/10 rounded-xl outline-none focus:border-cyan-400"></div>
+            <input id="uEmail" type="email" placeholder="Email" class="w-full p-4 bg-white/5 border border-white/10 rounded-xl outline-none focus:border-cyan-400">
+            <input id="uPass" type="password" placeholder="Access Key" class="w-full p-4 bg-white/5 border border-white/10 rounded-xl outline-none focus:border-cyan-400">
+            <button onclick="handleAuth()" class="w-full py-4 btn-glow uppercase font-black text-xs tracking-widest mt-2">Connect Node</button>
+            <p onclick="toggleAuth()" class="text-center text-xs text-gray-500 cursor-pointer pt-2">No account? <span class="text-cyan-400 font-bold" id="toggleLabel">Register</span></p>
         </div>
     </div>
 
     <div id="appArea" class="hidden">
-        <div class="flex justify-between items-center mb-8">
-            <div class="flex items-center space-x-3">
-                <div class="w-12 h-12 rounded-2xl btn-glow flex items-center justify-center font-bold text-lg">R</div>
-                <div>
-                    <div class="flex items-center gap-2">
-                        <h2 id="topName" class="font-bold text-sm truncate w-24">---</h2>
-                        <span id="topStatus" class="status-tag">---</span>
-                    </div>
-                    <p id="topUid" class="text-[9px] text-gray-500 font-mono">---</p>
-                </div>
+        <div class="flex justify-between items-center mb-6 px-2">
+            <div>
+                <h2 id="topName" class="font-bold text-lg">---</h2>
+                <p id="topUid" class="text-[10px] text-cyan-400 font-mono font-bold">---</p>
             </div>
             <div class="text-right">
-                <p class="text-[10px] text-cyan-400 font-bold uppercase">Total RIDA</p>
-                <p class="text-2xl font-black text-white" id="topBal">0.0000</p>
+                <p class="text-[10px] text-gray-500 uppercase font-bold tracking-widest">Total Earned</p>
+                <p id="topBal" class="text-2xl font-black tracking-tight">0.0000</p>
             </div>
         </div>
 
         <div id="page-home" class="page active-page space-y-6">
-            <div class="cyber-card p-10 flex flex-col items-center space-y-8 relative overflow-hidden">
-                <div id="mineCircle" class="w-60 h-60 rounded-full border-[8px] border-white/5 flex flex-col items-center justify-center transition-all duration-700">
-                    <span id="liveCounter" class="text-4xl font-bold text-cyan-400">0.00000000</span>
-                    <p class="text-[9px] text-gray-500 mt-3 font-black uppercase tracking-[0.2em]">Live Extraction</p>
+            <div class="cyber-card p-12 flex flex-col items-center space-y-8">
+                <div class="relative w-64 h-64 rounded-full border-[6px] border-white/5 flex flex-col items-center justify-center shadow-2xl">
+                    <div id="mineGlow" class="absolute inset-0 rounded-full bg-cyan-500/5 blur-3xl opacity-0 transition-opacity duration-1000"></div>
+                    <span id="liveCounter" class="text-4xl font-bold text-cyan-400 tabular-nums">0.00000000</span>
+                    <p class="text-[10px] text-gray-500 mt-2 uppercase font-black tracking-[0.3em]">RIDA Extraction</p>
                 </div>
-                <button onclick="startMining()" id="mineBtn" class="w-full py-5 btn-glow rounded-3xl font-black text-xs uppercase tracking-widest">Start 24h Session</button>
+                <button id="mineBtn" onclick="startMining()" class="w-full py-5 btn-glow uppercase font-black text-xs tracking-widest">Authorize Extraction</button>
             </div>
-            <div class="cyber-card p-5 border-l-4 border-cyan-400 flex items-center gap-4">
-                <span class="text-2xl">📢</span>
-                <p id="newsBox" class="text-xs text-gray-400 italic">Syncing global news...</p>
+            <div class="space-y-4">
+                <h3 class="text-[10px] font-black uppercase text-gray-500 tracking-[0.2em] px-2">Global Feed</h3>
+                <div id="newsTimeline" class="space-y-3"></div>
             </div>
         </div>
 
         <div id="page-profile" class="page space-y-4">
-            <div class="cyber-card p-6 space-y-5">
-                <div class="flex justify-between">
-                    <h2 id="profName" class="text-xl font-bold">---</h2>
-                    <span id="profStatus" class="status-tag">---</span>
-                </div>
-                <div class="bg-black/40 p-5 rounded-2xl border border-white/10">
-                    <p class="text-[8px] text-cyan-400 font-bold uppercase mb-2">Referral ID</p>
-                    <p id="refLink" class="text-[10px] font-mono text-gray-500">---</p>
-                    <button onclick="copyRef()" class="mt-4 w-full py-2 bg-white/5 rounded-xl text-[9px] font-bold uppercase border border-white/5">Copy Link</button>
-                </div>
-            </div>
-
-            <div class="cyber-card p-6 space-y-4">
-                <h3 class="text-[10px] font-black uppercase text-cyan-400">RIDA Team Support</h3>
-                <div id="chatBox" class="h-48 overflow-y-auto flex flex-col bg-black/40 p-4 rounded-2xl border border-white/5"></div>
+            <div class="cyber-card p-6 space-y-6">
+                <h3 class="text-xs font-black text-cyan-400 uppercase tracking-widest">Secure Chat Terminal</h3>
+                <div id="chatBox" class="h-80 overflow-y-auto flex flex-col p-4 bg-black/40 rounded-2xl border border-white/5"></div>
                 <div class="flex gap-2">
-                    <input id="chatInput" type="text" placeholder="Type message..." class="flex-1 p-4 bg-white/5 border border-white/10 rounded-2xl text-xs outline-none focus:border-cyan-400">
-                    <button onclick="sendMsg()" class="px-6 py-4 btn-glow rounded-2xl text-[10px] font-bold">SEND</button>
+                    <input id="chatInput" type="text" placeholder="Message RIDA Team..." class="flex-1 p-4 bg-white/5 border border-white/10 rounded-2xl text-xs outline-none">
+                    <button onclick="sendMsg()" class="px-6 btn-glow font-black text-xs">SEND</button>
                 </div>
             </div>
-            <button onclick="logout()" class="w-full py-4 text-red-500 text-[9px] font-black uppercase tracking-widest opacity-40">Disconnect</button>
+            <div class="cyber-card p-6 flex justify-between items-center">
+                <div>
+                    <h4 class="text-xs font-black uppercase">Withdraw Balance</h4>
+                    <p class="text-[10px] text-gray-500">Minimum 10.00 RIDA</p>
+                </div>
+                <button onclick="alert('Withdrawals open at 10.00 RIDA')" class="px-6 py-3 bg-white/5 border border-white/10 rounded-xl text-[10px] font-bold uppercase tracking-widest">PULL</button>
+            </div>
+            <button onclick="logout()" class="w-full py-4 text-red-500 text-[10px] font-black uppercase tracking-[0.4em] opacity-40">Disconnect</button>
         </div>
 
         <div id="page-admin" class="page space-y-6">
-            <h1 class="text-3xl font-black text-cyan-400 italic">OVERLORD</h1>
+            <h2 class="text-3xl font-black text-red-500 italic px-2">OVERLORD v8.0</h2>
             <div class="cyber-card p-6 space-y-4">
-                <h3 class="text-xs font-bold uppercase">News Broadcast</h3>
-                <textarea id="admMsg" class="w-full p-4 bg-white/5 border border-white/10 rounded-2xl text-xs h-28 outline-none" placeholder="Message..."></textarea>
-                <button onclick="adminBroadcast()" class="w-full py-5 btn-glow rounded-xl font-bold text-xs uppercase">Push Broadcast</button>
+                <h3 class="text-xs font-black uppercase tracking-widest text-cyan-400">Chat Dispatcher</h3>
+                <div id="adminChatHub" class="space-y-4 max-h-96 overflow-y-auto"></div>
             </div>
             <div class="cyber-card p-6 space-y-4">
-                <h3 class="text-xs font-bold uppercase">User Control</h3>
-                <input id="admUid" type="text" placeholder="UID" class="w-full p-4 bg-white/5 border border-white/10 rounded-xl text-xs">
-                <input id="admBal" type="number" placeholder="New Balance" class="w-full p-4 bg-white/5 border border-white/10 rounded-xl text-xs">
-                <select id="admVerify" class="w-full p-4 bg-slate-900 border border-white/10 rounded-xl text-xs">
-                    <option value="">Status Override</option>
-                    <option value="TRUE">VERIFIED</option>
-                    <option value="FALSE">UNVERIFIED</option>
-                </select>
-                <button onclick="adminUpdate()" class="w-full py-5 bg-cyan-500/10 text-cyan-400 border border-cyan-400/30 rounded-xl font-bold text-xs uppercase">Update Database</button>
+                <h3 class="text-xs font-black uppercase tracking-widest text-cyan-400">Push Global Update</h3>
+                <textarea id="admMsg" class="w-full p-4 bg-white/5 border border-white/10 rounded-2xl text-xs h-28 outline-none" placeholder="Enter broadcast text..."></textarea>
+                <button onclick="adminBroadcast()" class="w-full py-4 btn-glow font-black text-xs uppercase tracking-widest">Execute Broadcast</button>
             </div>
         </div>
 
-        <div id="navBar" class="fixed bottom-0 left-0 w-full nav-blur flex justify-around p-5 z-50">
-            <button onclick="switchTab('home', this)" class="text-center text-cyan-400"><span class="block text-2xl">⚡</span><span class="text-[9px] font-bold uppercase">Mining</span></button>
-            <button onclick="switchTab('profile', this)" class="text-center text-gray-500"><span class="block text-2xl">👤</span><span class="text-[9px] font-bold uppercase">Profile</span></button>
-            <button id="adminTab" onclick="switchTab('admin', this)" style="display:none;" class="text-center text-red-500"><span class="block text-2xl">⚙️</span><span class="text-[9px] font-bold uppercase">Admin</span></button>
-        </div>
+        <nav class="fixed bottom-0 left-0 w-full nav-blur flex justify-around p-5 z-50">
+            <button onclick="switchTab('home', this)" class="text-cyan-400 flex flex-col items-center"><span class="text-2xl mb-1">⚡</span><span class="text-[9px] font-black uppercase tracking-widest">Core</span></button>
+            <button onclick="switchTab('profile', this)" class="text-gray-600 flex flex-col items-center"><span class="text-2xl mb-1">💬</span><span class="text-[9px] font-black uppercase tracking-widest">Team</span></button>
+            <button id="adminTab" onclick="switchTab('admin', this)" style="display:none;" class="text-red-900 flex flex-col items-center"><span class="text-2xl mb-1">⚙️</span><span class="text-[9px] font-black uppercase tracking-widest">Panel</span></button>
+        </nav>
     </div>
 
     <script>
-        const API = "https://script.google.com/macros/s/AKfycbxdPIPzN4bStdUmJ7_sGZkNoTFnNlPNHtcOhhvwtL2hzmgdAjJ3TxEmFbiU2nyivE5aKQ/exec";
-        let user = JSON.parse(localStorage.getItem('rida_v6'));
+        const API = "https://script.google.com/macros/s/AKfycbxM3Xbh5FiUgCx8fSxfj6qxjSGsX2AlbDpoebFJOmaGhCnPq0neIcZXG1pd93w0RQ-CPA/exec";
+        let user = JSON.parse(localStorage.getItem('rida_nexus'));
         let isReg = false;
-        let mineInterval;
-        const MINE_DURATION = 24 * 60 * 60 * 1000;
-        const MINE_RATE = 0.5; // Amount earned in 24h
+        let lastMsgCount = 0;
+        let lastAnnCount = 0;
+        const notifySound = new Audio('https://assets.mixkit.co/active_storage/sfx/2358/2358-preview.mp3');
 
-        window.onload = () => { if(user) syncSession(); else hideLoader(); };
+        window.onload = () => { 
+            if(user) {
+                if ("Notification" in window) Notification.requestPermission();
+                sync();
+                setInterval(pulseCheck, 15000); // Pulse check every 15 seconds
+            } 
+        };
 
-        function hideLoader() { document.getElementById('global-loader').style.display = 'none'; document.getElementById('authArea').classList.remove('hidden'); }
+        function pulseCheck() {
+            server('checkUpdates', { lastMsgCount, lastAnnCount }, (res) => {
+                if(res.msgCount > lastMsgCount) {
+                    playNotification("New Message", "New incoming traffic in Terminal.");
+                    lastMsgCount = res.msgCount;
+                    loadChat();
+                    if(user.role === "ADMIN") loadAdminChats();
+                }
+                if(res.annCount > lastAnnCount) {
+                    playNotification("Network Alert", "A new global broadcast was received.");
+                    lastAnnCount = res.annCount;
+                    sync();
+                }
+            });
+        }
 
-        function syncSession() {
+        function playNotification(title, body) {
+            notifySound.play().catch(() => {});
+            if (Notification.permission === "granted") new Notification(title, { body });
+        }
+
+        function sync() {
             server('sync', { email: user.email }, (res) => {
                 if(res.success) {
                     user = res.user;
-                    localStorage.setItem('rida_v6', JSON.stringify(user));
-                    initApp(res.news);
-                    loadHistory();
+                    lastMsgCount = res.msgCount;
+                    lastAnnCount = res.annCount;
+                    localStorage.setItem('rida_nexus', JSON.stringify(user));
+                    initApp(res.announcements);
                 } else logout();
             });
         }
 
         function initApp(news) {
-            document.getElementById('global-loader').style.display = 'none';
             document.getElementById('authArea').classList.add('hidden');
             document.getElementById('appArea').classList.remove('hidden');
             document.getElementById('topName').innerText = user.name;
             document.getElementById('topUid').innerText = user.uid;
-            document.getElementById('newsBox').innerText = news;
-            document.getElementById('profName').innerText = user.name;
-            document.getElementById('refLink').innerText = window.location.origin + window.location.pathname + "?ref=" + user.uid;
+            document.getElementById('topBal').innerText = parseFloat(user.bal).toFixed(4);
+            if(user.role === "ADMIN") document.getElementById('adminTab').style.display = "flex";
             
-            const isV = String(user.verified).toUpperCase() === "TRUE";
-            const tags = [document.getElementById('topStatus'), document.getElementById('profStatus')];
-            tags.forEach(t => {
-                t.innerText = isV ? "Verified" : "Unverified";
-                t.className = isV ? "status-tag bg-emerald-500/20 text-emerald-400" : "status-tag bg-red-500/20 text-red-400";
-            });
-
-            if(String(user.role).toUpperCase() === "ADMIN") document.getElementById('adminTab').style.display = "block";
-            checkMiningStatus();
-        }
-
-        function checkMiningStatus() {
-            if (!user.lastMine || user.lastMine == 0) return;
-            const elapsed = new Date().getTime() - user.lastMine;
-            if (elapsed < MINE_DURATION) startVisualMining();
-            else {
-                document.getElementById('topBal').innerText = (parseFloat(user.bal) + MINE_RATE).toFixed(4);
-                document.getElementById('mineBtn').innerText = "Session Finished - Start New";
-            }
+            document.getElementById('newsTimeline').innerHTML = news.map(n => `
+                <div class="cyber-card p-5 border-l-[3px] border-cyan-400">
+                    <p class="text-[9px] text-gray-500 font-black mb-1">${new Date(n[0]).toLocaleDateString()} | ${new Date(n[0]).toLocaleTimeString()}</p>
+                    <p class="text-xs text-gray-200 leading-relaxed font-medium">${n[1]}</p>
+                </div>
+            `).join('');
+            loadChat();
+            checkMining();
         }
 
         function startMining() {
             server('startMiningSession', { uid: user.uid }, (res) => {
-                if(res.success) {
-                    user.lastMine = res.startTime;
-                    localStorage.setItem('rida_v6', JSON.stringify(user));
-                    startVisualMining();
-                }
+                if(res.success) { user.lastMine = res.startTime; startVisualMining(); }
             });
+        }
+
+        function checkMining() {
+            if (user.lastMine > 0) {
+                const diff = new Date().getTime() - user.lastMine;
+                if(diff < 86400000) startVisualMining();
+            }
         }
 
         function startVisualMining() {
             const btn = document.getElementById('mineBtn');
+            const glow = document.getElementById('mineGlow');
             btn.disabled = true;
-            document.getElementById('mineCircle').style.borderColor = "#00f2ff";
+            glow.style.opacity = "1";
             
-            if (mineInterval) clearInterval(mineInterval);
-            mineInterval = setInterval(() => {
+            const mineInterval = setInterval(() => {
                 const diff = new Date().getTime() - user.lastMine;
-                if (diff >= MINE_DURATION) {
-                    clearInterval(mineInterval);
-                    btn.disabled = false;
-                    btn.innerText = "Session Complete";
-                    return;
+                if(diff >= 86400000) { 
+                    clearInterval(mineInterval); 
+                    btn.disabled = false; 
+                    glow.style.opacity = "0";
+                    btn.innerText = "Claim & Restart Session"; 
+                    return; 
                 }
-                const currentEarned = (diff / MINE_DURATION) * MINE_RATE;
-                document.getElementById('topBal').innerText = (parseFloat(user.bal) + currentEarned).toFixed(4);
-                document.getElementById('liveCounter').innerText = (currentEarned % 1).toFixed(8);
-                
-                const rem = MINE_DURATION - diff;
-                const h = Math.floor(rem / 3600000);
-                const m = Math.floor((rem % 3600000) / 60000);
-                const s = Math.floor((rem % 60000) / 1000);
-                btn.innerText = `Extracting: ${h}h ${m}m ${s}s`;
+                const earned = (diff / 86400000) * 0.5; // Earn 0.5 per 24h
+                document.getElementById('liveCounter').innerText = earned.toFixed(8);
+                const rem = 86400000 - diff;
+                const h = Math.floor(rem/3600000), m = Math.floor((rem%3600000)/60000), s = Math.floor((rem%60000)/1000);
+                btn.innerText = `ACTIVE: ${h}h ${m}m ${s}s`;
             }, 1000);
         }
 
-        function loadHistory() {
+        function loadChat() {
             server('getMessages', { uid: user.uid }, (res) => {
-                if(res.success) {
-                    const box = document.getElementById('chatBox');
-                    box.innerHTML = "";
-                    res.history.forEach(m => {
-                        const isMe = m.sender === user.name;
-                        box.innerHTML += `<div class="chat-msg ${isMe ? 'msg-user' : 'msg-admin'}"><b>${m.sender}:</b><br>${m.text}</div>`;
-                    });
-                    box.scrollTop = box.scrollHeight;
-                }
+                const box = document.getElementById('chatBox');
+                box.innerHTML = res.history.map(m => `<div class="chat-msg ${m.sender === user.name ? 'user-msg' : 'admin-msg'}"><b>${m.sender}</b><br>${m.text}</div>`).join('');
+                box.scrollTop = box.scrollHeight;
+            });
+        }
+
+        function loadAdminChats() {
+            server('adminGetAllChats', {}, (res) => {
+                const hub = document.getElementById('adminChatHub');
+                hub.innerHTML = Object.entries(res.chats).map(([uid, msgs]) => `
+                    <div class="bg-white/5 p-5 rounded-2xl border border-white/10 shadow-inner">
+                        <p class="text-[10px] font-black text-cyan-400 mb-2">NODE ID: ${uid}</p>
+                        <div class="max-h-32 overflow-y-auto mb-4 text-[11px] opacity-70 space-y-2">${msgs.map(m => `<div><b class="text-white">${m.sender}:</b> ${m.text}</div>`).join('')}</div>
+                        <div class="flex gap-2">
+                            <input id="reply-${uid}" type="text" placeholder="Respond..." class="flex-1 bg-black/40 p-3 rounded-xl text-xs outline-none border border-white/10 focus:border-cyan-400">
+                            <button onclick="adminReply('${uid}')" class="bg-cyan-500 text-black px-5 rounded-xl text-[10px] font-black">REPLY</button>
+                        </div>
+                    </div>
+                `).join('');
+            });
+        }
+
+        function adminReply(targetUid) {
+            const txt = document.getElementById('reply-' + targetUid).value;
+            if(!txt) return;
+            server('sendMessage', { uid: targetUid, sender: "RIDA TEAM", text: txt }, () => {
+                document.getElementById('reply-' + targetUid).value = "";
+                loadAdminChats();
             });
         }
 
         function sendMsg() {
             const t = document.getElementById('chatInput').value;
             if(!t) return;
-            server('sendMessage', { uid: user.uid, sender: user.name, text: t }, () => {
-                document.getElementById('chatInput').value = "";
-                loadHistory();
-            });
-        }
-
-        function handleAuth() {
-            const email = document.getElementById('uEmail').value;
-            const pass = document.getElementById('uPass').value;
-            server(isReg ? 'register' : 'login', { email, pass, name: document.getElementById('uName').value, ref: new URLSearchParams(window.location.search).get('ref') || "none" }, (res) => {
-                if(res.success) {
-                    if(isReg) { alert("Registration Success. Login now."); toggleAuth(); }
-                    else { user = res.user; localStorage.setItem('rida_v6', JSON.stringify(user)); location.reload(); }
-                } else alert(res.msg || "Auth Failure");
+            server('sendMessage', { uid: user.uid, sender: user.name, text: t }, () => { 
+                document.getElementById('chatInput').value = ""; 
+                loadChat(); 
             });
         }
 
@@ -259,18 +253,26 @@
             document.body.appendChild(s);
         }
 
+        function handleAuth() {
+            const email = document.getElementById('uEmail').value, pass = document.getElementById('uPass').value;
+            server(isReg ? 'register' : 'login', { email, pass, name: document.getElementById('uName').value }, (res) => {
+                if(res.success) { 
+                    if(isReg) { alert("Node Registered."); toggleAuth(); }
+                    else { user = res.user; localStorage.setItem('rida_nexus', JSON.stringify(user)); location.reload(); }
+                } else alert("Authorization Failed.");
+            });
+        }
+
         function switchTab(t, el) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active-page'));
             document.getElementById('page-' + t).classList.add('active-page');
-            document.querySelectorAll('#navBar button').forEach(b => b.className = "text-center text-gray-500");
-            el.className = t === 'admin' ? "text-center text-red-500 font-bold" : "text-center text-cyan-400 font-bold";
+            document.querySelectorAll('nav button').forEach(b => b.className = "text-gray-600 flex flex-col items-center");
+            el.className = (t === 'admin' ? "text-red-500" : "text-cyan-400") + " flex flex-col items-center font-bold";
         }
 
-        function toggleAuth() { isReg = !isReg; document.getElementById('regInputs').classList.toggle('hidden'); document.getElementById('toggleLabel').innerText = isReg ? 'Login' : 'Register'; }
-        function copyRef() { navigator.clipboard.writeText(document.getElementById('refLink').innerText); alert("Referral Link Copied!"); }
+        function toggleAuth() { isReg = !isReg; document.getElementById('regFields').classList.toggle('hidden'); document.getElementById('toggleLabel').innerText = isReg ? 'Login' : 'Register'; }
         function logout() { localStorage.clear(); location.reload(); }
-        function adminBroadcast() { server('broadcast', { text: document.getElementById('admMsg').value }, () => alert("Pushed!")); }
-        function adminUpdate() { server('adminUpdateUser', { targetUid: document.getElementById('admUid').value, newBal: document.getElementById('admBal').value, setVerify: document.getElementById('admVerify').value }, (res) => alert(res.success ? "Success" : "Failed")); }
+        function adminBroadcast() { server('broadcast', { text: document.getElementById('admMsg').value }, () => { document.getElementById('admMsg').value = ""; alert("Broadcast Pushed."); sync(); }); }
     </script>
 </body>
 </html>
