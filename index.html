@@ -113,191 +113,205 @@
     </div>
 
     <script>
-        const API = "https://script.google.com/macros/s/AKfycbx9hh-xgQUZl6VIa_PIznuTuFYaPXdSPmmCbtNzsAxBiWfSjF7ulFdKdBWQXMCDVu01GQ/exec";
-        let user = JSON.parse(localStorage.getItem('rida_v10'));
-        let isReg = false;
+    const API = "https://script.google.com/macros/s/AKfycbx9hh-xgQUZl6VIa_PIznuTuFYaPXdSPmmCbtNzsAxBiWfSjF7ulFdKdBWQXMCDVu01GQ/exec";
+    let user = JSON.parse(localStorage.getItem('rida_v10'));
+    let isReg = false;
 
-        window.onload = () => { if(user) sync(); };
-
-        function sync() {
-            call('sync', { email: user.email }, (res) => {
-                if(res.success) {
-                    user = res.user;
-                    localStorage.setItem('rida_v10', JSON.stringify(user));
-                    renderUI(res.announcements);
-                } else logout();
-            });
+    // Run sync every 30 seconds to catch verification updates automatically
+    window.onload = () => { 
+        if(user) {
+            sync();
+            setInterval(sync, 30000); 
         }
+    };
 
-        function renderUI(ann) {
-            document.getElementById('authPage').classList.add('hidden');
-            document.getElementById('mainApp').classList.remove('hidden');
-            
-            document.getElementById('viewName').innerText = user.name;
-            document.getElementById('viewUid').innerText = user.uid;
-            document.getElementById('viewBal').innerText = parseFloat(user.bal).toFixed(2);
-            document.getElementById('viewRefCount').innerText = user.refCount;
-            document.getElementById('refLink').value = `https://earningpoint.github.io/rida/?ref=${user.uid}`;
-            
-            const badge = document.getElementById('viewStatus');
-            if(user.verified === "TRUE") { 
-                badge.className = "badge-v"; 
-                badge.innerText = "Verified"; 
+    function sync() {
+        call('sync', { email: user.email }, (res) => {
+            if(res.success) {
+                user = res.user;
+                localStorage.setItem('rida_v10', JSON.stringify(user));
+                renderUI(res.announcements);
+            } else logout();
+        });
+    }
+
+    function renderUI(ann) {
+        document.getElementById('authPage').classList.add('hidden');
+        document.getElementById('mainApp').classList.remove('hidden');
+        
+        document.getElementById('viewName').innerText = user.name;
+        document.getElementById('viewUid').innerText = user.uid;
+        document.getElementById('viewBal').innerText = parseFloat(user.bal).toFixed(2);
+        document.getElementById('viewRefCount').innerText = user.refCount;
+        document.getElementById('refLink').value = `https://earningpoint.github.io/rida/?ref=${user.uid}`;
+        
+        // FIX: Force badge update based on string or boolean from sheet
+        const badge = document.getElementById('viewStatus');
+        if(String(user.verified).toUpperCase() === "TRUE") { 
+            badge.className = "badge-v"; 
+            badge.innerText = "Verified"; 
+        } else {
+            badge.className = "badge-u"; 
+            badge.innerText = "Unverified";
+        }
+        
+        if(user.role === "ADMIN") document.getElementById('adminTab').classList.remove('hidden');
+
+        document.getElementById('annContainer').innerHTML = (ann || []).map(a => `
+            <div class="glass p-4 border-l-4 border-indigo-500">
+                <p class="text-[9px] text-slate-500 font-bold mb-1">${new Date(a[0]).toLocaleDateString()}</p>
+                <p class="text-xs text-slate-200">${a[1]}</p>
+            </div>
+        `).join('');
+        
+        checkMiningStatus();
+        loadChat();
+        if(user.role === "ADMIN") loadAdminChats();
+    }
+
+    function checkMiningStatus() {
+        const btn = document.getElementById('mineBtn');
+        const pulse = document.getElementById('miningPulse');
+        const label = document.getElementById('timerLabel');
+
+        if(user.lastMine > 0) {
+            const diff = new Date().getTime() - user.lastMine;
+            if(diff < 86400000) {
+                pulse.classList.remove('opacity-0');
+                btn.disabled = true;
+                updateCountdown(86400000 - diff);
+                label.innerText = "Mining Protocol Active";
             } else {
-                badge.className = "badge-u"; 
-                badge.innerText = "Unverified";
+                btn.innerText = "Claim 0.2 RIDA Yield";
+                btn.disabled = false;
+                btn.onclick = claim;
+                label.innerText = "Yield ready for extraction";
             }
-            
-            if(user.role === "ADMIN") document.getElementById('adminTab').classList.remove('hidden');
+        } else {
+            btn.innerText = "Initialize Mining";
+            btn.disabled = false;
+            btn.onclick = processMining;
+            label.innerText = "Protocol ready for extraction";
+        }
+    }
 
-            document.getElementById('annContainer').innerHTML = ann.map(a => `
-                <div class="glass p-4 border-l-4 border-indigo-500">
-                    <p class="text-[9px] text-slate-500 font-bold mb-1">${new Date(a[0]).toLocaleDateString()}</p>
-                    <p class="text-xs text-slate-200">${a[1]}</p>
+    function updateCountdown(ms) {
+        const btn = document.getElementById('mineBtn');
+        const interval = setInterval(() => {
+            ms -= 1000;
+            if(ms <= 0) { clearInterval(interval); sync(); return; }
+            const h = Math.floor(ms/3600000), m = Math.floor((ms%3600000)/60000), s = Math.floor((ms%60000)/1000);
+            btn.innerText = `${h}h ${m}m ${s}s Remaining`;
+        }, 1000);
+    }
+
+    function processMining() {
+        call('startMining', { uid: user.uid }, () => { sync(); });
+    }
+
+    function claim() {
+        call('claimMining', { uid: user.uid }, (res) => { if(res.success) sync(); });
+    }
+
+    function loadChat() {
+        call('getMessages', { uid: user.uid }, (res) => {
+            if(!res.history) return;
+            document.getElementById('chatBox').innerHTML = res.history.map(m => `
+                <div class="p-3 rounded-2xl ${m.sender === 'ADMIN' ? 'bg-white/5 mr-8' : 'bg-indigo-500/10 ml-8 text-right'}">
+                    <p class="font-bold text-[9px] mb-1 opacity-50 uppercase tracking-tighter">${m.sender}</p>
+                    <p>${m.text}</p>
                 </div>
             `).join('');
-            
-            checkMiningStatus();
+            const box = document.getElementById('chatBox');
+            box.scrollTop = box.scrollHeight;
+        });
+    }
+
+    function sendMsg() {
+        const text = document.getElementById('chatInp').value;
+        if(!text) return;
+        call('sendMessage', { uid: user.uid, sender: user.name, text: text }, () => {
+            document.getElementById('chatInp').value = "";
             loadChat();
-            if(user.role === "ADMIN") loadAdminChats();
-        }
+        });
+    }
 
-        function checkMiningStatus() {
-            const btn = document.getElementById('mineBtn');
-            const pulse = document.getElementById('miningPulse');
-            const label = document.getElementById('timerLabel');
-
-            if(user.lastMine > 0) {
-                const diff = new Date().getTime() - user.lastMine;
-                if(diff < 86400000) {
-                    pulse.classList.remove('opacity-0');
-                    btn.disabled = true;
-                    updateCountdown(86400000 - diff);
-                    label.innerText = "Mining Protocol Active";
-                } else {
-                    btn.innerText = "Claim 0.2 RIDA Yield";
-                    btn.disabled = false;
-                    btn.onclick = claim;
-                    label.innerText = "Yield ready for extraction";
-                }
-            } else {
-                btn.innerText = "Initialize Mining";
-                btn.disabled = false;
-                btn.onclick = processMining;
-                label.innerText = "Protocol ready for extraction";
-            }
-        }
-
-        function updateCountdown(ms) {
-            const btn = document.getElementById('mineBtn');
-            const interval = setInterval(() => {
-                ms -= 1000;
-                if(ms <= 0) { clearInterval(interval); sync(); return; }
-                const h = Math.floor(ms/3600000), m = Math.floor((ms%3600000)/60000), s = Math.floor((ms%60000)/1000);
-                btn.innerText = `${h}h ${m}m ${s}s Remaining`;
-            }, 1000);
-        }
-
-        function processMining() {
-            call('startMining', { uid: user.uid }, () => { sync(); });
-        }
-
-        function claim() {
-            call('claimMining', { uid: user.uid }, (res) => { if(res.success) sync(); });
-        }
-
-        function loadChat() {
-            call('getMessages', { uid: user.uid }, (res) => {
-                document.getElementById('chatBox').innerHTML = res.history.map(m => `
-                    <div class="p-3 rounded-2xl ${m.uid === user.uid && m.sender !== 'ADMIN' ? 'bg-indigo-500/10 ml-8 text-right' : 'bg-white/5 mr-8'}">
-                        <p class="font-bold text-[9px] mb-1 opacity-50 uppercase tracking-tighter">${m.sender}</p>
-                        <p>${m.text}</p>
+    function loadAdminChats() {
+        call('getMessages', { isAdmin: true }, (res) => {
+            if(!res.history) return;
+            const groups = {};
+            res.history.forEach(m => { if(!groups[m.uid]) groups[m.uid] = []; groups[m.uid].push(m); });
+            document.getElementById('adminChatHub').innerHTML = Object.entries(groups).map(([uid, msgs]) => `
+                <div class="glass p-5 space-y-3">
+                    <p class="text-[10px] font-bold text-indigo-400 tracking-widest uppercase">Node: ${uid}</p>
+                    <div class="max-h-32 overflow-y-auto space-y-2 text-[10px] opacity-70">${msgs.map(m => `<div><b class="text-white">${m.sender}:</b> ${m.text}</div>`).join('')}</div>
+                    <div class="flex gap-2">
+                        <input id="reply-${uid}" placeholder="Response..." class="w-full bg-black/30 p-2 rounded-lg text-xs border border-white/5 outline-none">
+                        <button onclick="adminReply('${uid}')" class="bg-indigo-500 px-4 rounded-lg text-[10px] font-bold uppercase">Reply</button>
+                        <button onclick="adminVerify('${uid}')" class="bg-green-600 px-4 rounded-lg text-[10px] font-bold uppercase">Verify</button>
                     </div>
-                `).join('');
-                const box = document.getElementById('chatBox');
-                box.scrollTop = box.scrollHeight;
-            });
-        }
+                </div>
+            `).join('');
+        });
+    }
 
-        function sendMsg() {
-            const text = document.getElementById('chatInp').value;
-            if(!text) return;
-            call('sendMessage', { uid: user.uid, sender: user.name, text: text }, () => {
-                document.getElementById('chatInp').value = "";
-                loadChat();
-            });
-        }
+    function adminReply(target) {
+        const val = document.getElementById('reply-'+target).value;
+        if(!val) return;
+        call('sendMessage', { uid: target, sender: "ADMIN", text: val }, () => loadAdminChats());
+    }
 
-        function loadAdminChats() {
-            call('getMessages', { isAdmin: true }, (res) => {
-                const groups = {};
-                res.history.forEach(m => { if(!groups[m.uid]) groups[m.uid] = []; groups[m.uid].push(m); });
-                document.getElementById('adminChatHub').innerHTML = Object.entries(groups).map(([uid, msgs]) => `
-                    <div class="glass p-5 space-y-3">
-                        <p class="text-[10px] font-bold text-indigo-400 tracking-widest uppercase">Node: ${uid}</p>
-                        <div class="max-h-32 overflow-y-auto space-y-2 text-[10px] opacity-70">${msgs.map(m => `<div><b class="text-white">${m.sender}:</b> ${m.text}</div>`).join('')}</div>
-                        <div class="flex gap-2">
-                            <input id="reply-${uid}" placeholder="Response..." class="w-full bg-black/30 p-2 rounded-lg text-xs border border-white/5 outline-none">
-                            <button onclick="adminReply('${uid}')" class="bg-indigo-500 px-4 rounded-lg text-[10px] font-bold uppercase">Reply</button>
-                            <button onclick="adminVerify('${uid}')" class="bg-green-600 px-4 rounded-lg text-[10px] font-bold uppercase">Verify</button>
-                        </div>
-                    </div>
-                `).join('');
-            });
-        }
-
-        function adminReply(target) {
-            const val = document.getElementById('reply-'+target).value;
-            if(!val) return;
-            call('sendMessage', { uid: target, sender: "ADMIN", text: val }, () => loadAdminChats());
-        }
-
-        function adminVerify(target) {
-            if(confirm("Verify this node?")) {
-                call('adminAction', { targetUid: target, type: 'verify' }, () => alert('Node Verified!'));
-            }
-        }
-
-        function handleAuth() {
-            const email = document.getElementById('uEmail').value, pass = document.getElementById('uPass').value;
-            const payload = { email, pass, name: document.getElementById('uName').value, ref: document.getElementById('uRef').value || "none" };
-            call(isReg ? 'register' : 'login', payload, (res) => {
+    function adminVerify(target) {
+        if(confirm("Verify this node?")) {
+            call('adminAction', { targetUid: target, type: 'verify' }, (res) => {
                 if(res.success) {
-                    if(isReg) { alert("Registration Complete!"); toggleAuth(); }
-                    else { user = res.user; localStorage.setItem('rida_v10', JSON.stringify(user)); sync(); }
-                } else alert(res.msg || "Auth Failed");
+                    alert('Node Verified in Database!');
+                    // If the admin is also the current user (testing), sync immediately
+                    if(user.uid === target) sync();
+                }
             });
         }
+    }
 
-        function toggleAuth() { 
-            isReg = !isReg;
-            document.getElementById('regInputs').classList.toggle('hidden');
-            document.getElementById('toggleText').innerText = isReg ? "Existing node? Login" : "New node? Register account";
-        }
+    function handleAuth() {
+        const email = document.getElementById('uEmail').value, pass = document.getElementById('uPass').value;
+        const payload = { email, pass, name: document.getElementById('uName').value, ref: document.getElementById('uRef').value || "none" };
+        call(isReg ? 'register' : 'login', payload, (res) => {
+            if(res.success) {
+                if(isReg) { alert("Registration Complete!"); toggleAuth(); }
+                else { user = res.user; localStorage.setItem('rida_v10', JSON.stringify(user)); sync(); }
+            } else alert(res.msg || "Auth Failed");
+        });
+    }
 
-        function switchTab(t, el) {
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.getElementById('page-' + t).classList.add('active');
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('nav-active'));
-            el.classList.add('nav-active');
-        }
+    function toggleAuth() { 
+        isReg = !isReg;
+        document.getElementById('regInputs').classList.toggle('hidden');
+        document.getElementById('toggleText').innerText = isReg ? "Existing node? Login" : "New node? Register account";
+    }
 
-        function call(action, payload, callback) {
-            const cb = 'cb_' + Math.round(Math.random()*10000);
-            window[cb] = (d) => { delete window[cb]; document.body.removeChild(s); callback(d); };
-            const s = document.createElement('script');
-            s.src = `${API}?callback=${cb}&action=${action}&payload=${encodeURIComponent(JSON.stringify(payload))}`;
-            document.body.appendChild(s);
-        }
+    function switchTab(t, el) {
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        document.getElementById('page-' + t).classList.add('active');
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('nav-active'));
+        el.classList.add('nav-active');
+    }
 
-        function copyRef() {
-            const link = document.getElementById('refLink');
-            link.select();
-            document.execCommand('copy');
-            alert("Referral link copied!");
-        }
+    function call(action, payload, callback) {
+        const cb = 'cb_' + Math.round(Math.random()*10000);
+        window[cb] = (d) => { delete window[cb]; document.body.removeChild(s); callback(d); };
+        const s = document.createElement('script');
+        s.src = `${API}?callback=${cb}&action=${action}&payload=${encodeURIComponent(JSON.stringify(payload))}`;
+        document.body.appendChild(s);
+    }
 
-        function logout() { localStorage.clear(); location.reload(); }
-    </script>
-</body>
-</html>
+    function copyRef() {
+        const link = document.getElementById('refLink');
+        link.select();
+        document.execCommand('copy');
+        alert("Referral link copied!");
+    }
+
+    function logout() { localStorage.clear(); location.reload(); }
+            </script>
+            
