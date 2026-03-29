@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>RIDA NETWORK v11.1</title>
+    <title>RIDA NETWORK v12.5</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
@@ -75,50 +75,46 @@
         </div>
 
         <div id="page-profile" class="page space-y-4">
-            <div class="glass p-6 space-y-6">
-                <h3 class="text-sm font-bold uppercase tracking-widest text-indigo-400">Referral Program</h3>
-                <div class="bg-indigo-500/10 p-4 rounded-2xl border border-indigo-500/20">
-                    <p class="text-[10px] text-indigo-300 font-bold mb-1">Your Referral Link</p>
-                    <div class="flex gap-2">
-                        <input id="refLink" readonly class="bg-transparent text-xs w-full outline-none font-mono" value="---">
-                        <button onclick="copyRef()" class="text-[10px] font-black text-indigo-400">COPY</button>
-                    </div>
-                </div>
-                <div class="flex justify-between text-center px-4">
-                    <div><p id="viewRefCount" class="text-xl font-bold">0</p><p class="text-[9px] text-slate-500 uppercase font-bold">Invites</p></div>
-                    <div><p class="text-xl font-bold">0.50</p><p class="text-[9px] text-slate-500 uppercase font-bold">Bonus/Ref</p></div>
+            <div class="glass p-6 space-y-4 border-t-4 border-indigo-500">
+                <h3 class="text-xs font-black uppercase tracking-widest text-indigo-400">P2P Transfer</h3>
+                <div class="space-y-3">
+                    <input id="p2pTarget" type="text" placeholder="Receiver UID" class="w-full bg-white/5 border border-white/10 p-4 rounded-xl outline-none text-xs">
+                    <input id="p2pAmount" type="number" placeholder="Amount (Min 10)" class="w-full bg-white/5 border border-white/10 p-4 rounded-xl outline-none text-xs">
+                    <button onclick="processP2P()" class="w-full py-4 btn-primary text-[10px] uppercase font-bold tracking-widest">Send RIDA</button>
                 </div>
             </div>
 
             <div class="glass p-6 space-y-4">
-                <h3 class="text-sm font-bold uppercase tracking-widest text-indigo-400">Support Terminal</h3>
-                <div id="chatBox" class="h-64 overflow-y-auto space-y-3 p-2 text-xs border-y border-white/5 py-4"></div>
-                <div class="flex gap-2">
-                    <input id="chatInp" type="text" placeholder="Message Admin..." class="w-full bg-white/5 border border-white/10 p-4 rounded-xl outline-none text-xs">
-                    <button onclick="sendMsg()" class="px-6 btn-primary text-[10px] font-black">SEND</button>
+                <h3 class="text-xs font-black uppercase tracking-widest text-indigo-400">Ledger History</h3>
+                <div id="txList" class="space-y-3 max-h-60 overflow-y-auto pr-2">
+                    <p class="text-[10px] text-slate-500 text-center py-4">No recent activity</p>
                 </div>
             </div>
-            <button onclick="logout()" class="w-full text-center text-[10px] text-red-500/50 font-bold uppercase tracking-[0.3em] py-4">Disconnect Node</button>
+
+            <div class="glass p-6">
+                <h3 class="text-xs font-black uppercase tracking-widest text-indigo-400 mb-4">Referral Link</h3>
+                <input id="refLink" readonly class="bg-indigo-500/10 p-4 rounded-xl text-xs w-full outline-none font-mono text-indigo-300 mb-2">
+                <button onclick="copyRef()" class="w-full text-[10px] font-black text-indigo-400 uppercase tracking-widest">Copy Link</button>
+            </div>
+
+            <div class="glass p-6 space-y-4">
+                <h3 class="text-xs font-black uppercase tracking-widest text-indigo-400">Support</h3>
+                <div id="chatBox" class="h-48 overflow-y-auto space-y-3 p-2 text-xs border-y border-white/5 py-4"></div>
+                <div class="flex gap-2">
+                    <input id="chatInp" type="text" placeholder="Message..." class="w-full bg-white/5 border border-white/10 p-3 rounded-xl outline-none text-xs">
+                    <button onclick="sendMsg()" class="px-4 btn-primary text-[10px] font-black">SEND</button>
+                </div>
+            </div>
+            <button onclick="logout()" class="w-full text-center text-[10px] text-red-500/50 font-bold uppercase py-4">Disconnect Node</button>
         </div>
 
         <div id="page-admin" class="page space-y-6">
             <div class="glass p-6 space-y-4">
-                <h2 class="text-xs font-black text-indigo-400 uppercase tracking-widest">Global Announcement</h2>
-                <textarea id="adminAnnInp" placeholder="Type global update..." class="w-full bg-black/30 p-4 rounded-xl text-xs outline-none border border-white/10 h-24"></textarea>
-                <button onclick="postAnnouncement()" class="w-full py-3 btn-primary text-[10px] uppercase font-bold">Broadcast Update</button>
+                <h2 class="text-xs font-black text-indigo-400 uppercase">Broadcast</h2>
+                <textarea id="adminAnnInp" class="w-full bg-black/30 p-4 rounded-xl text-xs outline-none border border-white/10 h-20"></textarea>
+                <button onclick="postAnnouncement()" class="w-full py-3 btn-primary text-[10px] uppercase font-bold">Post Update</button>
             </div>
-            <h2 class="text-xs font-black text-red-500 px-2 uppercase tracking-widest">Node Verification</h2>
             <div id="adminChatHub" class="space-y-4"></div>
-        </div>
-
-        <div id="annModal" class="hidden fixed inset-0 z-[100] bg-black/90 backdrop-blur-md p-6 overflow-y-auto">
-            <div class="max-w-md mx-auto">
-                <div class="flex justify-between items-center mb-8">
-                    <h2 class="text-2xl font-black italic text-indigo-500">ARCHIVE</h2>
-                    <button onclick="toggleAnnModal(false)" class="text-xl p-2">✕</button>
-                </div>
-                <div id="annArchiveList" class="space-y-4"></div>
-            </div>
         </div>
 
         <nav class="fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-md glass flex justify-around p-4 z-50">
@@ -135,25 +131,24 @@
     </div>
 
     <script>
-        const API = "https://script.google.com/macros/s/AKfycbybl0oedgRXxrKvEBcQifMGs18ew5WN4Pb7mdk5oqo2lm5f8iz60xVpL5Zy6mV9aeDWvw/exec";
-        let user = JSON.parse(localStorage.getItem('rida_v11'));
+        const API = "https://script.google.com/macros/s/AKfycbzn-QEd3KX4ng0CJa8mHyKoffsuJmkQn6s4FECPSzjwucJWAHy-ND-oyo9TC4GhyBoFjA/exec";
+        let user = JSON.parse(localStorage.getItem('rida_v12_5'));
         let allAnnouncements = [];
+        let transactions = [];
 
         window.onload = () => { 
-            // Automatic referral capture from URL
             const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.has('ref')) {
-                sessionStorage.setItem('pendingRef', urlParams.get('ref'));
-            }
+            if (urlParams.has('ref')) sessionStorage.setItem('pendingRef', urlParams.get('ref'));
             if(user) { sync(); setInterval(sync, 30000); } 
         };
 
         function sync() {
-            call('sync', { email: user.email }, (res) => {
+            call('sync', { email: user.email, uid: user.uid }, (res) => {
                 if(res.success) {
                     user = res.user;
                     allAnnouncements = res.announcements || [];
-                    localStorage.setItem('rida_v11', JSON.stringify(user));
+                    transactions = res.transactions || [];
+                    localStorage.setItem('rida_v12_5', JSON.stringify(user));
                     renderUI();
                 } else logout();
             });
@@ -162,15 +157,10 @@
         function renderUI() {
             document.getElementById('authPage').classList.add('hidden');
             document.getElementById('mainApp').classList.remove('hidden');
-            
             document.getElementById('viewName').innerText = user.name;
             document.getElementById('viewUid').innerText = user.uid;
             document.getElementById('viewBal').innerText = parseFloat(user.bal).toFixed(2);
-            document.getElementById('viewRefCount').innerText = user.refCount;
-            
-            // AUTOMATIC LINK GENERATION
-            const currentUrl = window.location.origin + window.location.pathname;
-            document.getElementById('refLink').value = `${currentUrl}?ref=${user.uid}`;
+            document.getElementById('refLink').value = `${window.location.origin + window.location.pathname}?ref=${user.uid}`;
             
             const badge = document.getElementById('viewStatus');
             if(String(user.verified).toUpperCase() === "TRUE") { badge.className = "badge-v"; badge.innerText = "Verified"; }
@@ -179,169 +169,100 @@
             if(user.role === "ADMIN") document.getElementById('adminTab').classList.remove('hidden');
             if(allAnnouncements.length > 0) document.getElementById('annText').innerText = allAnnouncements[0][1];
             
-            checkMiningStatus();
-            loadChat();
+            const txBox = document.getElementById('txList');
+            if(transactions.length > 0) {
+                txBox.innerHTML = transactions.map(t => {
+                    const isOut = t.from === user.uid;
+                    const color = isOut ? 'text-red-400' : 'text-green-400';
+                    const prefix = isOut ? '-' : '+';
+                    return `
+                        <div class="flex justify-between items-center bg-white/5 p-3 rounded-xl">
+                            <div>
+                                <p class="text-[10px] font-bold uppercase tracking-tighter">${t.type}</p>
+                                <p class="text-[8px] opacity-40">${new Date(t.date).toLocaleDateString()}</p>
+                            </div>
+                            <p class="font-black ${color}">${prefix}${parseFloat(t.amt).toFixed(2)}</p>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            checkMiningStatus(); loadChat();
             if(user.role === "ADMIN") loadAdminChats();
         }
 
-        function toggleAnnModal(show) {
-            const modal = document.getElementById('annModal');
-            modal.classList.toggle('hidden', !show);
-            if(show) {
-                document.getElementById('annArchiveList').innerHTML = allAnnouncements.map(a => `
-                    <div class="glass p-5 border-l-2 border-indigo-500">
-                        <p class="text-[10px] text-indigo-400 font-bold mb-2 uppercase">${new Date(a[0]).toLocaleString()}</p>
-                        <p class="text-sm text-slate-300 leading-relaxed">${a[1]}</p>
-                    </div>
-                `).join('');
+        function processP2P() {
+            const target = document.getElementById('p2pTarget').value;
+            const amount = document.getElementById('p2pAmount').value;
+            if(!target || !amount) return alert("Fill all fields");
+            if(confirm(`Send ${amount} RIDA to ${target}?`)) {
+                call('p2p', { senderUid: user.uid, targetUid: target, amount: amount }, (res) => {
+                    alert(res.msg);
+                    if(res.success) { sync(); document.getElementById('p2pTarget').value = ""; document.getElementById('p2pAmount').value = ""; }
+                });
             }
-        }
-
-        function postAnnouncement() {
-            const text = document.getElementById('adminAnnInp').value;
-            if(!text) return;
-            call('postAnn', { text: text }, () => {
-                alert("Broadcast Success!");
-                document.getElementById('adminAnnInp').value = "";
-                sync();
-            });
         }
 
         function checkMiningStatus() {
-            const btn = document.getElementById('mineBtn');
-            const pulse = document.getElementById('miningPulse');
-            const label = document.getElementById('timerLabel');
+            const btn = document.getElementById('mineBtn'); const pulse = document.getElementById('miningPulse'); const label = document.getElementById('timerLabel');
             if(user.lastMine > 0) {
                 const diff = new Date().getTime() - user.lastMine;
-                if(diff < 86400000) {
-                    pulse.classList.remove('opacity-0');
-                    btn.disabled = true;
-                    updateCountdown(86400000 - diff);
-                    label.innerText = "Mining Active";
-                } else {
-                    btn.innerText = "Claim 0.2 RIDA";
-                    btn.disabled = false;
-                    btn.onclick = claim;
-                    label.innerText = "Yield ready";
-                }
-            } else {
-                btn.innerText = "Start Mining";
-                btn.disabled = false;
-                btn.onclick = processMining;
-                label.innerText = "Ready";
-            }
+                if(diff < 86400000) { pulse.classList.remove('opacity-0'); btn.disabled = true; updateCountdown(86400000 - diff); label.innerText = "Mining Active"; } 
+                else { btn.innerText = "Claim 0.2 RIDA"; btn.disabled = false; btn.onclick = claim; label.innerText = "Yield ready"; }
+            } else { btn.innerText = "Start Mining"; btn.disabled = false; btn.onclick = processMining; label.innerText = "Ready"; }
         }
-
         function updateCountdown(ms) {
             const btn = document.getElementById('mineBtn');
-            const interval = setInterval(() => {
-                ms -= 1000;
-                if(ms <= 0) { clearInterval(interval); sync(); return; }
+            const interval = setInterval(() => { ms -= 1000; if(ms <= 0) { clearInterval(interval); sync(); return; }
                 const h = Math.floor(ms/3600000), m = Math.floor((ms%3600000)/60000), s = Math.floor((ms%60000)/1000);
                 btn.innerText = `${h}h ${m}m ${s}s`;
             }, 1000);
         }
-
         function processMining() { call('startMining', { uid: user.uid }, () => { sync(); }); }
         function claim() { call('claimMining', { uid: user.uid }, (res) => { if(res.success) sync(); }); }
-
         function loadChat() {
             call('getMessages', { uid: user.uid }, (res) => {
                 if(!res.history) return;
-                document.getElementById('chatBox').innerHTML = res.history.map(m => `
-                    <div class="p-3 rounded-2xl ${m.sender === 'ADMIN' ? 'bg-white/5 mr-8' : 'bg-indigo-500/10 ml-8 text-right'}">
-                        <p class="font-bold text-[9px] mb-1 opacity-50 uppercase tracking-tighter">${m.sender}</p>
-                        <p>${m.text}</p>
-                    </div>
-                `).join('');
+                document.getElementById('chatBox').innerHTML = res.history.map(m => `<div class="p-2 rounded-xl ${m.sender === 'ADMIN' ? 'bg-white/5 mr-6' : 'bg-indigo-500/10 ml-6 text-right'}"><p class="text-[10px] opacity-40">${m.sender}</p><p>${m.text}</p></div>`).join('');
                 const b = document.getElementById('chatBox'); b.scrollTop = b.scrollHeight;
             });
         }
-
         function sendMsg() {
-            const t = document.getElementById('chatInp').value;
-            if(!t) return;
-            call('sendMessage', { uid: user.uid, sender: user.name, text: t }, () => {
-                document.getElementById('chatInp').value = ""; loadChat();
-            });
+            const t = document.getElementById('chatInp').value; if(!t) return;
+            call('sendMessage', { uid: user.uid, sender: user.name, text: t }, () => { document.getElementById('chatInp').value = ""; loadChat(); });
         }
-
         function loadAdminChats() {
             call('getMessages', { isAdmin: true }, (res) => {
                 if(!res.history) return;
-                const groups = {};
-                res.history.forEach(m => { if(!groups[m.uid]) groups[m.uid] = []; groups[m.uid].push(m); });
+                const groups = {}; res.history.forEach(m => { if(!groups[m.uid]) groups[m.uid] = []; groups[m.uid].push(m); });
                 document.getElementById('adminChatHub').innerHTML = Object.entries(groups).map(([uid, msgs]) => `
-                    <div class="glass p-5 space-y-3">
-                        <p class="text-[10px] font-bold text-indigo-400 uppercase tracking-widest">Node: ${uid}</p>
-                        <div class="max-h-32 overflow-y-auto space-y-2 text-[10px] opacity-70">${msgs.map(m => `<div><b class="text-white">${m.sender}:</b> ${m.text}</div>`).join('')}</div>
-                        <div class="flex gap-2">
-                            <input id="reply-${uid}" placeholder="..." class="w-full bg-black/30 p-2 rounded-lg text-xs border border-white/5 outline-none">
-                            <button onclick="adminReply('${uid}')" class="bg-indigo-500 px-4 rounded-lg text-[10px] font-bold uppercase">Reply</button>
-                            <button onclick="adminVerify('${uid}')" class="bg-green-600 px-4 rounded-lg text-[10px] font-bold uppercase">Verify</button>
+                    <div class="glass p-4 space-y-2 text-[10px]"><p class="font-bold text-indigo-400">Node: ${uid}</p>
+                        <div class="max-h-24 overflow-y-auto space-y-1">${msgs.map(m => `<div><b>${m.sender}:</b> ${m.text}</div>`).join('')}</div>
+                        <div class="flex gap-1"><input id="reply-${uid}" placeholder="..." class="w-full bg-black/30 p-2 rounded-lg outline-none border border-white/5">
+                            <button onclick="adminReply('${uid}')" class="bg-indigo-500 px-3 rounded-lg font-bold">Reply</button>
+                            <button onclick="adminVerify('${uid}')" class="bg-green-600 px-3 rounded-lg font-bold">Verify</button>
                         </div>
-                    </div>
-                `).join('');
+                    </div>`).join('');
             });
         }
-
-        function adminReply(target) {
-            const v = document.getElementById('reply-'+target).value;
-            if(!v) return;
-            call('sendMessage', { uid: target, sender: "ADMIN", text: v }, () => loadAdminChats());
-        }
-
-        function adminVerify(target) {
-            if(confirm("Verify node?")) call('adminAction', { targetUid: target, type: 'verify' }, () => { alert('Verified!'); sync(); });
-        }
-
+        function adminReply(target) { const v = document.getElementById('reply-'+target).value; if(!v) return; call('sendMessage', { uid: target, sender: "ADMIN", text: v }, () => loadAdminChats()); }
+        function adminVerify(target) { if(confirm("Verify node?")) call('adminAction', { targetUid: target, type: 'verify' }, () => { alert('Verified!'); sync(); }); }
         function handleAuth() {
             let isR = !document.getElementById('regInputs').classList.contains('hidden');
             const e = document.getElementById('uEmail').value, p = document.getElementById('uPass').value;
             const refCode = sessionStorage.getItem('pendingRef') || document.getElementById('uRef').value || "none";
-            const pay = { email: e, pass: p, name: document.getElementById('uName').value, ref: refCode };
-            call(isR ? 'register' : 'login', pay, (res) => {
-                if(res.success) {
-                    if(isR) { alert("Registered!"); toggleAuth(); }
-                    else { user = res.user; localStorage.setItem('rida_v11', JSON.stringify(user)); sync(); }
+            call(isR ? 'register' : 'login', { email: e, pass: p, name: document.getElementById('uName').value, ref: refCode }, (res) => {
+                if(res.success) { if(isR) { alert("Registered!"); toggleAuth(); } else { user = res.user; localStorage.setItem('rida_v12_5', JSON.stringify(user)); sync(); }
                 } else alert(res.msg || "Auth Failed");
             });
         }
-
-        function toggleAuth() { 
-            const ri = document.getElementById('regInputs');
-            const hidden = ri.classList.toggle('hidden');
-            document.getElementById('toggleText').innerText = hidden ? "New user? Register account" : "Existing node? Login";
-            // Pre-fill referral if exists
-            if(!hidden && sessionStorage.getItem('pendingRef')) {
-                document.getElementById('uRef').value = sessionStorage.getItem('pendingRef');
-            }
-        }
-
-        function switchTab(t, el) {
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.getElementById('page-' + t).classList.add('active');
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('nav-active'));
-            el.classList.add('nav-active');
-        }
-
-        function call(action, payload, callback) {
-            const cb = 'cb_' + Math.round(Math.random()*10000);
-            window[cb] = (d) => { delete window[cb]; document.body.removeChild(s); callback(d); };
-            const s = document.createElement('script');
-            s.src = `${API}?callback=${cb}&action=${action}&payload=${encodeURIComponent(JSON.stringify(payload))}`;
-            document.body.appendChild(s);
-        }
-
-        function copyRef() {
-            const link = document.getElementById('refLink');
-            link.select();
-            document.execCommand('copy');
-            alert("Copied!");
-        }
-
+        function toggleAuth() { const ri = document.getElementById('regInputs'); const h = ri.classList.toggle('hidden'); document.getElementById('toggleText').innerText = h ? "New user? Register account" : "Existing node? Login"; }
+        function switchTab(t, el) { document.querySelectorAll('.page').forEach(p => p.classList.remove('active')); document.getElementById('page-' + t).classList.add('active'); document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('nav-active')); el.classList.add('nav-active'); }
+        function postAnnouncement() { const t = document.getElementById('adminAnnInp').value; if(!t) return; call('postAnn', { text: t }, () => { alert("Success!"); document.getElementById('adminAnnInp').value = ""; sync(); }); }
+        function call(action, payload, callback) { const cb = 'cb_' + Math.round(Math.random()*10000); window[cb] = (d) => { delete window[cb]; document.body.removeChild(s); callback(d); }; const s = document.createElement('script'); s.src = `${API}?callback=${cb}&action=${action}&payload=${encodeURIComponent(JSON.stringify(payload))}`; document.body.appendChild(s); }
+        function copyRef() { const link = document.getElementById('refLink'); link.select(); document.execCommand('copy'); alert("Copied!"); }
         function logout() { localStorage.clear(); location.reload(); }
     </script>
 </body>
-                            </html>
-                    
+        </html>
+                
