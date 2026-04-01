@@ -1,173 +1,196 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>RIDA OS | MASTER</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background: #010409; color: white; margin: 0; -webkit-tap-highlight-color: transparent; }
-        .glass { background: rgba(13, 17, 23, 0.9); backdrop-filter: blur(25px); border: 1px solid rgba(255,255,255,0.05); }
-        .hidden { display: none !important; }
-        .admin-glow { border: 1px solid #3b82f6 !important; box-shadow: 0 0 15px rgba(59, 130, 246, 0.1); }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RIDA NETWORK</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+
+<style>
+body { background:#050508; color:#fff; font-family:sans-serif; }
+.glass { background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:20px; backdrop-filter:blur(10px);}
+.btn { background:linear-gradient(135deg,#6366f1,#a855f7); padding:14px; border-radius:12px; font-weight:bold;}
+.page{display:none;}
+.active{display:block;}
+</style>
 </head>
-<body class="pb-10">
 
-    <div id="loginView" class="min-h-screen flex items-center justify-center p-6">
-        <div class="glass w-full max-w-sm p-10 rounded-[3.5rem] text-center border-t border-white/10 shadow-2xl">
-            <h1 class="text-5xl font-black italic text-blue-500 mb-2">RIDA</h1>
-            <p class="text-[8px] font-black opacity-30 uppercase tracking-[0.5em] mb-12">Neural Link v32.0</p>
-            <div class="space-y-4">
-                <input type="email" id="email" class="w-full bg-white/5 p-5 rounded-2xl border border-white/5 outline-none text-sm focus:border-blue-500 transition-all" placeholder="Email Address">
-                <input type="password" id="pass" class="w-full bg-white/5 p-5 rounded-2xl border border-white/5 outline-none text-sm focus:border-blue-500 transition-all" placeholder="Access Key">
-                <button onclick="handleLogin()" class="w-full bg-blue-600 py-5 rounded-2xl font-black uppercase text-[10px] tracking-widest shadow-xl active:scale-95 transition-all">Initialize</button>
-            </div>
-        </div>
-    </div>
+<body class="p-4 max-w-md mx-auto">
 
-    <div id="adminPanel" class="hidden p-6 space-y-6">
-        <header class="flex justify-between items-center glass p-6 rounded-[2.5rem] admin-glow">
-            <div>
-                <h2 class="text-xl font-black text-blue-500 italic uppercase">Command Center</h2>
-                <p class="text-[8px] opacity-40 font-bold tracking-widest">Master Node Status: Active</p>
-            </div>
-            <button onclick="logout()" class="p-3 bg-red-500/10 rounded-2xl text-red-500"><i data-lucide="power"></i></button>
-        </header>
+<!-- AUTH -->
+<div id="authPage">
+<h1 class="text-3xl font-bold mb-6 text-center">RIDA</h1>
 
-        <button onclick="fetchRegistry()" class="w-full bg-blue-600 py-5 rounded-2xl font-black uppercase text-xs tracking-widest shadow-lg active:ring-2 ring-blue-400 transition-all">Sync Cloud Registry</button>
+<div class="glass p-6 space-y-3">
+<input id="email" placeholder="Email" class="w-full p-3 bg-black/30 rounded">
+<input id="pass" type="password" placeholder="Password" class="w-full p-3 bg-black/30 rounded">
+<input id="name" placeholder="Name (Register only)" class="w-full p-3 bg-black/30 rounded">
 
-        <div class="glass rounded-[2rem] overflow-hidden border border-white/5">
-            <div class="p-5 border-b border-white/5 bg-white/5 text-[10px] font-black uppercase tracking-widest opacity-50">Global User Database</div>
-            <div class="overflow-x-auto">
-                <table class="w-full text-left text-[11px]">
-                    <thead class="bg-black/20 text-slate-500 uppercase font-bold">
-                        <tr><th class="p-4">Node / ID</th><th class="p-4">Status</th><th class="p-4 text-right">Action</th></tr>
-                    </thead>
-                    <tbody id="registryBody" class="divide-y divide-white/5">
-                        <tr><td colspan="3" class="p-10 text-center opacity-30 italic">Registry Pending Sync...</td></tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
+<button onclick="register()" class="btn w-full">Register</button>
+<button onclick="login()" class="btn w-full">Login</button>
+</div>
+</div>
 
-    <div id="userApp" class="hidden">
-        <header class="p-6 flex justify-between items-center glass rounded-b-[2.5rem]">
-            <h2 class="text-xl font-black italic">RIDA <span class="text-blue-500 text-sm">MINER</span></h2>
-            <button onclick="logout()" class="p-3 bg-white/5 rounded-2xl text-slate-400"><i data-lucide="log-out"></i></button>
-        </header>
-        <main class="p-6 text-center space-y-6">
-            <div class="glass p-12 rounded-[4rem] border-t border-white/10 mt-10">
-                <p class="text-[10px] opacity-30 uppercase mb-2">Network Yield</p>
-                <h2 class="text-5xl font-black mb-10 tracking-tighter"><span id="uBal">0.000000</span></h2>
-                <button class="w-full py-6 rounded-3xl bg-blue-600/50 font-black uppercase text-[10px] tracking-widest shadow-xl cursor-not-allowed">Node Syncing...</button>
-            </div>
-        </main>
-    </div>
+<!-- APP -->
+<div id="app" class="hidden">
 
-    <script>
-        // --- YOUR WEB APP URL ---
-        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwSc8BC0EWChXcqHgYE9h0FmFdBk03SruudDC2WuMC9y1Rb6WV6rjvipn29m58U8pEyqg/exec";
+<header class="flex justify-between mb-4">
+<div>
+<h2 id="nameView"></h2>
+<p id="uidView" class="text-xs text-indigo-400"></p>
+</div>
+<div>
+<p id="balView" class="text-xl font-bold">0</p>
+</div>
+</header>
 
-        function handleLogin() {
-            const e = document.getElementById('email').value.trim();
-            const p = document.getElementById('pass').value.trim();
-            if(!e || !p) return alert("All fields required.");
+<!-- ANNOUNCEMENT -->
+<div class="glass p-3 mb-4">
+<p id="annText">No announcements</p>
+</div>
 
-            localStorage.removeItem('rida_session');
-            let session;
+<!-- TABS -->
+<div class="flex gap-2 mb-4">
+<button onclick="show('home')" class="btn flex-1">Mine</button>
+<button onclick="show('wallet')" class="btn flex-1">Wallet</button>
+<button onclick="show('admin')" id="adminBtn" class="btn flex-1 hidden">Admin</button>
+</div>
 
-            if(e === "adminrida@gmail.com" && p === "CocoMomoPakistan@786") {
-                session = { role: 'admin', email: e };
-            } else {
-                session = { role: 'user', email: e, balance: 0.0, status: 'Unverified' };
-            }
+<!-- HOME -->
+<div id="home" class="page active">
+<div class="glass p-6 text-center space-y-4">
+<h2 class="text-3xl" id="timer">0.2</h2>
+<button id="mineBtn" onclick="startMining()" class="btn w-full">Start Mining</button>
+</div>
+</div>
 
-            localStorage.setItem('rida_session', JSON.stringify(session));
-            renderView();
-        }
+<!-- WALLET -->
+<div id="wallet" class="page space-y-3">
+<input id="to" placeholder="Receiver UID" class="w-full p-3 bg-black/30 rounded">
+<input id="amount" placeholder="Amount" class="w-full p-3 bg-black/30 rounded">
+<button onclick="transfer()" class="btn w-full">Send</button>
 
-        async function fetchRegistry() {
-            const body = document.getElementById('registryBody');
-            body.innerHTML = '<tr><td colspan="3" class="p-10 text-center animate-pulse text-blue-500 font-black tracking-widest">ESTABLISHING UPLINK...</td></tr>';
-            
-            try {
-                const res = await fetch(WEB_APP_URL);
-                const data = await res.json();
-                
-                if (!data || data.length === 0) {
-                    body.innerHTML = '<tr><td colspan="3" class="p-10 text-center opacity-30 italic">Cloud Registry is Empty</td></tr>';
-                    return;
-                }
+<div class="glass p-3">
+<h3>Chat</h3>
+<div id="chat" class="h-32 overflow-y-auto text-xs"></div>
+<input id="msg" class="w-full p-2 bg-black/30 mt-2">
+<button onclick="sendMsg()" class="btn w-full mt-2">Send</button>
+</div>
+</div>
 
-                // Since your new Code.gs returns OBJECTS based on Row 1 Headers:
-                // Expected Keys: Timestamp, UID, Email, Status, Wallet, etc.
-                body.innerHTML = data.map(user => `
-                    <tr class="hover:bg-white/5 transition-colors">
-                        <td class="p-4 font-bold text-blue-400">
-                            ${user.UID || 'N/A'}<br>
-                            <span class="text-[8px] text-white opacity-20 font-normal lowercase">${user.Email || ''}</span>
-                        </td>
-                        <td class="p-4">
-                            <span class="px-2 py-1 rounded-lg bg-blue-600/10 text-[9px] font-black uppercase text-blue-500 border border-blue-500/20">
-                                ${user.Status || 'PENDING'}
-                            </span>
-                        </td>
-                        <td class="p-4 text-right">
-                            <button onclick="approveUser('${user.UID}')" class="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded-xl text-[9px] font-black uppercase shadow-lg active:scale-95 transition-all">Verify</button>
-                        </td>
-                    </tr>
-                `).join('');
-            } catch(e) {
-                body.innerHTML = `<tr><td colspan="3" class="p-10 text-center text-red-500 font-bold uppercase">Sync Failed<br><span class="text-[8px] opacity-50">${e.message}</span></td></tr>`;
-            }
-        }
+<!-- ADMIN -->
+<div id="admin" class="page space-y-3">
+<textarea id="annInp" class="w-full p-3 bg-black/30 rounded"></textarea>
+<select id="type" class="w-full p-2 bg-black/30">
+<option value="info">Info</option>
+<option value="warning">Warning</option>
+<option value="urgent">Urgent</option>
+</select>
+<button onclick="broadcast()" class="btn w-full">Broadcast</button>
+</div>
 
-        async function approveUser(uid) {
-            if(!uid || uid === 'undefined') return alert("Invalid Node ID");
-            
-            // Matches your new 'e.parameter' logic (URLSearchParams)
-            const params = new URLSearchParams();
-            params.append('action', 'APPROVE');
-            params.append('uid', uid);
+</div>
 
-            try {
-                // POST using 'no-cors' to avoid pre-flight drama
-                await fetch(WEB_APP_URL, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    body: params
-                });
-                alert("Verification Signal Transmitted for Node: " + uid);
-                fetchRegistry(); // Refresh table
-            } catch(e) {
-                alert("Transmission Error: Protocol Failed");
-            }
-        }
+<script>
+const API = "https://script.google.com/macros/s/AKfycbwNSWs99pYjhzcCQ6bayGDEut7HQjAlb0JB9usctGTRYReTMparM64nyhLP6mk1-OPmkA/exec";
 
-        function renderView() {
-            const session = JSON.parse(localStorage.getItem('rida_session'));
-            document.getElementById('loginView').classList.add('hidden');
-            document.getElementById('adminPanel').classList.add('hidden');
-            document.getElementById('userApp').classList.add('hidden');
+let user = JSON.parse(localStorage.getItem("rida_user"));
 
-            if(!session) {
-                document.getElementById('loginView').classList.remove('hidden');
-            } else if(session.role === 'admin') {
-                document.getElementById('adminPanel').classList.remove('hidden');
-                fetchRegistry();
-            } else {
-                document.getElementById('userApp').classList.remove('hidden');
-                document.getElementById('uBal').innerText = (session.balance || 0).toFixed(6);
-            }
-            lucide.createIcons();
-        }
+function call(action,payload,cb){
+ const c="cb"+Math.random();
+ window[c]=(res)=>{delete window[c];document.body.removeChild(s);cb(res);}
+ const s=document.createElement("script");
+ s.src=`${API}?callback=${c}&action=${action}&payload=${encodeURIComponent(JSON.stringify(payload))}`;
+ document.body.appendChild(s);
+}
 
-        function logout() { localStorage.clear(); location.reload(); }
-        window.onload = renderView;
-    </script>
+// INIT
+if(user){init();}
+
+function init(){
+ document.getElementById("authPage").style.display="none";
+ document.getElementById("app").classList.remove("hidden");
+ sync();
+ setInterval(sync,10000);
+}
+
+// AUTH
+function register(){
+ call("register",{email:email.value,pass:pass.value,name:name.value},res=>{
+ alert(res.success?"Registered":"Error");
+ });
+}
+
+function login(){
+ call("login",{email:email.value,pass:pass.value},res=>{
+ if(res.success){
+ user=res.user;
+ localStorage.setItem("rida_user",JSON.stringify(user));
+ init();
+ } else alert("Login failed");
+ });
+}
+
+// SYNC
+function sync(){
+ call("sync",{uid:user.uid},res=>{
+ if(!res.success) return;
+
+ user=res.user;
+ localStorage.setItem("rida_user",JSON.stringify(user));
+
+ nameView.innerText=user.name;
+ uidView.innerText=user.uid;
+ balView.innerText=user.bal;
+
+ if(res.announcements.length){
+ annText.innerText=res.announcements[0].text;
+ }
+
+ if(user.role==="ADMIN"){
+ adminBtn.classList.remove("hidden");
+ }
+
+ loadChat(res.history);
+});
+}
+
+// MINING
+function startMining(){
+ call("startMining",{uid:user.uid},sync);
+}
+
+// P2P
+function transfer(){
+ call("p2pTransfer",{from:user.uid,to:to.value,amount:parseFloat(amount.value)},res=>{
+ alert(res.success?"Sent":"Error");
+ sync();
+});
+}
+
+// CHAT
+function sendMsg(){
+ call("sendMessage",{uid:user.uid,sender:user.name,text:msg.value},()=>{msg.value="";sync();});
+}
+
+function loadChat(h){
+ chat.innerHTML=h.map(m=>`<div>${m.sender}: ${m.text}</div>`).join("");
+}
+
+// ADMIN
+function broadcast(){
+ call("adminAction",{type:"postAnnouncement",text:annInp.value,annType:type.value},res=>{
+ alert(res.success?"Sent":"Error");
+});
+}
+
+// NAV
+function show(id){
+ document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+ document.getElementById(id).classList.add("active");
+}
+</script>
+
 </body>
 </html>
