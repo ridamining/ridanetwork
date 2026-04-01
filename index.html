@@ -29,10 +29,10 @@
             <div id="regInputs" class="hidden space-y-4">
                 <input id="uName" type="text" placeholder="Full Name" class="w-full p-4 bg-white/5 rounded-xl border border-white/10 outline-none">
             </div>
-            <input id="uEmail" type="email" placeholder="Email" class="w-full p-4 bg-white/5 rounded-xl border border-white/10 outline-none">
-            <input id="uPass" type="password" placeholder="Password" class="w-full p-4 bg-white/5 rounded-xl border border-white/10 outline-none">
+            <input id="uEmail" type="email" placeholder="Email Address" class="w-full p-4 bg-white/5 rounded-xl border border-white/10 outline-none">
+            <input id="uPass" type="password" placeholder="Secure Password" class="w-full p-4 bg-white/5 rounded-xl border border-white/10 outline-none">
             <button id="authBtn" onclick="handleAuth()" class="w-full py-4 btn-primary uppercase tracking-widest text-sm">Connect Node</button>
-            <p onclick="toggleAuth()" class="text-center text-xs text-slate-500 cursor-pointer pt-2 uppercase font-bold">New node? Create Identity</p>
+            <p id="toggleText" onclick="toggleAuth()" class="text-center text-xs text-slate-500 cursor-pointer pt-2 uppercase font-bold">New node? Create Identity</p>
         </div>
     </div>
 
@@ -47,22 +47,23 @@
             </div>
             <div class="text-right">
                 <p id="viewBal" class="text-3xl font-extrabold tracking-tighter">0.00</p>
-                <p class="text-[9px] font-bold text-slate-500 uppercase">RIDA Asset</p>
+                <p class="text-[9px] font-bold text-slate-500 uppercase tracking-widest">RIDA Asset</p>
             </div>
         </header>
 
         <div id="page-home" class="page active space-y-6">
             <div class="glass p-4 border-l-4 border-indigo-500">
-                <span class="text-[9px] font-black uppercase text-indigo-400">Broadcast</span>
-                <p id="annText" class="text-xs text-slate-200 mt-1 italic">Syncing...</p>
+                <span class="text-[9px] font-black uppercase text-indigo-400">Network Broadcast</span>
+                <p id="annText" class="text-xs text-slate-200 mt-1 italic">Waiting for signal...</p>
             </div>
 
             <div class="glass p-10 flex flex-col items-center justify-center space-y-6 text-center shadow-xl">
                 <div class="relative w-52 h-52 flex items-center justify-center border-4 border-indigo-500/20 rounded-full">
                     <div id="miningPulse" class="absolute inset-0 border-4 border-indigo-500 rounded-full animate-ping opacity-0"></div>
-                    <span id="mineTimerDisplay" class="text-4xl font-black text-indigo-400">0.20</span>
+                    <span id="mineTimer" class="text-4xl font-black text-indigo-400">0.20</span>
                 </div>
                 <button id="mineBtn" class="w-full py-5 btn-primary uppercase text-xs tracking-widest">Initialize Node</button>
+                <p id="timerLabel" class="text-xs text-slate-400 font-medium italic">Ready for extraction</p>
             </div>
         </div>
 
@@ -81,15 +82,15 @@
             <button id="adminTab" onclick="switchTab('admin', this)" class="nav-item hidden flex flex-col items-center">
                 <span class="text-xl mb-1">⚙️</span><span>Admin</span>
             </button>
-            <button onclick="logout()" class="nav-item flex flex-col items-center text-red-500/50">
+            <button onclick="logout()" class="nav-item flex flex-col items-center">
                 <span class="text-xl mb-1">✕</span><span>Exit</span>
             </button>
         </nav>
     </div>
 
     <script>
-        const API = "https://script.google.com/macros/s/AKfycbweEVQxqGo7ApevNBdeAb5UU-1RyKbrL45DFYugMA7i3nu4cHSOA1Q0Y43d_46l8vIX6g/exec";
-        let user = JSON.parse(localStorage.getItem('rida_session')) || null;
+        const API = "https://script.google.com/macros/s/AKfycbzfx-v_c0zGxq45NZBKCXWtc0DSTD6tcfvkZRdda-v0eCJxYVtK8V6jVHrT4KhTyLKvWQ/exec";
+        let user = JSON.parse(localStorage.getItem('rida_v13_session')) || null;
         let mineInterval = null;
 
         window.onload = () => { if(user) sync(); };
@@ -111,7 +112,7 @@
             call('sync', { email: user.email }, (res) => {
                 if(res.success) {
                     user = res.user;
-                    localStorage.setItem('rida_session', JSON.stringify(user));
+                    localStorage.setItem('rida_v13_session', JSON.stringify(user));
                     renderUI(res);
                 } else { logout(); }
             });
@@ -127,39 +128,54 @@
             const badge = document.getElementById('viewStatus');
             if(String(user.verified).toUpperCase() === "TRUE") {
                 badge.className = "badge-v"; badge.innerText = "VERIFIED";
-            } else {
-                badge.className = "badge-u"; badge.innerText = "PENDING";
-            }
+            } else { badge.className = "badge-u"; badge.innerText = "PENDING"; }
 
             if(user.role === "ADMIN") document.getElementById('adminTab').classList.remove('hidden');
             if(res.announcements && res.announcements.length > 0) {
                 document.getElementById('annText').innerText = res.announcements[0][1];
             }
-            updateMiningUI();
+            checkMiningStatus();
         }
 
-        function updateMiningUI() {
+        function handleAuth() {
+            const email = document.getElementById('uEmail').value.trim();
+            const pass = document.getElementById('uPass').value.trim();
+            const name = document.getElementById('uName').value.trim();
+            const isReg = !document.getElementById('regInputs').classList.contains('hidden');
+            
+            if(!email || !pass) return alert("Fill credentials");
+            
+            call(isReg ? 'register' : 'login', { email, pass, name }, (res) => {
+                if(res.success) {
+                    user = res.user;
+                    localStorage.setItem('rida_v13_session', JSON.stringify(user));
+                    sync();
+                } else { alert(res.msg || "Access Denied"); }
+            });
+        }
+
+        function checkMiningStatus() {
             const btn = document.getElementById('mineBtn');
             const pulse = document.getElementById('miningPulse');
             if(mineInterval) clearInterval(mineInterval);
 
-            const now = new Date().getTime();
             const lastMine = parseInt(user.lastMine || 0);
+            const now = new Date().getTime();
             const diff = now - lastMine;
 
             if(diff < 86400000) {
                 btn.disabled = true;
                 pulse.classList.add('opacity-100');
-                startCountdown(86400000 - diff);
+                updateTimer(86400000 - diff);
             } else {
                 btn.disabled = false;
-                btn.innerText = "CLAIM 0.20 RIDA";
+                btn.innerText = "START MINING";
                 btn.onclick = () => call('startMining', { uid: user.uid }, sync);
                 pulse.classList.remove('opacity-100');
             }
         }
 
-        function startCountdown(ms) {
+        function updateTimer(ms) {
             const btn = document.getElementById('mineBtn');
             mineInterval = setInterval(() => {
                 ms -= 1000;
@@ -169,41 +185,26 @@
             }, 1000);
         }
 
-        function handleAuth() {
-            const email = document.getElementById('uEmail').value.trim();
-            const pass = document.getElementById('uPass').value.trim();
-            const name = document.getElementById('uName').value.trim();
-            const isReg = !document.getElementById('regInputs').classList.contains('hidden');
-            
-            if(!email || !pass) return alert("Credentials required");
-            
-            document.getElementById('authBtn').innerText = "CONNECTING...";
-            call(isReg ? 'register' : 'login', { email, pass, name }, (res) => {
-                document.getElementById('authBtn').innerText = "CONNECT NODE";
-                if(res.success) {
-                    user = res.user;
-                    localStorage.setItem('rida_session', JSON.stringify(user));
-                    sync();
-                } else { alert(res.msg || "Access Denied"); }
-            });
-        }
-
         function postAnnouncement() {
-            const text = document.getElementById('adminAnnInp').value;
-            if(!text) return;
-            call('adminAction', { type: 'postAnnouncement', text: text }, () => {
-                alert("Broadcast Sent");
-                document.getElementById('adminAnnInp').value = "";
-                sync();
+            const txt = document.getElementById('adminAnnInp').value;
+            if(!txt) return;
+            call('adminAction', { type: 'postAnnouncement', text: txt }, () => {
+                alert("Posted"); document.getElementById('adminAnnInp').value = ""; sync();
             });
         }
 
-        function switchTab(t) {
+        function switchTab(t, el) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.getElementById('page-' + t).classList.add('active');
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('nav-active'));
+            el.classList.add('nav-active');
         }
 
-        function toggleAuth() { document.getElementById('regInputs').classList.toggle('hidden'); }
+        function toggleAuth() { 
+            document.getElementById('regInputs').classList.toggle('hidden'); 
+            document.getElementById('toggleText').innerText = document.getElementById('regInputs').classList.contains('hidden') ? "New node? Create Identity" : "Already registered? Login";
+        }
+        
         function logout() { localStorage.clear(); location.reload(); }
     </script>
 </body>
