@@ -1,257 +1,196 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>RIDA NETWORK v13.1</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
-    <style>
-        body { background: #050508; color: #fff; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
-        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.08); border-radius: 24px; }
-        .btn-primary { background: linear-gradient(135deg, #6366f1, #a855f7); border-radius: 16px; font-weight: 700; transition: 0.2s; }
-        .btn-primary:active { transform: scale(0.95); }
-        .btn-primary:disabled { opacity: 0.5; filter: grayscale(1); }
-        .page { display: none; padding-bottom: 120px; animation: fadeIn 0.3s ease-in-out; }
-        .active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        .nav-item { color: #64748b; font-size: 10px; font-weight: 800; text-transform: uppercase; }
-        .nav-active { color: #6366f1; }
-        .badge-v { background: rgba(34, 197, 94, 0.1); color: #22c55e; border: 1px solid rgba(34, 197, 94, 0.2); font-size: 9px; padding: 2px 8px; border-radius: 6px; }
-        .badge-u { background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); font-size: 9px; padding: 2px 8px; border-radius: 6px; }
-        #wpModal { display:none; position:fixed; inset:0; z-index:100; background:rgba(0,0,0,0.9); padding:20px; align-items:center; justify-content:center; }
-        .wp-content { max-width:500px; width:100%; max-height:80vh; overflow-y:auto; background:#0f111a; border:1px solid #1e293b; padding:25px; border-radius:30px; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RIDA NETWORK</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+
+<style>
+body { background:#050508; color:#fff; font-family:sans-serif; }
+.glass { background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:20px; backdrop-filter:blur(10px);}
+.btn { background:linear-gradient(135deg,#6366f1,#a855f7); padding:14px; border-radius:12px; font-weight:bold;}
+.page{display:none;}
+.active{display:block;}
+</style>
 </head>
-<body class="p-4">
 
-    <div id="wpModal" onclick="closeWP()">
-        <div class="wp-content glass" onclick="event.stopPropagation()">
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="text-xl font-black text-indigo-400 uppercase">White Paper</h2>
-                <button onclick="closeWP()" class="text-slate-500 font-bold px-2 py-1 bg-white/5 rounded-lg">CLOSE</button>
-            </div>
-            <div class="space-y-4 text-xs leading-relaxed text-slate-300">
-                <p class="font-bold text-white uppercase tracking-widest border-b border-white/5 pb-2">1. Protocol</p>
-                <p>Rida Network utilizes Proof-of-Presence (PoP) to democratize digital asset generation.</p>
-                <p class="font-bold text-white uppercase tracking-widest border-b border-white/5 pb-2">2. Mining</p>
-                <p>Nodes generate 0.2 RIDA per 24h cycle. Manual initialization is required to prove presence.</p>
-                <p class="font-bold text-white uppercase tracking-widest border-b border-white/5 pb-2">3. Security</p>
-                <p>Anti-sybil measures include manual verification for P2P asset transfers.</p>
-                <p class="pt-4 text-center opacity-30 italic">© 2026 RIDA NETWORK</p>
-            </div>
-        </div>
-    </div>
+<body class="p-4 max-w-md mx-auto">
 
-    <div id="authPage" class="min-h-screen flex flex-col justify-center max-w-md mx-auto">
-        <h1 class="text-5xl font-extrabold mb-8 text-center tracking-tighter">RIDA<span class="text-indigo-500">.</span></h1>
-        <div class="glass p-8 space-y-4">
-            <div id="regInputs" class="hidden space-y-4">
-                <input id="uName" type="text" placeholder="Full Name" class="w-full p-4 bg-white/5 rounded-xl border border-white/10 outline-none">
-                <input id="uRef" type="text" placeholder="Referral Code (Optional)" class="w-full p-4 bg-white/5 rounded-xl border border-white/10 outline-none">
-            </div>
-            <input id="uEmail" type="email" placeholder="Email" class="w-full p-4 bg-white/5 rounded-xl border border-white/10 outline-none">
-            <input id="uPass" type="password" placeholder="Password" class="w-full p-4 bg-white/5 rounded-xl border border-white/10 outline-none">
-            <button id="authBtn" onclick="handleAuth()" class="w-full py-4 btn-primary uppercase tracking-widest text-sm">Connect Node</button>
-            <p id="toggleText" onclick="toggleAuth()" class="text-center text-xs text-slate-500 cursor-pointer pt-2 uppercase font-bold">New node? Create Identity</p>
-        </div>
-    </div>
+<!-- AUTH -->
+<div id="authPage">
+<h1 class="text-3xl font-bold mb-6 text-center">RIDA</h1>
 
-    <div id="mainApp" class="hidden max-w-md mx-auto">
-        <header class="flex justify-between items-center mb-6 px-2">
-            <div>
-                <div class="flex items-center gap-2">
-                    <h2 id="viewName" class="font-bold text-lg">---</h2>
-                    <span id="viewStatus" class="badge-u italic">PENDING</span>
-                </div>
-                <p id="viewUid" class="text-xs text-indigo-400 font-mono font-bold">---</p>
-            </div>
-            <div class="text-right">
-                <p id="viewBal" class="text-3xl font-extrabold tracking-tighter">0.00</p>
-                <p class="text-[9px] font-bold text-slate-500 uppercase tracking-widest">RIDA Asset</p>
-            </div>
-        </header>
+<div class="glass p-6 space-y-3">
+<input id="email" placeholder="Email" class="w-full p-3 bg-black/30 rounded">
+<input id="pass" type="password" placeholder="Password" class="w-full p-3 bg-black/30 rounded">
+<input id="name" placeholder="Name (Register only)" class="w-full p-3 bg-black/30 rounded">
 
-        <div id="page-home" class="page active space-y-6">
-            <div class="glass p-4 border-l-4 border-indigo-500">
-                <span class="text-[9px] font-black uppercase text-indigo-400">Network Broadcast</span>
-                <p id="annText" class="text-xs text-slate-200 mt-1 italic">Syncing node data...</p>
-            </div>
+<button onclick="register()" class="btn w-full">Register</button>
+<button onclick="login()" class="btn w-full">Login</button>
+</div>
+</div>
 
-            <div class="glass p-10 flex flex-col items-center justify-center space-y-6 text-center shadow-xl">
-                <div class="relative w-52 h-52 flex items-center justify-center border-4 border-indigo-500/20 rounded-full">
-                    <div id="miningPulse" class="absolute inset-0 border-4 border-indigo-500 rounded-full animate-ping opacity-0"></div>
-                    <span id="mineTimer" class="text-4xl font-black text-indigo-400">0.20</span>
-                </div>
-                <button id="mineBtn" onclick="processMining()" class="w-full py-5 btn-primary uppercase text-xs tracking-widest">Initialize Node</button>
-                <p id="timerLabel" class="text-xs text-slate-400 font-medium italic">Ready for extraction</p>
-            </div>
-        </div>
+<!-- APP -->
+<div id="app" class="hidden">
 
-        <div id="page-profile" class="page space-y-4">
-            <button onclick="openWP()" class="w-full p-4 glass border border-indigo-500/20 text-indigo-400 text-[10px] font-black uppercase tracking-widest mb-2">
-                📄 Read Technical White Paper
-            </button>
-            <div class="glass p-6 space-y-4 border-t-4 border-indigo-500">
-                <h3 class="text-xs font-black uppercase tracking-widest text-indigo-400">Secure Transfer</h3>
-                <input id="p2pTarget" type="text" placeholder="Receiver UID" class="w-full bg-white/5 border border-white/10 p-4 rounded-xl outline-none text-xs">
-                <input id="p2pAmount" type="number" placeholder="Amount (Min 10)" class="w-full bg-white/5 border border-white/10 p-4 rounded-xl outline-none text-xs">
-                <button onclick="processP2P()" class="w-full py-4 btn-primary text-[10px] uppercase font-bold">Execute P2P</button>
-            </div>
-            <div class="glass p-6">
-                <h3 class="text-xs font-black uppercase tracking-widest text-indigo-400 mb-2">My Referral</h3>
-                <input id="refLink" readonly class="bg-indigo-500/10 p-4 rounded-xl text-[10px] w-full outline-none font-mono text-indigo-300">
-            </div>
-            <div class="glass p-6 space-y-4">
-                <h3 class="text-xs font-black uppercase tracking-widest text-indigo-400">Support Hub</h3>
-                <div id="chatBox" class="h-40 overflow-y-auto space-y-3 p-2 text-xs border-y border-white/5 py-4"></div>
-                <div class="flex gap-2">
-                    <input id="chatInp" type="text" placeholder="Message..." class="w-full bg-white/5 border border-white/10 p-3 rounded-xl outline-none text-xs">
-                    <button onclick="sendMsg()" class="px-4 btn-primary text-[10px] font-black">SEND</button>
-                </div>
-            </div>
-            <button onclick="logout()" class="w-full text-center text-[10px] text-red-500/50 font-bold uppercase py-10">Terminate Session</button>
-        </div>
+<header class="flex justify-between mb-4">
+<div>
+<h2 id="nameView"></h2>
+<p id="uidView" class="text-xs text-indigo-400"></p>
+</div>
+<div>
+<p id="balView" class="text-xl font-bold">0</p>
+</div>
+</header>
 
-        <div id="page-admin" class="page space-y-6">
-            <div class="glass p-6 space-y-4">
-                <h2 class="text-xs font-black text-indigo-400 uppercase">Broadcast Manager</h2>
-                <textarea id="adminAnnInp" placeholder="Type global announcement here..." class="w-full bg-black/30 p-4 rounded-xl text-xs outline-none border border-white/10 h-20 text-white"></textarea>
-                <button onclick="postAnnouncement()" id="annBtn" class="w-full py-3 btn-primary text-[10px] uppercase font-bold">Post Update</button>
-            </div>
-            <div id="adminChatHub" class="space-y-4 pb-10"></div>
-        </div>
+<!-- ANNOUNCEMENT -->
+<div class="glass p-3 mb-4">
+<p id="annText">No announcements</p>
+</div>
 
-        <nav class="fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-md glass flex justify-around p-4 z-50">
-            <button onclick="switchTab('home', this)" class="nav-item nav-active flex flex-col items-center">
-                <span class="text-xl mb-1">⚡</span><span>Mine</span>
-            </button>
-            <button onclick="switchTab('profile', this)" class="nav-item flex flex-col items-center">
-                <span class="text-xl mb-1">💼</span><span>Asset</span>
-            </button>
-            <button id="adminTab" onclick="switchTab('admin', this)" class="nav-item hidden flex flex-col items-center">
-                <span class="text-xl mb-1">⚙️</span><span>Admin</span>
-            </button>
-        </nav>
-    </div>
+<!-- TABS -->
+<div class="flex gap-2 mb-4">
+<button onclick="show('home')" class="btn flex-1">Mine</button>
+<button onclick="show('wallet')" class="btn flex-1">Wallet</button>
+<button onclick="show('admin')" id="adminBtn" class="btn flex-1 hidden">Admin</button>
+</div>
 
-    <script>
-        const API = "https://script.google.com/macros/s/AKfycbxi-O3HM35ytPK_Hic8R5eJibliPih8b3gsNNvkU62Bk62n4npIAz9DZShx_ECpKATyVg/exec";
-        let user = JSON.parse(localStorage.getItem('rida_v13_1'));
-        let mineInterval = null;
+<!-- HOME -->
+<div id="home" class="page active">
+<div class="glass p-6 text-center space-y-4">
+<h2 class="text-3xl" id="timer">0.2</h2>
+<button id="mineBtn" onclick="startMining()" class="btn w-full">Start Mining</button>
+</div>
+</div>
 
-        window.onload = () => { 
-            const urlParams = new URLSearchParams(window.location.search);
-            if(urlParams.has('ref')) sessionStorage.setItem('pendingRef', urlParams.get('ref'));
-            if(user) { sync(); setInterval(sync, 30000); } 
-            else { document.getElementById('authPage').classList.remove('hidden'); }
-        };
+<!-- WALLET -->
+<div id="wallet" class="page space-y-3">
+<input id="to" placeholder="Receiver UID" class="w-full p-3 bg-black/30 rounded">
+<input id="amount" placeholder="Amount" class="w-full p-3 bg-black/30 rounded">
+<button onclick="transfer()" class="btn w-full">Send</button>
 
-        function sync() {
-            if(!user) return;
-            call('sync', { email: user.email, uid: user.uid }, (res) => {
-                if(res.success) {
-                    user = res.user;
-                    localStorage.setItem('rida_v13_1', JSON.stringify(user));
-                    renderUI(res);
-                } else logout();
-            });
-        }
+<div class="glass p-3">
+<h3>Chat</h3>
+<div id="chat" class="h-32 overflow-y-auto text-xs"></div>
+<input id="msg" class="w-full p-2 bg-black/30 mt-2">
+<button onclick="sendMsg()" class="btn w-full mt-2">Send</button>
+</div>
+</div>
 
-        function renderUI(fullRes) {
-            document.getElementById('authPage').classList.add('hidden');
-            document.getElementById('mainApp').classList.remove('hidden');
-            document.getElementById('viewName').innerText = user.name;
-            document.getElementById('viewUid').innerText = user.uid;
-            document.getElementById('viewBal').innerText = parseFloat(user.bal || 0).toFixed(2);
-            document.getElementById('refLink').value = `${window.location.origin + window.location.pathname}?ref=${user.uid}`;
-            
-            const badge = document.getElementById('viewStatus');
-            if(String(user.verified).toUpperCase() === "TRUE") { badge.className = "badge-v"; badge.innerText = "VERIFIED"; }
-            else { badge.className = "badge-u"; badge.innerText = "UNVERIFIED"; }
-            
-            if(user.role === "ADMIN") document.getElementById('adminTab').classList.remove('hidden');
-            if(fullRes.announcements && fullRes.announcements.length > 0) document.getElementById('annText').innerText = fullRes.announcements[0][1];
-            
-            checkMiningStatus(); loadChat();
-            if(user.role === "ADMIN") loadAdminChats();
-        }
+<!-- ADMIN -->
+<div id="admin" class="page space-y-3">
+<textarea id="annInp" class="w-full p-3 bg-black/30 rounded"></textarea>
+<select id="type" class="w-full p-2 bg-black/30">
+<option value="info">Info</option>
+<option value="warning">Warning</option>
+<option value="urgent">Urgent</option>
+</select>
+<button onclick="broadcast()" class="btn w-full">Broadcast</button>
+</div>
 
-        function handleAuth() {
-            const email = document.getElementById('uEmail').value.trim();
-            const pass = document.getElementById('uPass').value.trim();
-            const name = document.getElementById('uName').value.trim();
-            const isReg = !document.getElementById('regInputs').classList.contains('hidden');
-            if(!email || !pass || (isReg && !name)) return alert("All fields required.");
-            const btn = document.getElementById('authBtn');
-            btn.disabled = true; btn.innerText = "Validating...";
-            call(isReg ? 'register' : 'login', { email, pass, name, ref: sessionStorage.getItem('pendingRef') || "none" }, (res) => {
-                btn.disabled = false; btn.innerText = "Connect Node";
-                if(res.success) {
-                    if(isReg) { alert("Identity Secured. Please Login."); toggleAuth(); }
-                    else { user = res.user; localStorage.setItem('rida_v13_1', JSON.stringify(user)); sync(); }
-                } else alert(res.msg || "Authentication Failed");
-            });
-        }
+</div>
 
-        function checkMiningStatus() {
-            const btn = document.getElementById('mineBtn'), pulse = document.getElementById('miningPulse'), label = document.getElementById('timerLabel');
-            if(mineInterval) clearInterval(mineInterval);
-            if(user.lastMine > 0) {
-                const diff = new Date().getTime() - user.lastMine;
-                if(diff < 86400000) { pulse.classList.add('opacity-100'); btn.disabled = true; updateCountdown(86400000 - diff); label.innerText = "Node Extraction Active"; } 
-                else { btn.innerText = "Claim 0.2 RIDA"; btn.disabled = false; btn.onclick = claim; label.innerText = "Cycle Complete"; pulse.classList.remove('opacity-100'); }
-            } else { btn.innerText = "Initialize Node"; btn.disabled = false; btn.onclick = processMining; }
-        }
+<script>
+const API = "https://script.google.com/macros/s/AKfycbwNSWs99pYjhzcCQ6bayGDEut7HQjAlb0JB9usctGTRYReTMparM64nyhLP6mk1-OPmkA/exec";
 
-        function updateCountdown(ms) {
-            const btn = document.getElementById('mineBtn');
-            mineInterval = setInterval(() => { ms -= 1000; if(ms <= 0) { clearInterval(mineInterval); sync(); return; }
-                const h = Math.floor(ms/3600000), m = Math.floor((ms%3600000)/60000), s = Math.floor((ms%60000)/1000);
-                btn.innerText = `${h}H ${m}M ${s}S`;
-            }, 1000);
-        }
+let user = JSON.parse(localStorage.getItem("rida_user"));
 
-        function postAnnouncement() {
-            const text = document.getElementById('adminAnnInp').value.trim();
-            if(!text) return alert("Announcement cannot be empty.");
-            const btn = document.getElementById('annBtn');
-            btn.disabled = true; btn.innerText = "Broadcasting...";
-            call('adminAction', { type: 'postAnnouncement', text: text, uid: user.uid }, (res) => {
-                btn.disabled = false; btn.innerText = "Post Update";
-                if(res.success) { alert("Broadcast Successful"); document.getElementById('adminAnnInp').value = ""; sync(); }
-                else alert("Broadcast Failed");
-            });
-        }
+function call(action,payload,cb){
+ const c="cb"+Math.random();
+ window[c]=(res)=>{delete window[c];document.body.removeChild(s);cb(res);}
+ const s=document.createElement("script");
+ s.src=`${API}?callback=${c}&action=${action}&payload=${encodeURIComponent(JSON.stringify(payload))}`;
+ document.body.appendChild(s);
+}
 
-        function processMining() { call('startMining', { uid: user.uid }, sync); }
-        function claim() { call('claimMining', { uid: user.uid }, sync); }
-        function logout() { localStorage.clear(); location.reload(); }
-        function toggleAuth() { document.getElementById('regInputs').classList.toggle('hidden'); }
-        function switchTab(t, el) { document.querySelectorAll('.page').forEach(p => p.classList.remove('active')); document.getElementById('page-' + t).classList.add('active'); document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('nav-active')); el.classList.add('nav-active'); }
-        function openWP() { document.getElementById('wpModal').style.display = 'flex'; }
-        function closeWP() { document.getElementById('wpModal').style.display = 'none'; }
-        
-        function call(action, payload, callback) { 
-            const cb = 'cb_' + Math.round(Math.random()*10000); 
-            window[cb] = (d) => { delete window[cb]; document.body.removeChild(s); callback(d); }; 
-            const s = document.createElement('script'); 
-            s.src = `${API}?callback=${cb}&action=${action}&payload=${encodeURIComponent(JSON.stringify(payload))}`; 
-            document.body.appendChild(s); 
-        }
+// INIT
+if(user){init();}
 
-        function sendMsg() { const t = document.getElementById('chatInp').value; if(!t) return; call('sendMessage', { uid: user.uid, sender: user.name, text: t }, () => { document.getElementById('chatInp').value = ""; loadChat(); }); }
-        function loadChat() { call('getMessages', { uid: user.uid }, (res) => { if(!res.history) return; document.getElementById('chatBox').innerHTML = res.history.map(m => `<div class="p-2 rounded-xl ${m.sender === 'ADMIN' ? 'bg-white/5 mr-6' : 'bg-indigo-500/10 ml-6 text-right'}"><p class="text-[8px] opacity-40 uppercase font-black">${m.sender}</p><p>${m.text}</p></div>`).join(''); const b = document.getElementById('chatBox'); b.scrollTop = b.scrollHeight; }); }
-        function loadAdminChats() { call('getMessages', { isAdmin: true }, (res) => { if(!res.history) return; const groups = {}; res.history.forEach(m => { if(!groups[m.uid]) groups[m.uid] = []; groups[m.uid].push(m); }); document.getElementById('adminChatHub').innerHTML = Object.entries(groups).map(([uid, msgs]) => `<div class="glass p-4 text-[10px] space-y-2"><p class="font-bold text-indigo-400">Node: ${uid}</p><div class="max-h-24 overflow-y-auto">${msgs.map(m => `<div><b>${m.sender}:</b> ${m.text}</div>`).join('')}</div><div class="flex gap-1"><input id="reply-${uid}" placeholder="..." class="w-full bg-black/30 p-2 rounded-lg border border-white/5 outline-none text-white"><button onclick="adminReply('${uid}')" class="bg-indigo-500 px-3 rounded-lg font-bold">Reply</button><button onclick="adminVerify('${uid}')" class="bg-green-600 px-3 rounded-lg font-bold">Verify</button></div></div>`).join(''); }); }
-        function adminReply(target) { const v = document.getElementById('reply-'+target).value; if(!v) return; call('sendMessage', { uid: target, sender: "ADMIN", text: v }, () => loadAdminChats()); }
-        function adminVerify(target) { if(confirm("Verify node?")) call('adminAction', { targetUid: target, type: 'verify' }, () => { sync(); loadAdminChats(); }); }
-        function processP2P() {
-            const t = document.getElementById('p2pTarget').value.trim(), a = parseFloat(document.getElementById('p2pAmount').value);
-            if(!t || a < 10) return alert("Min transfer is 10 RIDA");
-            if(a > user.bal) return alert("Insufficient balance");
-            call('p2pTransfer', { from: user.uid, to: t, amount: a }, (res) => { if(res.success) { alert("Transfer Successful"); sync(); } else alert(res.msg); });
-        }
-    </script>
+function init(){
+ document.getElementById("authPage").style.display="none";
+ document.getElementById("app").classList.remove("hidden");
+ sync();
+ setInterval(sync,10000);
+}
+
+// AUTH
+function register(){
+ call("register",{email:email.value,pass:pass.value,name:name.value},res=>{
+ alert(res.success?"Registered":"Error");
+ });
+}
+
+function login(){
+ call("login",{email:email.value,pass:pass.value},res=>{
+ if(res.success){
+ user=res.user;
+ localStorage.setItem("rida_user",JSON.stringify(user));
+ init();
+ } else alert("Login failed");
+ });
+}
+
+// SYNC
+function sync(){
+ call("sync",{uid:user.uid},res=>{
+ if(!res.success) return;
+
+ user=res.user;
+ localStorage.setItem("rida_user",JSON.stringify(user));
+
+ nameView.innerText=user.name;
+ uidView.innerText=user.uid;
+ balView.innerText=user.bal;
+
+ if(res.announcements.length){
+ annText.innerText=res.announcements[0].text;
+ }
+
+ if(user.role==="ADMIN"){
+ adminBtn.classList.remove("hidden");
+ }
+
+ loadChat(res.history);
+});
+}
+
+// MINING
+function startMining(){
+ call("startMining",{uid:user.uid},sync);
+}
+
+// P2P
+function transfer(){
+ call("p2pTransfer",{from:user.uid,to:to.value,amount:parseFloat(amount.value)},res=>{
+ alert(res.success?"Sent":"Error");
+ sync();
+});
+}
+
+// CHAT
+function sendMsg(){
+ call("sendMessage",{uid:user.uid,sender:user.name,text:msg.value},()=>{msg.value="";sync();});
+}
+
+function loadChat(h){
+ chat.innerHTML=h.map(m=>`<div>${m.sender}: ${m.text}</div>`).join("");
+}
+
+// ADMIN
+function broadcast(){
+ call("adminAction",{type:"postAnnouncement",text:annInp.value,annType:type.value},res=>{
+ alert(res.success?"Sent":"Error");
+});
+}
+
+// NAV
+function show(id){
+ document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+ document.getElementById(id).classList.add("active");
+}
+</script>
+
 </body>
-                </html>
-                    
+</html>
