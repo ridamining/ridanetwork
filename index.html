@@ -7,7 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
-        body { background: #050508; color: #fff; font-family: 'Plus Jakarta Sans', sans-serif; }
+        body { background: #050508; color: #fff; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
         .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.08); border-radius: 24px; }
         .btn-primary { background: linear-gradient(135deg, #6366f1, #a855f7); border-radius: 16px; font-weight: 700; transition: 0.2s; }
         .btn-primary:active { transform: scale(0.95); }
@@ -116,10 +116,10 @@
         <div id="page-admin" class="page space-y-6">
             <div class="glass p-6 space-y-4">
                 <h2 class="text-xs font-black text-indigo-400 uppercase">Broadcast Manager</h2>
-                <textarea id="adminAnnInp" class="w-full bg-black/30 p-4 rounded-xl text-xs outline-none border border-white/10 h-20"></textarea>
-                <button onclick="postAnnouncement()" class="w-full py-3 btn-primary text-[10px] uppercase font-bold">Post Update</button>
+                <textarea id="adminAnnInp" placeholder="Type global announcement here..." class="w-full bg-black/30 p-4 rounded-xl text-xs outline-none border border-white/10 h-20 text-white"></textarea>
+                <button onclick="postAnnouncement()" id="annBtn" class="w-full py-3 btn-primary text-[10px] uppercase font-bold">Post Update</button>
             </div>
-            <div id="adminChatHub" class="space-y-4"></div>
+            <div id="adminChatHub" class="space-y-4 pb-10"></div>
         </div>
 
         <nav class="fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-md glass flex justify-around p-4 z-50">
@@ -140,10 +140,9 @@
         let user = JSON.parse(localStorage.getItem('rida_v13_1'));
         let mineInterval = null;
 
-        function openWP() { document.getElementById('wpModal').style.display = 'flex'; }
-        function closeWP() { document.getElementById('wpModal').style.display = 'none'; }
-
         window.onload = () => { 
+            const urlParams = new URLSearchParams(window.location.search);
+            if(urlParams.has('ref')) sessionStorage.setItem('pendingRef', urlParams.get('ref'));
             if(user) { sync(); setInterval(sync, 30000); } 
             else { document.getElementById('authPage').classList.remove('hidden'); }
         };
@@ -183,12 +182,9 @@
             const pass = document.getElementById('uPass').value.trim();
             const name = document.getElementById('uName').value.trim();
             const isReg = !document.getElementById('regInputs').classList.contains('hidden');
-
-            if(!email || !pass || (isReg && !name)) return alert("All fields are required.");
-
+            if(!email || !pass || (isReg && !name)) return alert("All fields required.");
             const btn = document.getElementById('authBtn');
             btn.disabled = true; btn.innerText = "Validating...";
-
             call(isReg ? 'register' : 'login', { email, pass, name, ref: sessionStorage.getItem('pendingRef') || "none" }, (res) => {
                 btn.disabled = false; btn.innerText = "Connect Node";
                 if(res.success) {
@@ -216,17 +212,46 @@
             }, 1000);
         }
 
+        function postAnnouncement() {
+            const text = document.getElementById('adminAnnInp').value.trim();
+            if(!text) return alert("Announcement cannot be empty.");
+            const btn = document.getElementById('annBtn');
+            btn.disabled = true; btn.innerText = "Broadcasting...";
+            call('adminAction', { type: 'postAnnouncement', text: text, uid: user.uid }, (res) => {
+                btn.disabled = false; btn.innerText = "Post Update";
+                if(res.success) { alert("Broadcast Successful"); document.getElementById('adminAnnInp').value = ""; sync(); }
+                else alert("Broadcast Failed");
+            });
+        }
+
         function processMining() { call('startMining', { uid: user.uid }, sync); }
         function claim() { call('claimMining', { uid: user.uid }, sync); }
         function logout() { localStorage.clear(); location.reload(); }
         function toggleAuth() { document.getElementById('regInputs').classList.toggle('hidden'); }
         function switchTab(t, el) { document.querySelectorAll('.page').forEach(p => p.classList.remove('active')); document.getElementById('page-' + t).classList.add('active'); document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('nav-active')); el.classList.add('nav-active'); }
-        function call(action, payload, callback) { const cb = 'cb_' + Math.round(Math.random()*10000); window[cb] = (d) => { delete window[cb]; document.body.removeChild(s); callback(d); }; const s = document.createElement('script'); s.src = `${API}?callback=${cb}&action=${action}&payload=${encodeURIComponent(JSON.stringify(payload))}`; document.body.appendChild(s); }
+        function openWP() { document.getElementById('wpModal').style.display = 'flex'; }
+        function closeWP() { document.getElementById('wpModal').style.display = 'none'; }
+        
+        function call(action, payload, callback) { 
+            const cb = 'cb_' + Math.round(Math.random()*10000); 
+            window[cb] = (d) => { delete window[cb]; document.body.removeChild(s); callback(d); }; 
+            const s = document.createElement('script'); 
+            s.src = `${API}?callback=${cb}&action=${action}&payload=${encodeURIComponent(JSON.stringify(payload))}`; 
+            document.body.appendChild(s); 
+        }
+
         function sendMsg() { const t = document.getElementById('chatInp').value; if(!t) return; call('sendMessage', { uid: user.uid, sender: user.name, text: t }, () => { document.getElementById('chatInp').value = ""; loadChat(); }); }
         function loadChat() { call('getMessages', { uid: user.uid }, (res) => { if(!res.history) return; document.getElementById('chatBox').innerHTML = res.history.map(m => `<div class="p-2 rounded-xl ${m.sender === 'ADMIN' ? 'bg-white/5 mr-6' : 'bg-indigo-500/10 ml-6 text-right'}"><p class="text-[8px] opacity-40 uppercase font-black">${m.sender}</p><p>${m.text}</p></div>`).join(''); const b = document.getElementById('chatBox'); b.scrollTop = b.scrollHeight; }); }
-        function loadAdminChats() { call('getMessages', { isAdmin: true }, (res) => { if(!res.history) return; const groups = {}; res.history.forEach(m => { if(!groups[m.uid]) groups[m.uid] = []; groups[m.uid].push(m); }); document.getElementById('adminChatHub').innerHTML = Object.entries(groups).map(([uid, msgs]) => `<div class="glass p-4 text-[10px] space-y-2"><p class="font-bold text-indigo-400">Node: ${uid}</p><div class="max-h-24 overflow-y-auto">${msgs.map(m => `<div><b>${m.sender}:</b> ${m.text}</div>`).join('')}</div><div class="flex gap-1"><input id="reply-${uid}" placeholder="..." class="w-full bg-black/30 p-2 rounded-lg border border-white/5 outline-none"><button onclick="adminReply('${uid}')" class="bg-indigo-500 px-3 rounded-lg font-bold">Reply</button><button onclick="adminVerify('${uid}')" class="bg-green-600 px-3 rounded-lg font-bold">Verify</button></div></div>`).join(''); }); }
+        function loadAdminChats() { call('getMessages', { isAdmin: true }, (res) => { if(!res.history) return; const groups = {}; res.history.forEach(m => { if(!groups[m.uid]) groups[m.uid] = []; groups[m.uid].push(m); }); document.getElementById('adminChatHub').innerHTML = Object.entries(groups).map(([uid, msgs]) => `<div class="glass p-4 text-[10px] space-y-2"><p class="font-bold text-indigo-400">Node: ${uid}</p><div class="max-h-24 overflow-y-auto">${msgs.map(m => `<div><b>${m.sender}:</b> ${m.text}</div>`).join('')}</div><div class="flex gap-1"><input id="reply-${uid}" placeholder="..." class="w-full bg-black/30 p-2 rounded-lg border border-white/5 outline-none text-white"><button onclick="adminReply('${uid}')" class="bg-indigo-500 px-3 rounded-lg font-bold">Reply</button><button onclick="adminVerify('${uid}')" class="bg-green-600 px-3 rounded-lg font-bold">Verify</button></div></div>`).join(''); }); }
         function adminReply(target) { const v = document.getElementById('reply-'+target).value; if(!v) return; call('sendMessage', { uid: target, sender: "ADMIN", text: v }, () => loadAdminChats()); }
         function adminVerify(target) { if(confirm("Verify node?")) call('adminAction', { targetUid: target, type: 'verify' }, () => { sync(); loadAdminChats(); }); }
+        function processP2P() {
+            const t = document.getElementById('p2pTarget').value.trim(), a = parseFloat(document.getElementById('p2pAmount').value);
+            if(!t || a < 10) return alert("Min transfer is 10 RIDA");
+            if(a > user.bal) return alert("Insufficient balance");
+            call('p2pTransfer', { from: user.uid, to: t, amount: a }, (res) => { if(res.success) { alert("Transfer Successful"); sync(); } else alert(res.msg); });
+        }
     </script>
 </body>
-</html>
+                </html>
+                    
