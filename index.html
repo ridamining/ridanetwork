@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>RIDA Engine 5.0</title>
+<title>RIDA Engine PRO</title>
 
 <style>
 body{margin:0;font-family:sans-serif;background:#020617;color:white;}
@@ -12,16 +12,16 @@ body{margin:0;font-family:sans-serif;background:#020617;color:white;}
 input,button{width:100%;padding:12px;margin:6px 0;border:none;border-radius:8px;}
 button{background:#22c55e;color:white;font-weight:bold;}
 .nav{position:fixed;bottom:0;width:100%;display:flex;background:#020617;}
-.nav button{flex:1;background:none;color:white;padding:10px;}
-.top{text-align:center;padding:10px;font-size:20px;background:#020617;}
-.balance{font-size:28px;font-weight:bold;color:#22c55e;}
+.nav button{flex:1;background:none;color:white;}
+.top{text-align:center;padding:12px;font-size:20px;background:#020617;}
+.balance{font-size:30px;color:#22c55e;}
 .loader{position:fixed;top:0;left:0;width:100%;height:100%;background:#0009;display:none;align-items:center;justify-content:center;}
 </style>
 </head>
 
 <body>
 
-<div class="top">🚀 RIDA Engine 5.0</div>
+<div class="top">🚀 RIDA Engine PRO</div>
 
 <!-- AUTH -->
 <div id="auth" class="screen active">
@@ -30,6 +30,7 @@ button{background:#22c55e;color:white;font-weight:bold;}
 <input id="name" placeholder="Name" style="display:none">
 <input id="email" placeholder="Email">
 <input id="pass" type="password" placeholder="Password">
+<input id="ref" placeholder="Referral UID (optional)" style="display:none">
 <button onclick="submitAuth()">Continue</button>
 <button onclick="toggleAuth()">Switch</button>
 </div>
@@ -40,7 +41,7 @@ button{background:#22c55e;color:white;font-weight:bold;}
 <div class="card">
 <div id="userInfo"></div>
 <div class="balance" id="bal">0</div>
-<button onclick="sync()">Refresh</button>
+<button onclick="sync()">🔄 Sync</button>
 </div>
 </div>
 
@@ -48,9 +49,8 @@ button{background:#22c55e;color:white;font-weight:bold;}
 <div id="mining" class="screen">
 <div class="card">
 <h3>⛏ Mining</h3>
-<div id="mineStatus">Inactive</div>
-<div class="balance" id="liveBal">0</div>
-<button onclick="startMining()">Start Mining</button>
+<p id="mineStatus">Ready</p>
+<button onclick="mine()">Start Mining</button>
 </div>
 </div>
 
@@ -67,7 +67,7 @@ button{background:#22c55e;color:white;font-weight:bold;}
 <!-- ADMIN -->
 <div id="admin" class="screen">
 <div class="card">
-<h3>📢 Admin</h3>
+<h3>📢 Admin Panel</h3>
 <input id="ann" placeholder="Announcement">
 <button onclick="postAnn()">Post</button>
 </div>
@@ -75,53 +75,69 @@ button{background:#22c55e;color:white;font-weight:bold;}
 
 <!-- NAV -->
 <div class="nav">
-<button onclick="show('dashboard')">Home</button>
-<button onclick="show('mining')">Mine</button>
-<button onclick="show('transfer')">Send</button>
-<button onclick="show('admin')">Admin</button>
+<button onclick="show('dashboard')">🏠</button>
+<button onclick="show('mining')">⛏</button>
+<button onclick="show('transfer')">💸</button>
+<button onclick="show('admin')">⚙️</button>
 </div>
 
-<div id="loader" class="loader">⏳</div>
+<div id="loader" class="loader">⏳ Processing...</div>
 
 <script>
-var API="https://script.google.com/macros/s/AKfycbxhwFo2ycjOPDunKdrtgjo4uO769ZDqR6ZAyhuhpgG5eL0OxYSpRvnXLSZu0P5Bbp-1uQ/exec";
+var API="https://script.google.com/macros/s/AKfycbymumK9LAnF60Rt1UAyyQqKmthzK1y_qDAQOKAcF9Wj7jZmw7j3zqnPgEHPFWhUsgrOqQ/exec";
 
-var user=null,isLogin=true,mining=false,live=0,interval;
+var user=null,isLogin=true;
 
-// JSONP
+// JSONP CALL
 function api(action,data,cb){
   loader.style.display="flex";
   var name="cb_"+Date.now();
+
   window[name]=function(res){
     loader.style.display="none";
     cb(res);
     delete window[name];
     script.remove();
   };
+
   var script=document.createElement("script");
-  script.src=API+"?callback="+name+"&action="+action+"&payload="+encodeURIComponent(JSON.stringify(data));
+  script.onerror=function(){
+    loader.style.display="none";
+    alert("Network error");
+  };
+
+  script.src=API+"?callback="+name+
+    "&action="+action+
+    "&payload="+encodeURIComponent(JSON.stringify(data));
+
   document.body.appendChild(script);
 }
 
-// AUTH
+// TOGGLE AUTH
 function toggleAuth(){
   isLogin=!isLogin;
   authTitle.innerText=isLogin?"Login":"Register";
   name.style.display=isLogin?"none":"block";
+  ref.style.display=isLogin?"none":"block";
 }
 
+// AUTH
 function submitAuth(){
-  api(isLogin?"login":"register",{
+  var data={
     email:email.value,
     pass:pass.value,
-    name:name.value
-  },res=>{
-    if(!res.success)return alert(res.msg);
+    name:name.value,
+    ref:ref.value
+  };
+
+  api(isLogin?"login":"register",data,function(res){
+    if(!res.success) return alert(res.msg);
+
     if(isLogin){
       user=res.user;
       openApp();
     }else{
-      alert("Registered");
+      alert("Registered successfully");
       toggleAuth();
     }
   });
@@ -132,16 +148,19 @@ function openApp(){
   auth.classList.remove("active");
   show("dashboard");
   render();
-  if(user.role!=="ADMIN") document.querySelector('[onclick="show(\'admin\')"]').style.display="none";
+
+  if(user.role!=="ADMIN"){
+    document.querySelector('[onclick="show(\\'admin\\')"]').style.display="none";
+  }
 }
 
-// NAV
+// NAVIGATION
 function show(id){
   document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
   document.getElementById(id).classList.add("active");
 }
 
-// RENDER
+// RENDER USER
 function render(){
   userInfo.innerText="👤 "+user.name+" | "+user.uid;
   bal.innerText=user.bal;
@@ -149,7 +168,7 @@ function render(){
 
 // SYNC
 function sync(){
-  api("sync",{uid:user.uid},res=>{
+  api("sync",{uid:user.uid},function(res){
     if(res.success){
       user=res.user;
       render();
@@ -157,41 +176,30 @@ function sync(){
   });
 }
 
-// MINING SYSTEM
-function startMining(){
-  if(mining)return;
-  mining=true;
-  mineStatus.innerText="Active";
-
-  api("startMining",{uid:user.uid},res=>{
-    if(res.success){
-      sync();
-    }
+// MINING (24H BASED)
+function mine(){
+  api("mine",{uid:user.uid},function(res){
+    alert(res.msg);
+    sync();
   });
-
-  live=parseFloat(user.bal);
-  interval=setInterval(()=>{
-    live+=0.0001;
-    liveBal.innerText=live.toFixed(4);
-  },1000);
 }
 
 // TRANSFER
 function send(){
-  api("p2pTransfer",{
+  api("transfer",{
     from:user.uid,
     to:to.value,
     amount:parseFloat(amt.value)
-  },res=>{
-    alert(res.msg||"Done");
+  },function(res){
+    alert(res.msg);
     sync();
   });
 }
 
 // ADMIN
 function postAnn(){
-  api("postAnnouncement",{uid:user.uid,text:ann.value},res=>{
-    alert(res.msg||"Posted");
+  api("announce",{uid:user.uid,text:ann.value},function(res){
+    alert(res.msg);
   });
 }
 </script>
