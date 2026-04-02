@@ -8,69 +8,13 @@
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;700;900&display=swap" rel="stylesheet">
 
 <style>
-body {
-  margin:0;
-  background:#050508;
-  font-family:'Plus Jakarta Sans',sans-serif;
-  color:#fff;
-}
-
-.container {
-  max-width:420px;
-  margin:auto;
-  padding:16px;
-}
-
-.glass {
-  background:rgba(255,255,255,0.04);
-  border:1px solid rgba(255,255,255,0.08);
-  backdrop-filter:blur(12px);
-  border-radius:18px;
-  padding:16px;
-}
-
-input {
-  width:100%;
-  padding:12px;
-  border-radius:10px;
-  border:1px solid #222;
-  background:#0f111a;
-  color:#fff;
-  margin-top:8px;
-}
-
-button {
-  width:100%;
-  padding:14px;
-  margin-top:10px;
-  border:none;
-  border-radius:12px;
-  background:linear-gradient(135deg,#6366f1,#a855f7);
-  color:white;
-  font-weight:700;
-  cursor:pointer;
-}
-
-.small { font-size:12px; opacity:.7; }
-.hidden { display:none; }
-.center { text-align:center; }
-
-.nav {
-  position:fixed;
-  bottom:10px;
-  left:50%;
-  transform:translateX(-50%);
-  width:90%;
-  max-width:420px;
-  display:flex;
-  justify-content:space-around;
-}
-
-.nav button {
-  width:auto;
-  padding:10px;
-  font-size:12px;
-}
+body {margin:0;background:#050508;font-family:'Plus Jakarta Sans';color:#fff;}
+.container {max-width:420px;margin:auto;padding:16px;}
+.glass {background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:18px;padding:16px;}
+input,textarea {width:100%;padding:12px;border-radius:10px;border:1px solid #222;background:#0f111a;color:#fff;margin-top:8px;}
+button {width:100%;padding:14px;margin-top:10px;border:none;border-radius:12px;background:linear-gradient(135deg,#6366f1,#a855f7);color:white;font-weight:700;}
+.hidden{display:none;}
+.nav{position:fixed;bottom:10px;left:50%;transform:translateX(-50%);width:90%;max-width:420px;display:flex;justify-content:space-around;}
 </style>
 </head>
 
@@ -80,79 +24,58 @@ button {
 
 <!-- AUTH -->
 <div id="auth">
-  <h2 class="center">RIDA Network</h2>
+<h2>RIDA Network</h2>
 
-  <div id="regBox" class="hidden">
-    <input id="name" placeholder="Full Name">
-  </div>
+<div id="regBox" class="hidden">
+<input id="name" placeholder="Full Name">
+</div>
 
-  <input id="email" placeholder="Email">
-  <input id="pass" type="password" placeholder="Password">
+<input id="email" placeholder="Email">
+<input id="pass" type="password" placeholder="Password">
 
-  <button onclick="auth()">Continue</button>
-  <p class="center small" onclick="toggle()">Switch Mode</p>
+<button onclick="auth()">Continue</button>
+<p onclick="toggle()">Switch Mode</p>
 </div>
 
 <!-- APP -->
 <div id="app" class="hidden">
 
-<!-- HEADER -->
 <div class="glass">
-  <h3 id="username"></h3>
-  <p class="small">UID: <span id="uid"></span></p>
-  <h1 id="balance">0.00</h1>
+<h3 id="username"></h3>
+<p>UID: <span id="uid"></span></p>
+<h2 id="balance"></h2>
 </div>
 
-<!-- HOME -->
 <div id="home" class="page">
-  <div class="glass">
-    <p id="announcement">Loading...</p>
-  </div>
-
-  <div class="glass center">
-    <h2 id="timer">0.20</h2>
-    <button id="mineBtn" onclick="startMining()">Start Mining</button>
-  </div>
+<div class="glass"><p id="announcement"></p></div>
+<button onclick="startMining()">Start Mining</button>
+<button onclick="claim()">Claim</button>
 </div>
 
-<!-- PROFILE -->
 <div id="profile" class="page hidden">
-  <div class="glass">
-    <input id="to" placeholder="Receiver UID">
-    <input id="amount" placeholder="Amount">
-    <button onclick="transfer()">Send</button>
-  </div>
+<input id="to" placeholder="Receiver UID">
+<input id="amount" placeholder="Amount">
+<button onclick="transfer()">Send</button>
 
-  <div class="glass">
-    <input id="ref" readonly>
-  </div>
+<div id="chat"></div>
+<input id="msg">
+<button onclick="send()">Send</button>
 
-  <div class="glass">
-    <div id="chat" style="height:120px;overflow:auto;"></div>
-    <input id="msg">
-    <button onclick="send()">Send</button>
-  </div>
-
-  <button onclick="logout()">Logout</button>
+<button onclick="logout()">Logout</button>
 </div>
 
-<!-- ADMIN -->
 <div id="admin" class="page hidden">
-  <div class="glass">
-    <textarea id="annInput"></textarea>
-    <button onclick="postAnn()">Post</button>
-  </div>
-
-  <div id="adminChats"></div>
+<textarea id="annInput"></textarea>
+<button onclick="postAnn()">Post</button>
+<div id="adminChats"></div>
 </div>
 
 </div>
 
-<!-- NAV -->
 <div class="nav hidden" id="nav">
-  <button onclick="tab('home')">Home</button>
-  <button onclick="tab('profile')">Profile</button>
-  <button id="adminBtn" onclick="tab('admin')" class="hidden">Admin</button>
+<button onclick="tab('home')">Home</button>
+<button onclick="tab('profile')">Profile</button>
+<button id="adminBtn" onclick="tab('admin')" class="hidden">Admin</button>
 </div>
 
 </div>
@@ -164,103 +87,115 @@ let user=JSON.parse(localStorage.getItem("rida_user"));
 let isReg=false;
 
 function toggle(){
-  isReg=!isReg;
-  document.getElementById("regBox").classList.toggle("hidden");
+isReg=!isReg;
+document.getElementById("regBox").classList.toggle("hidden");
 }
 
 function auth(){
-  let email=emailEl.value;
-  let pass=passEl.value;
-  let name=nameEl.value;
+let email=document.getElementById("email").value;
+let pass=document.getElementById("pass").value;
+let name=document.getElementById("name").value;
 
-  call(isReg?"register":"login",{email,pass,name},res=>{
-    if(res.success){
-      user=res.user;
-      localStorage.setItem("rida_user",JSON.stringify(user));
-      init();
-    } else alert(res.msg);
-  });
+call(isReg?"register":"login",{email,pass,name},res=>{
+if(res.success){
+user=res.user;
+localStorage.setItem("rida_user",JSON.stringify(user));
+init();
+}else alert(res.msg);
+});
 }
 
 function init(){
-  authDiv.style.display="none";
-  app.classList.remove("hidden");
-  nav.classList.remove("hidden");
+document.getElementById("auth").style.display="none";
+document.getElementById("app").classList.remove("hidden");
+document.getElementById("nav").classList.remove("hidden");
 
-  username.innerText=user.name;
-  uid.innerText=user.uid;
-  balance.innerText=parseFloat(user.bal).toFixed(2);
+document.getElementById("username").innerText=user.name;
+document.getElementById("uid").innerText=user.uid;
+document.getElementById("balance").innerText=parseFloat(user.bal).toFixed(2);
 
-  ref.value=location.origin+"?ref="+user.uid;
+if(user.role==="ADMIN") document.getElementById("adminBtn").classList.remove("hidden");
 
-  if(user.role==="ADMIN") adminBtn.classList.remove("hidden");
-
-  sync();
+sync();
 }
 
 function sync(){
-  call("sync",{uid:user.uid,email:user.email},res=>{
-    if(!res.success) return logout();
+call("sync",{uid:user.uid,email:user.email},res=>{
+if(!res.success) return logout();
 
-    user=res.user;
-    localStorage.setItem("rida_user",JSON.stringify(user));
+user=res.user;
+localStorage.setItem("rida_user",JSON.stringify(user));
 
-    balance.innerText=parseFloat(user.bal).toFixed(2);
+document.getElementById("balance").innerText=parseFloat(user.bal).toFixed(2);
 
-    if(res.announcements)
-      announcement.innerText=res.announcements[0][1];
+if(res.announcements)
+document.getElementById("announcement").innerText=res.announcements[0][1];
 
-    loadChat();
-    if(user.role==="ADMIN") loadAdmin();
-  });
+loadChat();
+if(user.role==="ADMIN") loadAdmin();
+});
 }
 
-function startMining(){ call("startMining",{uid:user.uid},sync); }
-function claim(){ call("claimMining",{uid:user.uid},sync); }
+function startMining(){call("startMining",{uid:user.uid},sync);}
+function claim(){call("claimMining",{uid:user.uid},sync);}
 
 function transfer(){
-  call("p2pTransfer",{from:user.uid,to:to.value,amount:amount.value},sync);
+call("p2pTransfer",{
+from:user.uid,
+to:document.getElementById("to").value,
+amount:document.getElementById("amount").value
+},sync);
 }
 
 function send(){
-  call("sendMessage",{uid:user.uid,sender:user.name,text:msg.value},()=>{
-    msg.value="";
-    loadChat();
-  });
+call("sendMessage",{
+uid:user.uid,
+sender:user.name,
+text:document.getElementById("msg").value
+},()=>{
+document.getElementById("msg").value="";
+loadChat();
+});
 }
 
 function loadChat(){
-  call("getMessages",{uid:user.uid},res=>{
-    chat.innerHTML=res.history.map(m=>`<p>${m.sender}: ${m.text}</p>`).join("");
-  });
+call("getMessages",{uid:user.uid},res=>{
+document.getElementById("chat").innerHTML=
+res.history.map(m=>`<p>${m.sender}: ${m.text}</p>`).join("");
+});
 }
 
 function loadAdmin(){
-  call("getMessages",{isAdmin:true},res=>{
-    adminChats.innerHTML=res.history.map(m=>`<p>${m.uid}: ${m.text}</p>`).join("");
-  });
+call("getMessages",{isAdmin:true},res=>{
+document.getElementById("adminChats").innerHTML=
+res.history.map(m=>`<p>${m.uid}: ${m.text}</p>`).join("");
+});
 }
 
 function postAnn(){
-  call("adminAction",{type:"postAnnouncement",text:annInput.value,uid:user.uid},sync);
+call("adminAction",{
+type:"postAnnouncement",
+text:document.getElementById("annInput").value,
+uid:user.uid
+},sync);
 }
 
 function tab(t){
-  document.querySelectorAll(".page").forEach(p=>p.classList.add("hidden"));
-  document.getElementById(t).classList.remove("hidden");
+document.querySelectorAll(".page").forEach(p=>p.classList.add("hidden"));
+document.getElementById(t).classList.remove("hidden");
 }
 
 function logout(){
-  localStorage.clear();
-  location.reload();
+localStorage.clear();
+location.reload();
 }
 
 function call(action,payload,cb){
-  const c="cb"+Math.random();
-  window[c]=res=>{delete window[c];cb(res)};
-  const s=document.createElement("script");
-  s.src=`${API}?action=${action}&payload=${encodeURIComponent(JSON.stringify(payload))}&callback=${c}`;
-  document.body.appendChild(s);
+const c="cb"+Math.random();
+window[c]=res=>{delete window[c];cb(res)};
+const s=document.createElement("script");
+s.src=`${API}?action=${action}&payload=${encodeURIComponent(JSON.stringify(payload))}&callback=${c}`;
+document.body.appendChild(s);
 }
 
 if(user) init();
