@@ -3,184 +3,130 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>RIDA Network</title>
+<title>RIDA NETWORK</title>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;700;900&display=swap" rel="stylesheet">
 <style>
-body { margin:0; background:#050508; color:#fff; font-family:'Plus Jakarta Sans', sans-serif; }
-.glass { background: rgba(255,255,255,0.03); backdrop-filter: blur(10px); border:1px solid rgba(255,255,255,0.08); border-radius:24px; }
-.btn-primary { background: linear-gradient(135deg, #6366f1, #a855f7); border-radius:16px; font-weight:700; transition:0.2s; }
-.btn-primary:active { transform:scale(0.95); } .btn-primary:disabled { opacity:0.5; filter:grayscale(1); }
-.page { display:none; padding-bottom:120px; animation:fadeIn 0.3s ease-in-out; } .active{display:block;}
-@keyframes fadeIn { from{opacity:0;} to{opacity:1;} }
-.nav-item { color:#64748b; font-size:10px; font-weight:800; text-transform:uppercase; } .nav-active{color:#6366f1;}
-.badge-v { background:rgba(34,197,94,0.1); color:#22c55e; border:1px solid rgba(34,197,94,0.2); font-size:9px; padding:2px 8px; border-radius:6px; }
-.badge-u { background:rgba(239,68,68,0.1); color:#ef4444; border:1px solid rgba(239,68,68,0.2); font-size:9px; padding:2px 8px; border-radius:6px; }
-input,textarea { color:#fff; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:12px; padding:10px; outline:none; }
+body{background:#050508;color:#fff;font-family:'Plus Jakarta Sans',sans-serif;margin:0;padding:0;}
+.glass{background:rgba(255,255,255,0.03);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,0.08);border-radius:24px;padding:20px;margin:10px 0;}
+.btn-primary{background:linear-gradient(135deg,#6366f1,#a855f7);border-radius:16px;font-weight:700;padding:15px;width:100%;cursor:pointer;transition:.2s;}
+.btn-primary:active{transform:scale(0.95);}
+.btn-primary:disabled{opacity:.5;cursor:not-allowed;}
+.page{display:none;}
+.active{display:block;}
+.nav-item{color:#64748b;font-size:10px;font-weight:800;text-transform:uppercase;cursor:pointer;}
+.nav-active{color:#6366f1;}
+.badge-v{background:rgba(34,197,94,.1);color:#22c55e;border:1px solid rgba(34,197,94,.2);font-size:9px;padding:2px 8px;border-radius:6px;}
+.badge-u{background:rgba(239,68,68,.1);color:#ef4444;border:1px solid rgba(239,68,68,.2);font-size:9px;padding:2px 8px;border-radius:6px;}
+input{width:100%;padding:12px;border-radius:12px;border:none;background:rgba(255,255,255,0.05);color:#fff;margin-bottom:10px;outline:none;}
 </style>
 </head>
 <body>
 
-<!-- Authentication Page -->
-<div id="authPage" class="min-h-screen flex flex-col justify-center max-w-md mx-auto">
-<h1 class="text-5xl font-extrabold mb-8 text-center tracking-tighter">RIDA<span style="color:#6366f1">.</span></h1>
-<div class="glass p-8 space-y-4">
-<div id="regInputs" class="hidden space-y-4">
-<input id="uName" type="text" placeholder="Full Name">
-<input id="uRef" type="text" placeholder="Referral Code (Optional)">
-</div>
-<input id="uEmail" type="email" placeholder="Email">
-<input id="uPass" type="password" placeholder="Password">
-<button id="authBtn" onclick="handleAuth()" class="btn-primary w-full py-4 uppercase tracking-widest text-sm">Connect Node</button>
-<p id="toggleText" onclick="toggleAuth()" style="text-align:center; cursor:pointer;">New node? Create Identity</p>
-</div>
+<!-- Login/Register Page -->
+<div id="authPage" class="page active">
+  <h1 style="text-align:center;margin-bottom:20px;">RIDA NETWORK</h1>
+  <div class="glass">
+    <input id="uName" placeholder="Full Name (Register only)">
+    <input id="uEmail" placeholder="Email">
+    <input id="uPass" type="password" placeholder="Password">
+    <button class="btn-primary" id="authBtn">Login / Register</button>
+    <p id="authMsg" style="color:#f87171;font-size:12px;margin-top:8px;"></p>
+  </div>
 </div>
 
-<!-- Main App -->
-<div id="mainApp" class="hidden max-w-md mx-auto">
-
-<header class="flex justify-between items-center mb-6 px-2">
-<div>
-<div class="flex items-center gap-2">
-<h2 id="viewName" class="font-bold text-lg">---</h2>
-<span id="viewStatus" class="badge-u italic">PENDING</span>
+<!-- Main App Page -->
+<div id="mainApp" class="page">
+  <h2 id="userName">---</h2>
+  <p id="userEmail">---</p>
+  <p id="userRole">---</p>
+  <p>Balance: <span id="userBal">0</span> RIDA</p>
+  <button class="btn-primary" id="startMine">Start Mining</button>
+  <h3>P2P Transfer</h3>
+  <input id="p2pTo" placeholder="Receiver UID">
+  <input id="p2pAmount" type="number" placeholder="Amount">
+  <button class="btn-primary" id="sendP2P">Send</button>
+  <div id="announcements" class="glass"></div>
+  <button class="btn-primary" id="logoutBtn" style="background:red;">Logout</button>
 </div>
-<p id="viewUid" style="font-family:monospace; font-size:10px; color:#6366f1">---</p>
-</div>
-<div class="text-right">
-<p id="viewBal" class="text-3xl font-extrabold tracking-tighter">0.00</p>
-<p style="font-size:9px; color:#888; text-transform:uppercase;">RIDA Asset</p>
-</div>
-</header>
-
-<!-- Pages -->
-<div id="page-home" class="page active space-y-6">
-<div class="glass p-4 border-l-4 border-indigo-500">
-<span style="font-size:9px; font-weight:bold; color:#6366f1">Network Broadcast</span>
-<p id="annText" style="font-size:12px; color:#aaa;">Syncing node data...</p>
-</div>
-<div class="glass p-10 flex flex-col items-center justify-center space-y-6 text-center shadow-xl">
-<div class="relative w-52 h-52 flex items-center justify-center border-4 border-indigo-500/20 rounded-full">
-<div id="miningPulse" class="absolute inset-0 border-4 border-indigo-500 rounded-full animate-ping opacity-0"></div>
-<span id="mineTimer" class="text-4xl font-black text-indigo-400">0.20</span>
-</div>
-<button id="mineBtn" onclick="processMining()" class="btn-primary w-full py-5 uppercase text-xs tracking-widest">Initialize Node</button>
-<p id="timerLabel" style="font-size:12px; color:#888;">Ready for extraction</p>
-</div>
-</div>
-
-<div id="page-profile" class="page space-y-4">
-<button onclick="openWP()" class="btn-primary w-full py-3 uppercase text-xs tracking-widest mb-2">📄 Read Technical White Paper</button>
-
-<div class="glass p-6 space-y-4 border-t-4 border-indigo-500">
-<h3 style="font-size:10px; color:#6366f1;">Secure Transfer</h3>
-<input id="p2pTarget" type="text" placeholder="Receiver UID">
-<input id="p2pAmount" type="number" placeholder="Amount (Min 10)">
-<button onclick="processP2P()" class="btn-primary w-full py-2 text-xs uppercase font-bold">Execute P2P</button>
-</div>
-
-<div class="glass p-6">
-<h3 style="font-size:10px; color:#6366f1;">My Referral</h3>
-<input id="refLink" readonly>
-</div>
-
-<div class="glass p-6 space-y-4">
-<h3 style="font-size:10px; color:#6366f1;">Support Hub</h3>
-<div id="chatBox" style="height:100px; overflow-y:auto;"></div>
-<div class="flex gap-2">
-<input id="chatInp" type="text" placeholder="Message...">
-<button onclick="sendMsg()" class="btn-primary px-3 text-[10px] font-bold">SEND</button>
-</div>
-</div>
-
-<button onclick="logout()" style="width:100%; color:red; font-weight:bold; padding:10px;">Terminate Session</button>
-</div>
-
-<div id="page-admin" class="page space-y-6">
-<div class="glass p-6 space-y-4">
-<h2 style="font-size:10px; color:#6366f1;">Broadcast Manager</h2>
-<textarea id="adminAnnInp" placeholder="Announcement text..." style="width:100%;height:60px;"></textarea>
-<button onclick="postAnnouncement()" class="btn-primary w-full py-2 text-xs uppercase font-bold">Post Update</button>
-</div>
-<div id="adminChatHub"></div>
-</div>
-
-<!-- Nav -->
-<nav class="fixed bottom:6px; left:50%; transform:translateX(-50%); width:90%; max-width:400px; display:flex; justify-content:space-around; padding:10px; background:rgba(255,255,255,0.05); border-radius:20px;">
-<button onclick="switchTab('home', this)" class="nav-item nav-active">⚡<br>Mine</button>
-<button onclick="switchTab('profile', this)" class="nav-item">💼<br>Asset</button>
-<button id="adminTab" onclick="switchTab('admin', this)" class="nav-item" style="display:none;">⚙️<br>Admin</button>
-</nav>
 
 <script>
-const API = "https://script.google.com/macros/s/AKfycbzJK41PueHcl5QVMdMU4mp9vuDkEPMnMRbuC5x_vaSbpzRCnI4OaER5-kTnZkTZ4wuCXQ/exec";
-let user = JSON.parse(localStorage.getItem('rida_user'));
-let mineInterval = null;
+const API_URL = "https://script.google.com/macros/s/AKfycbzJK41PueHcl5QVMdMU4mp9vuDkEPMnMRbuC5x_vaSbpzRCnI4OaER5-kTnZkTZ4wuCXQ/exec";
+let currentUser = null;
 
-window.onload = ()=>{
-  if(user){ sync(); setInterval(sync,30000); }
-  else { document.getElementById('authPage').classList.remove('hidden'); }
+function callAPI(action, payload){
+  return new Promise((resolve)=>{
+    const cb = "cb"+Date.now();
+    window[cb] = function(res){ resolve(res); delete window[cb]; }
+    const url = `${API_URL}?action=${action}&payload=${encodeURIComponent(JSON.stringify(payload))}&callback=${cb}`;
+    const s = document.createElement("script");
+    s.src = url;
+    document.body.appendChild(s);
+    s.onload = ()=>document.body.removeChild(s);
+  });
+}
+
+// Login/Register
+document.getElementById("authBtn").onclick = async ()=>{
+  const email = document.getElementById("uEmail").value.trim();
+  const pass = document.getElementById("uPass").value.trim();
+  const name = document.getElementById("uName").value.trim();
+  let res;
+  if(name) res = await callAPI("register",{email, pass, name});
+  else res = await callAPI("login",{email, pass});
+  if(res.success){
+    currentUser = res.user;
+    loadMainUI();
+  }else{
+    document.getElementById("authMsg").innerText = res.msg || "Error";
+  }
 };
 
-function handleAuth(){
-  const email = document.getElementById('uEmail').value.trim();
-  const pass = document.getElementById('uPass').value.trim();
-  const name = document.getElementById('uName').value.trim();
-  const isReg = !document.getElementById('regInputs').classList.contains('hidden');
-  if(!email||!pass||(isReg&&!name)) return alert("All fields required.");
-  document.getElementById('authBtn').disabled=true;
-  document.getElementById('authBtn').innerText="Validating...";
-  call(isReg?'register':'login',{email,pass,name},(res)=>{
-    document.getElementById('authBtn').disabled=false;
-    document.getElementById('authBtn').innerText="Connect Node";
-    if(res.success){
-      if(isReg){ alert("Identity secured, login now."); toggleAuth(); }
-      else { user=res.user; localStorage.setItem('rida_user',JSON.stringify(user)); sync(); }
-    } else alert(res.msg||"Authentication failed");
-  });
+function loadMainUI(){
+  document.getElementById("authPage").style.display="none";
+  document.getElementById("mainApp").style.display="block";
+  document.getElementById("userName").innerText = currentUser.name;
+  document.getElementById("userEmail").innerText = currentUser.email;
+  document.getElementById("userRole").innerText = currentUser.role;
+  document.getElementById("userBal").innerText = currentUser.bal;
+  loadAnnouncements();
 }
 
-function sync(){
-  if(!user) return;
-  call('sync',{uid:user.uid},(res)=>{
-    if(res.success){
-      user=res.user; localStorage.setItem('rida_user',JSON.stringify(user));
-      renderUI();
-    } else logout();
-  });
+// Mining
+document.getElementById("startMine").onclick = async ()=>{
+  if(!currentUser) return;
+  const res = await callAPI("startMining",{uid:currentUser.uid});
+  if(res.success){
+    currentUser.bal = parseFloat(currentUser.bal)+0.2;
+    document.getElementById("userBal").innerText = currentUser.bal;
+    alert("Mining successful +0.2 RIDA");
+  }
+};
+
+// P2P
+document.getElementById("sendP2P").onclick = async ()=>{
+  const to = document.getElementById("p2pTo").value.trim();
+  const amt = parseFloat(document.getElementById("p2pAmount").value);
+  if(!to||!amt){alert("Invalid");return;}
+  const res = await callAPI("p2pTransfer",{from:currentUser.uid, to, amount:amt});
+  if(res.success){
+    currentUser.bal -= amt;
+    document.getElementById("userBal").innerText = currentUser.bal;
+    alert("Transfer successful");
+  }else alert(res.msg);
+};
+
+// Announcements
+async function loadAnnouncements(){
+  const res = await callAPI("sync",{uid:currentUser.uid});
+  if(res.success) document.getElementById("announcements").innerText = "Node synced successfully.";
 }
 
-function renderUI(){
-  document.getElementById('authPage').classList.add('hidden');
-  document.getElementById('mainApp').classList.remove('hidden');
-  document.getElementById('viewName').innerText=user.name;
-  document.getElementById('viewUid').innerText=user.uid;
-  document.getElementById('viewBal').innerText=parseFloat(user.bal||0).toFixed(2);
-  document.getElementById('refLink').value=`${window.location.origin}?ref=${user.uid}`;
-  const badge=document.getElementById('viewStatus');
-  if(String(user.verified).toUpperCase()==="TRUE"){ badge.className="badge-v"; badge.innerText="VERIFIED"; }
-  else{ badge.className="badge-u"; badge.innerText="UNVERIFIED"; }
-  if(user.role==="ADMIN") document.getElementById('adminTab').style.display="block";
-  checkMiningStatus();
-}
-
-function toggleAuth(){ document.getElementById('regInputs').classList.toggle('hidden'); }
-
-function switchTab(tab,el){
-  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  document.getElementById('page-'+tab).classList.add('active');
-  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('nav-active'));
-  el.classList.add('nav-active');
-}
-
-function call(action,payload,callback){
-  const cb='cb_'+Math.floor(Math.random()*10000);
-  window[cb]=(d)=>{ delete window[cb]; document.body.removeChild(s); callback(d); };
-  const s=document.createElement('script');
-  s.src=`${API}?callback=${cb}&action=${action}&payload=${encodeURIComponent(JSON.stringify(payload))}`;
-  document.body.appendChild(s);
-}
-
-// Mining, P2P, Admin, Chat functions remain same as previous working code...
+// Logout
+document.getElementById("logoutBtn").onclick = ()=>{
+  currentUser = null;
+  document.getElementById("mainApp").style.display="none";
+  document.getElementById("authPage").style.display="block";
+};
 </script>
 </body>
 </html>
