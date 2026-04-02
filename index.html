@@ -3,221 +3,177 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>RIDA OS | MASTER</title>
+<title>RIDA OS | Advanced</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://unpkg.com/lucide@latest"></script>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
-body { font-family: 'Plus Jakarta Sans', sans-serif; background: #010409; color: white; margin: 0; -webkit-tap-highlight-color: transparent; }
-.glass { background: rgba(13, 17, 23, 0.9); backdrop-filter: blur(25px); border: 1px solid rgba(255,255,255,0.05); }
-.hidden { display: none !important; }
-.button-glow { box-shadow: 0 0 10px rgba(59,130,246,0.5); }
+body { font-family: 'Plus Jakarta Sans', sans-serif; background:#010409; color:white; margin:0; -webkit-tap-highlight-color:transparent; }
+.glass { background: rgba(13,17,23,0.9); backdrop-filter: blur(25px); border:1px solid rgba(255,255,255,0.05); }
+.hidden { display:none !important; }
+button:disabled { cursor:not-allowed; opacity:0.6; }
 </style>
 </head>
 <body class="pb-10">
 
-<!-- Login/Register View -->
+<!-- Login/Register -->
 <div id="loginView" class="min-h-screen flex items-center justify-center p-6">
-  <div class="glass w-full max-w-sm p-10 rounded-[3rem] text-center border-t border-white/10 shadow-2xl space-y-4">
-    <h1 class="text-5xl font-black italic text-blue-500 mb-2">RIDA</h1>
-    <p class="text-[8px] font-black opacity-30 uppercase tracking-[0.5em] mb-6">Neural Link v32.0</p>
-    <input type="text" id="name" class="w-full bg-white/5 p-4 rounded-2xl border border-white/5 outline-none text-sm focus:border-blue-500 transition-all" placeholder="Full Name">
-    <input type="email" id="email" class="w-full bg-white/5 p-4 rounded-2xl border border-white/5 outline-none text-sm focus:border-blue-500 transition-all" placeholder="Email">
-    <input type="password" id="pass" class="w-full bg-white/5 p-4 rounded-2xl border border-white/5 outline-none text-sm focus:border-blue-500 transition-all" placeholder="Password">
-    <div class="flex space-x-2 justify-center">
-      <button onclick="handleLogin()" class="w-1/2 bg-blue-600 py-3 rounded-2xl font-black uppercase text-[10px] tracking-widest shadow-xl active:scale-95 transition-all">Login</button>
-      <button onclick="handleRegister()" class="w-1/2 bg-green-600 py-3 rounded-2xl font-black uppercase text-[10px] tracking-widest shadow-xl active:scale-95 transition-all">Register</button>
-    </div>
-  </div>
+<div class="glass w-full max-w-sm p-10 rounded-[3.5rem] text-center border-t border-white/10 shadow-2xl">
+<h1 class="text-5xl font-black italic text-blue-500 mb-2">RIDA</h1>
+<p class="text-[8px] font-black opacity-30 uppercase tracking-[0.5em] mb-12">Neural Link v33.0</p>
+<div class="space-y-4">
+<input type="email" id="email" class="w-full bg-white/5 p-5 rounded-2xl border border-white/5 outline-none text-sm focus:border-blue-500 transition-all" placeholder="Email Address">
+<input type="password" id="pass" class="w-full bg-white/5 p-5 rounded-2xl border border-white/5 outline-none text-sm focus:border-blue-500 transition-all" placeholder="Password">
+<input type="text" id="name" class="w-full bg-white/5 p-5 rounded-2xl border border-white/5 outline-none text-sm focus:border-blue-500 transition-all" placeholder="Name (for register)">
+<div class="flex space-x-2">
+<button onclick="handleLogin()" class="flex-1 bg-blue-600 py-4 rounded-2xl font-black uppercase text-[10px] tracking-widest shadow-xl active:scale-95 transition-all">Login</button>
+<button onclick="handleRegister()" class="flex-1 bg-green-600 py-4 rounded-2xl font-black uppercase text-[10px] tracking-widest shadow-xl active:scale-95 transition-all">Register</button>
+</div>
+</div>
+</div>
 </div>
 
 <!-- Admin Panel -->
 <div id="adminPanel" class="hidden p-6 space-y-6">
-  <header class="flex justify-between items-center glass p-6 rounded-[2rem] button-glow">
-    <div>
-      <h2 class="text-xl font-black text-blue-500 italic uppercase">Admin Command Center</h2>
-      <p class="text-[8px] opacity-40 font-bold tracking-widest">Master Node Status: Active</p>
-    </div>
-    <button onclick="logout()" class="p-3 bg-red-500/10 rounded-2xl text-red-500"><i data-lucide="power"></i></button>
-  </header>
+<header class="flex justify-between items-center glass p-6 rounded-[2.5rem] border border-white/10">
+<div>
+<h2 class="text-xl font-black text-blue-500 italic uppercase">Command Center</h2>
+<p class="text-[8px] opacity-40 font-bold tracking-widest">Master Node Status: Active</p>
+</div>
+<button onclick="logout()" class="p-3 bg-red-500/10 rounded-2xl text-red-500"><i data-lucide="power"></i></button>
+</header>
 
-  <button onclick="fetchRegistry()" class="w-full bg-blue-600 py-4 rounded-2xl font-black uppercase text-xs tracking-widest shadow-lg active:ring-2 ring-blue-400 transition-all">Sync User Registry</button>
-
-  <div class="glass rounded-[2rem] overflow-hidden border border-white/5">
-    <div class="p-4 border-b border-white/5 bg-white/5 text-[10px] font-black uppercase tracking-widest opacity-50">Global User Database</div>
-    <div class="overflow-x-auto">
-      <table class="w-full text-left text-[11px]">
-        <thead class="bg-black/20 text-slate-500 uppercase font-bold">
-          <tr><th class="p-4">UID / Email</th><th class="p-4">Balance</th><th class="p-4 text-right">Action</th></tr>
-        </thead>
-        <tbody id="registryBody" class="divide-y divide-white/5">
-          <tr><td colspan="3" class="p-10 text-center opacity-30 italic">Registry Pending Sync...</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-
-  <div class="glass p-4 rounded-[2rem] space-y-3">
-    <h3 class="font-black text-blue-400 text-sm uppercase">Broadcast Announcement</h3>
-    <textarea id="announcementText" class="w-full p-3 rounded-xl bg-white/5 text-sm outline-none" placeholder="Enter message"></textarea>
-    <button onclick="postAnnouncement()" class="w-full bg-purple-600 py-3 rounded-2xl font-black uppercase text-xs tracking-widest shadow-xl active:scale-95 transition-all">Post</button>
-  </div>
+<div>
+<input type="text" id="announcementText" placeholder="Broadcast announcement..." class="w-full p-4 rounded-xl bg-white/5 border border-white/10 mb-2">
+<button onclick="postAnnouncement()" class="w-full py-4 bg-blue-600 rounded-2xl font-black uppercase text-[10px] tracking-widest shadow-xl">Post Announcement</button>
 </div>
 
-<!-- User Dashboard -->
-<div id="userApp" class="hidden p-6 space-y-6">
-  <header class="p-6 flex justify-between items-center glass rounded-b-[2rem] button-glow">
-    <h2 class="text-xl font-black italic">RIDA <span class="text-blue-500 text-sm">MINER</span></h2>
-    <button onclick="logout()" class="p-3 bg-white/5 rounded-2xl text-slate-400"><i data-lucide="log-out"></i></button>
-  </header>
+<div class="glass rounded-[2rem] overflow-hidden border border-white/5">
+<div class="p-5 border-b border-white/5 bg-white/5 text-[10px] font-black uppercase tracking-widest opacity-50">Global User Database</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left text-[11px]">
+<thead class="bg-black/20 text-slate-500 uppercase font-bold">
+<tr><th class="p-4">Node / ID</th><th class="p-4">Balance</th><th class="p-4 text-right">Action</th></tr>
+</thead>
+<tbody id="registryBody" class="divide-y divide-white/5">
+<tr><td colspan="3" class="p-10 text-center opacity-30 italic">Registry Pending Sync...</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
 
-  <main class="p-6 text-center space-y-6">
-    <div class="glass p-10 rounded-[3rem] border-t border-white/10 mt-6">
-      <p class="text-[10px] opacity-30 uppercase mb-2">Network Yield</p>
-      <h2 class="text-5xl font-black mb-6 tracking-tighter"><span id="uBal">0.000000</span></h2>
-      <button id="mineBtn" onclick="startMining()" class="w-full py-4 rounded-3xl bg-blue-600/50 font-black uppercase text-[10px] tracking-widest shadow-xl transition-all">Start Mining</button>
-      <p id="mineMsg" class="text-[8px] opacity-40 mt-2"></p>
-    </div>
-  </main>
+<!-- User App -->
+<div id="userApp" class="hidden">
+<header class="p-6 flex justify-between items-center glass rounded-b-[2.5rem]">
+<h2 class="text-xl font-black italic">RIDA <span class="text-blue-500 text-sm">MINER</span></h2>
+<button onclick="logout()" class="p-3 bg-white/5 rounded-2xl text-slate-400"><i data-lucide="log-out"></i></button>
+</header>
+<main class="p-6 text-center space-y-6">
+<div class="glass p-12 rounded-[4rem] border-t border-white/10 mt-10">
+<p class="text-[10px] opacity-30 uppercase mb-2">Network Yield</p>
+<h2 class="text-5xl font-black mb-10 tracking-tighter"><span id="uBal">0.000000</span></h2>
+<button id="mineBtn" onclick="startMining()" class="w-full py-6 rounded-3xl bg-blue-600 font-black uppercase text-[10px] tracking-widest shadow-xl">Start Mining</button>
+</div>
+
+<div class="glass p-6 rounded-[2rem] border-t border-white/10 mt-6 space-y-4">
+<h3 class="text-[10px] opacity-50 uppercase tracking-widest mb-2">P2P Transfer</h3>
+<input type="text" id="toUID" placeholder="Recipient UID" class="w-full p-3 rounded-xl bg-white/5 border border-white/10">
+<input type="number" id="amount" placeholder="Amount" class="w-full p-3 rounded-xl bg-white/5 border border-white/10">
+<button onclick="p2pTransfer()" class="w-full py-3 bg-green-600 rounded-xl font-black uppercase text-[10px] tracking-widest shadow-xl">Send</button>
+</div>
+</main>
 </div>
 
 <script>
-const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbztmx9pPM_9pmlNpxQaYjxevPCQLUWzg-8njG-bsvC7CiPplOGqSO3h057i0x0Y0BZe/exec";
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwt0Pf48R674i8pYMCUZqIzIVy7AcmlWWKxM89yR7M54Up7-DqwaKXaBCvd21OKGpiWIBg/exec";
 
-// --- Session Management ---
-function saveSession(data) { localStorage.setItem('rida_session', JSON.stringify(data)); }
-function getSession() { return JSON.parse(localStorage.getItem('rida_session')); }
-function logout() { localStorage.clear(); location.reload(); }
+let session = JSON.parse(localStorage.getItem('rida_session')) || null;
 
-// --- Render Views ---
-function renderView() {
-  const session = getSession();
-  document.getElementById('loginView').classList.add('hidden');
-  document.getElementById('adminPanel').classList.add('hidden');
-  document.getElementById('userApp').classList.add('hidden');
+function renderView(){
+document.getElementById('loginView').classList.add('hidden');
+document.getElementById('adminPanel').classList.add('hidden');
+document.getElementById('userApp').classList.add('hidden');
 
-  if(!session) { document.getElementById('loginView').classList.remove('hidden'); }
-  else if(session.role === 'admin') { document.getElementById('adminPanel').classList.remove('hidden'); fetchRegistry(); }
-  else { document.getElementById('userApp').classList.remove('hidden'); updateBalance(session.balance); }
-  lucide.createIcons();
+if(!session){ document.getElementById('loginView').classList.remove('hidden'); }
+else if(session.role==='ADMIN'){ document.getElementById('adminPanel').classList.remove('hidden'); fetchRegistry(); }
+else{ document.getElementById('userApp').classList.remove('hidden'); document.getElementById('uBal').innerText = session.bal.toFixed(6); }
+
+lucide.createIcons();
 }
 
-// --- Update balance ---
-function updateBalance(val) { document.getElementById('uBal').innerText = parseFloat(val||0).toFixed(6); }
+async function handleRegister(){
+const email = document.getElementById('email').value.trim();
+const pass = document.getElementById('pass').value.trim();
+const name = document.getElementById('name').value.trim();
+if(!email || !pass || !name) return alert("All fields required.");
 
-// --- Login/Register ---
-async function handleLogin() {
-  const email = document.getElementById('email').value.trim();
-  const pass = document.getElementById('pass').value.trim();
-  if(!email || !pass) return alert("All fields required.");
-
-  const params = new URLSearchParams();
-  params.append('action','login');
-  params.append('payload', JSON.stringify({ email, pass }));
-
-  try {
-    const res = await fetch(`${WEB_APP_URL}?${params}`);
-    const data = await res.json();
-    if(!data.success) return alert(data.msg);
-
-    saveSession(data.user);
-    renderView();
-  } catch(e) { alert("Server error: "+e.message); }
+try{
+let res = await fetch(`${WEB_APP_URL}?action=register&payload=${encodeURIComponent(JSON.stringify({email,pass,name}))}`);
+let data = await res.json();
+if(data.success){ alert("Registered! UID: "+data.uid); session={email,role:'USER',bal:0,uid:data.uid}; localStorage.setItem('rida_session', JSON.stringify(session)); renderView();}
+else alert(data.msg);
+}catch(e){alert("Error:"+e.message);}
 }
 
-async function handleRegister() {
-  const name = document.getElementById('name').value.trim();
-  const email = document.getElementById('email').value.trim();
-  const pass = document.getElementById('pass').value.trim();
-  if(!name || !email || !pass) return alert("All fields required.");
-
-  const params = new URLSearchParams();
-  params.append('action','register');
-  params.append('payload', JSON.stringify({ name,email,pass }));
-
-  try {
-    const res = await fetch(`${WEB_APP_URL}?${params}`);
-    const data = await res.json();
-    if(!data.success) return alert(data.msg);
-    alert("Registration successful! You can login now.");
-  } catch(e) { alert("Server error: "+e.message); }
+async function handleLogin(){
+const email = document.getElementById('email').value.trim();
+const pass = document.getElementById('pass').value.trim();
+if(!email || !pass) return alert("All fields required.");
+try{
+let res = await fetch(`${WEB_APP_URL}?action=login&payload=${encodeURIComponent(JSON.stringify({email,pass}))}`);
+let data = await res.json();
+if(data.success){ session = data.user; localStorage.setItem('rida_session', JSON.stringify(session)); renderView(); }
+else alert(data.msg);
+}catch(e){alert("Error:"+e.message);}
 }
 
-// --- Mining with cooldown ---
-let miningActive = false;
-async function startMining() {
-  if(miningActive) return alert("Mining in progress... wait!");
-  miningActive = true;
-  document.getElementById('mineBtn').innerText="Mining Active...";
-  document.getElementById('mineMsg').innerText="Rewards 0.2 Rida";
-
-  const session = getSession();
-  const params = new URLSearchParams();
-  params.append('action','startMining');
-  params.append('payload', JSON.stringify({ uid: session.uid }));
-
-  try {
-    const res = await fetch(`${WEB_APP_URL}?${params}`);
-    const data = await res.json();
-    if(!data.success) return alert(data.msg);
-    session.balance = parseFloat(session.balance || 0)+0.2;
-    saveSession(session);
-    updateBalance(session.balance);
-  } catch(e){ alert("Mining failed: "+e.message); }
-
-  setTimeout(()=>{
-    miningActive=false;
-    document.getElementById('mineBtn').innerText="Start Mining";
-    document.getElementById('mineMsg').innerText="";
-  }, 24*60*60*1000); // 24 hours cooldown
+async function startMining(){
+if(!session || session.role!=='USER') return;
+const btn = document.getElementById('mineBtn'); btn.disabled=true;
+try{
+let res = await fetch(`${WEB_APP_URL}?action=startMining&payload=${encodeURIComponent(JSON.stringify({uid:session.uid}))}`);
+let data = await res.json();
+if(data.success){ session.bal=data.newBalance; localStorage.setItem('rida_session', JSON.stringify(session)); document.getElementById('uBal').innerText=session.bal.toFixed(6); alert("Mined +0.2 RIDA"); }
+else alert(data.msg);
+}catch(e){alert("Error:"+e.message);}
+finally{btn.disabled=false;}
 }
 
-// --- Admin Functions ---
-async function fetchRegistry() {
-  const body = document.getElementById('registryBody');
-  body.innerHTML='<tr><td colspan="3" class="p-4 text-center opacity-30 italic">Syncing...</td></tr>';
-  const params = new URLSearchParams();
-  params.append('action','sync');
-
-  try {
-    const res = await fetch(`${WEB_APP_URL}?${params}`);
-    const data = await res.json();
-    if(!data.success){ body.innerHTML='<tr><td colspan="3" class="p-4 text-center opacity-30 italic">Empty</td></tr>'; return; }
-    // assume data.users = array of all users
-    const users = data.users || [];
-    body.innerHTML = users.map(u=>`
-      <tr class="hover:bg-white/5 transition-colors">
-        <td class="p-2 font-bold text-blue-400">${u.uid}<br><span class="text-[8px] opacity-30 lowercase">${u.email}</span></td>
-        <td class="p-2">${u.bal || 0}</td>
-        <td class="p-2 text-right">
-          <button onclick="verifyUser('${u.uid}')" class="bg-blue-600 px-2 py-1 rounded-xl text-[9px] font-black uppercase shadow active:scale-95 transition-all">Verify</button>
-        </td>
-      </tr>
-    `).join('');
-  } catch(e){ body.innerHTML='<tr><td colspan="3" class="text-red-500 p-4">Sync Failed</td></tr>'; }
+async function p2pTransfer(){
+const to = document.getElementById('toUID').value.trim();
+const amount = parseFloat(document.getElementById('amount').value);
+if(!to || !amount) return alert("Recipient and amount required.");
+try{
+let res = await fetch(`${WEB_APP_URL}?action=p2pTransfer&payload=${encodeURIComponent(JSON.stringify({from:session.uid,to,amount}))}`);
+let data = await res.json();
+if(data.success){ alert("Transfer complete!"); startMining(); } 
+else alert(data.msg);
+}catch(e){alert("Error:"+e.message);}
 }
 
-async function postAnnouncement() {
-  const text = document.getElementById('announcementText').value.trim();
-  if(!text) return alert("Enter message");
-  const session = getSession();
-  const params = new URLSearchParams();
-  params.append('action','postAnnouncement');
-  params.append('payload', JSON.stringify({ uid: session.uid, text }));
-
-  try {
-    const res = await fetch(`${WEB_APP_URL}?${params}`);
-    const data = await res.json();
-    if(!data.success) return alert(data.msg);
-    alert("Announcement posted!");
-    document.getElementById('announcementText').value="";
-  } catch(e){ alert("Failed: "+e.message); }
+async function fetchRegistry(){
+const body=document.getElementById('registryBody'); body.innerHTML='<tr><td colspan="3" class="p-10 text-center opacity-30 italic">Loading...</td></tr>';
+try{
+let res=await fetch(`${WEB_APP_URL}?action=sync&payload=${encodeURIComponent(JSON.stringify({uid:session.uid}))}`);
+let data=await res.json();
+body.innerHTML=`<tr><td class="p-4 font-bold text-blue-400">${session.uid}</td><td class="p-4">${session.bal.toFixed(6)}</td><td class="p-4 text-right">---</td></tr>`;
+}catch(e){body.innerHTML='<tr><td colspan="3" class="p-10 text-center text-red-500">Failed</td></tr>';}
 }
 
-// Placeholder for verify user
-function verifyUser(uid){ alert("Verification request sent for UID: "+uid); }
+async function postAnnouncement(){
+const text=document.getElementById('announcementText').value.trim();
+if(!text) return alert("Text required");
+try{
+let res=await fetch(`${WEB_APP_URL}?action=postAnnouncement&payload=${encodeURIComponent(JSON.stringify({uid:session.uid,text}))}`);
+let data=await res.json();
+if(data.success){ alert("Announcement posted!"); document.getElementById('announcementText').value=''; }
+else alert(data.msg);
+}catch(e){alert("Error:"+e.message);}
+}
 
-window.onload = renderView;
+function logout(){ localStorage.removeItem('rida_session'); session=null; renderView(); }
+
+window.onload=renderView;
 </script>
 </body>
 </html>
