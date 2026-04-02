@@ -4,202 +4,220 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>RIDA Network</title>
-
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;700;900&display=swap" rel="stylesheet">
-
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <style>
-body {margin:0;background:#050508;font-family:'Plus Jakarta Sans';color:#fff;}
-.container {max-width:420px;margin:auto;padding:16px;}
-.glass {background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:18px;padding:16px;}
-input,textarea {width:100%;padding:12px;border-radius:10px;border:1px solid #222;background:#0f111a;color:#fff;margin-top:8px;}
-button {width:100%;padding:14px;margin-top:10px;border:none;border-radius:12px;background:linear-gradient(135deg,#6366f1,#a855f7);color:white;font-weight:700;}
-.hidden{display:none;}
-.nav{position:fixed;bottom:10px;left:50%;transform:translateX(-50%);width:90%;max-width:420px;display:flex;justify-content:space-around;}
+  body { margin: 0; font-family: 'Plus Jakarta Sans', sans-serif; background: #050508; color: #fff; }
+  .glass { background: rgba(255,255,255,0.03); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.08); border-radius: 24px; }
+  .btn-primary { background: linear-gradient(135deg,#6366f1,#a855f7); border-radius:16px; font-weight:700; transition:0.2s; cursor:pointer; color:white; border:none; }
+  .btn-primary:active { transform: scale(0.95); }
+  .btn-primary:disabled { opacity:0.5; filter:grayscale(1); cursor:not-allowed; }
+  .page { display:none; padding-bottom:120px; animation: fadeIn 0.3s ease-in-out; }
+  .active { display:block; }
+  @keyframes fadeIn { from{opacity:0} to{opacity:1} }
+  .nav-item { color:#64748b; font-size:10px; font-weight:800; text-transform:uppercase; cursor:pointer; }
+  .nav-active { color:#6366f1; }
+  .badge-v { background:rgba(34,197,94,0.1); color:#22c55e; border:1px solid rgba(34,197,94,0.2); font-size:9px; padding:2px 8px; border-radius:6px; }
+  .badge-u { background:rgba(239,68,68,0.1); color:#ef4444; border:1px solid rgba(239,68,68,0.2); font-size:9px; padding:2px 8px; border-radius:6px; }
+  input, textarea { outline:none; background:#111; color:#fff; border:1px solid #555; border-radius:12px; padding:12px; width:100%; }
+  #wpModal { display:none; position:fixed; inset:0; z-index:100; background:rgba(0,0,0,0.9); padding:20px; align-items:center; justify-content:center; }
+  .wp-content { max-width:500px; width:100%; max-height:80vh; overflow-y:auto; background:#0f111a; border:1px solid #1e293b; padding:25px; border-radius:30px; }
+  @keyframes ping { 0% { transform: scale(0.9); opacity:1; } 50% { transform: scale(1.2); opacity:0.3; } 100% { transform: scale(0.9); opacity:1; } }
 </style>
 </head>
-
 <body>
 
-<div class="container">
-
-<!-- AUTH -->
-<div id="auth">
-<h2>RIDA Network</h2>
-
-<div id="regBox" class="hidden">
-<input id="name" placeholder="Full Name">
+<!-- White Paper Modal -->
+<div id="wpModal" onclick="closeWP()">
+  <div class="wp-content glass" onclick="event.stopPropagation()">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+      <h2 style="text-transform:uppercase;color:#6366f1;">White Paper</h2>
+      <button onclick="closeWP()" style="background:#111;padding:5px 10px;border-radius:8px;color:white;">Close</button>
+    </div>
+    <div style="font-size:12px;line-height:1.5;color:#ccc;">
+      <p><strong>1. Protocol</strong>: Proof-of-Presence (PoP) to democratize digital asset generation.</p>
+      <p><strong>2. Mining</strong>: Nodes generate 0.2 RIDA per 24h cycle. Manual initialization required.</p>
+      <p><strong>3. Security</strong>: Anti-sybil with manual verification for P2P transfers.</p>
+      <p style="text-align:center;font-style:italic;opacity:0.4;margin-top:16px;">© 2026 RIDA NETWORK</p>
+    </div>
+  </div>
 </div>
 
-<input id="email" placeholder="Email">
-<input id="pass" type="password" placeholder="Password">
-
-<button onclick="auth()">Continue</button>
-<p onclick="toggle()">Switch Mode</p>
+<!-- Auth Page -->
+<div id="authPage" style="min-height:100vh;display:flex;justify-content:center;align-items:center;">
+  <div style="width:100%;max-width:400px;padding:24px;">
+    <h1 style="text-align:center;font-size:48px;margin-bottom:24px;">RIDA<span style="color:#6366f1;">.</span></h1>
+    <div class="glass" style="padding:24px;display:flex;flex-direction:column;gap:16px;">
+      <div id="regInputs" style="display:none;flex-direction:column;gap:12px;">
+        <input id="uName" placeholder="Full Name">
+        <input id="uRef" placeholder="Referral Code (Optional)">
+      </div>
+      <input id="uEmail" type="email" placeholder="Email">
+      <input id="uPass" type="password" placeholder="Password">
+      <button id="authBtn" class="btn-primary" style="padding:12px;" onclick="handleAuth()">Connect Node</button>
+      <p id="toggleText" onclick="toggleAuth()" style="text-align:center;font-size:10px;color:#888;cursor:pointer;">New node? Create Identity</p>
+    </div>
+  </div>
 </div>
 
-<!-- APP -->
-<div id="app" class="hidden">
+<!-- Main App -->
+<div id="mainApp" style="max-width:400px;margin:0 auto;display:none;">
+  <header style="display:flex;justify-content:space-between;align-items:center;margin:16px 0;">
+    <div>
+      <h2 id="viewName"></h2>
+      <span id="viewStatus" class="badge-u"></span>
+      <p id="viewUid" style="font-size:10px;color:#6366f1;font-family:monospace;"></p>
+    </div>
+    <div style="text-align:right;">
+      <p id="viewBal" style="font-size:24px;font-weight:bold;">0.00</p>
+      <p style="font-size:10px;color:#888;text-transform:uppercase;">RIDA Asset</p>
+    </div>
+  </header>
 
-<div class="glass">
-<h3 id="username"></h3>
-<p>UID: <span id="uid"></span></p>
-<h2 id="balance"></h2>
-</div>
+  <!-- Pages -->
+  <div id="page-home" class="page active" style="display:block;">
+    <div class="glass" style="padding:16px;border-left:4px solid #6366f1;margin-bottom:16px;">
+      <span style="font-size:10px;color:#6366f1;">Network Broadcast</span>
+      <p id="annText" style="font-size:12px;color:#ccc;margin-top:4px;">Syncing node data...</p>
+    </div>
 
-<div id="home" class="page">
-<div class="glass"><p id="announcement"></p></div>
-<button onclick="startMining()">Start Mining</button>
-<button onclick="claim()">Claim</button>
-</div>
+    <div class="glass" style="padding:16px;text-align:center;">
+      <div style="width:150px;height:150px;border:4px solid #6366f1;margin:0 auto;border-radius:50%;position:relative;">
+        <div id="miningPulse" style="position:absolute;inset:0;border:4px solid #6366f1;border-radius:50%;animation:ping 1.5s infinite;"></div>
+        <span id="mineTimer" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:bold;color:#6366f1;">0.20</span>
+      </div>
+      <button id="mineBtn" class="btn-primary" style="margin-top:16px;padding:12px;width:100%;" onclick="processMining()">Initialize Node</button>
+      <p id="timerLabel" style="font-size:10px;color:#888;margin-top:8px;">Ready for extraction</p>
+    </div>
+  </div>
 
-<div id="profile" class="page hidden">
-<input id="to" placeholder="Receiver UID">
-<input id="amount" placeholder="Amount">
-<button onclick="transfer()">Send</button>
+  <div id="page-profile" class="page" style="padding:16px;display:none;">
+    <button onclick="openWP()" class="btn-primary" style="padding:8px;width:100%;margin-bottom:12px;font-size:10px;">📄 Read White Paper</button>
 
-<div id="chat"></div>
-<input id="msg">
-<button onclick="send()">Send</button>
+    <div class="glass" style="padding:16px;margin-bottom:12px;">
+      <h3 style="font-size:10px;color:#6366f1;">Secure Transfer</h3>
+      <input id="p2pTarget" placeholder="Receiver UID" style="margin-bottom:8px;">
+      <input id="p2pAmount" type="number" placeholder="Amount (Min 10)" style="margin-bottom:8px;">
+      <button onclick="processP2P()" class="btn-primary" style="width:100%;padding:8px;font-size:10px;">Execute P2P</button>
+    </div>
 
-<button onclick="logout()">Logout</button>
-</div>
+    <div class="glass" style="padding:16px;margin-bottom:12px;">
+      <h3 style="font-size:10px;color:#6366f1;">My Referral</h3>
+      <input id="refLink" readonly style="font-family:monospace;">
+    </div>
 
-<div id="admin" class="page hidden">
-<textarea id="annInput"></textarea>
-<button onclick="postAnn()">Post</button>
-<div id="adminChats"></div>
-</div>
+    <div class="glass" style="padding:16px;margin-bottom:12px;">
+      <h3 style="font-size:10px;color:#6366f1;">Support Hub</h3>
+      <div id="chatBox" style="height:120px;overflow-y:auto;font-size:10px;margin-bottom:8px;"></div>
+      <div style="display:flex;gap:8px;">
+        <input id="chatInp" placeholder="Message..." style="flex:1;font-size:10px;">
+        <button onclick="sendMsg()" class="btn-primary" style="padding:8px;font-size:10px;">SEND</button>
+      </div>
+    </div>
 
-</div>
+    <button onclick="logout()" style="width:100%;padding:12px;font-size:10px;color:red;">Terminate Session</button>
+  </div>
 
-<div class="nav hidden" id="nav">
-<button onclick="tab('home')">Home</button>
-<button onclick="tab('profile')">Profile</button>
-<button id="adminBtn" onclick="tab('admin')" class="hidden">Admin</button>
-</div>
+  <div id="page-admin" class="page" style="padding:16px;display:none;">
+    <div class="glass" style="padding:16px;margin-bottom:12px;">
+      <h2 style="font-size:10px;color:#6366f1;">Broadcast Manager</h2>
+      <textarea id="adminAnnInp" style="width:100%;height:60px;background:#111;color:#fff;border-radius:8px;border:1px solid #555;margin-bottom:8px;"></textarea>
+      <button onclick="postAnnouncement()" class="btn-primary" style="width:100%;padding:8px;font-size:10px;">Post Update</button>
+    </div>
+    <div id="adminChatHub" style="display:flex;flex-direction:column;gap:8px;"></div>
+  </div>
 
+  <!-- Bottom Navigation -->
+  <nav style="position:fixed;bottom:16px;left:50%;transform:translateX(-50%);width:90%;max-width:400px;display:flex;justify-content:space-around;align-items:center;background:rgba(255,255,255,0.03);backdrop-filter:blur(10px);padding:8px;border-radius:16px;">
+    <div class="nav-item nav-active" onclick="switchTab('home', this)">⚡<br>Mine</div>
+    <div class="nav-item" onclick="switchTab('profile', this)">💼<br>Asset</div>
+    <div id="adminTab" class="nav-item" style="display:none;" onclick="switchTab('admin', this)">⚙️<br>Admin</div>
+  </nav>
 </div>
 
 <script>
-const API="https://script.google.com/macros/s/AKfycbyiFwRP2P_jPMvntHypZv3RVuk0VTXED5EmTazozpQotmSiOTcIL-omEC9UUU6HmanN2w/exec";
+const API = "https://script.google.com/macros/s/AKfycbz7APY4Snz5w5h4ejTrz6IdcFeYDwmmorHH2dKlatYNJIYM3ob-UrNPTc1loG9XLJTbBQ/exec";
+let user = JSON.parse(localStorage.getItem('rida_v13_1'));
 
-let user=JSON.parse(localStorage.getItem("rida_user"));
-let isReg=false;
+window.onload = () => {
+  if(user) { sync(); setInterval(sync,30000); }
+  else document.getElementById('authPage').style.display='flex';
+};
 
-function toggle(){
-isReg=!isReg;
-document.getElementById("regBox").classList.toggle("hidden");
+function openWP(){ document.getElementById('wpModal').style.display='flex'; }
+function closeWP(){ document.getElementById('wpModal').style.display='none'; }
+function toggleAuth(){ 
+  let reg=document.getElementById('regInputs');
+  reg.style.display = reg.style.display==='flex'?'none':'flex';
 }
 
-function auth(){
-let email=document.getElementById("email").value;
-let pass=document.getElementById("pass").value;
-let name=document.getElementById("name").value;
+function handleAuth(){
+  const email=document.getElementById('uEmail').value.trim();
+  const pass=document.getElementById('uPass').value.trim();
+  const name=document.getElementById('uName').value.trim();
+  const isReg=!document.getElementById('regInputs').style.display.includes('none');
+  if(!email || !pass || (isReg && !name)) return alert("All fields required");
 
-call(isReg?"register":"login",{email,pass,name},res=>{
-if(res.success){
-user=res.user;
-localStorage.setItem("rida_user",JSON.stringify(user));
-init();
-}else alert(res.msg);
-});
-}
-
-function init(){
-document.getElementById("auth").style.display="none";
-document.getElementById("app").classList.remove("hidden");
-document.getElementById("nav").classList.remove("hidden");
-
-document.getElementById("username").innerText=user.name;
-document.getElementById("uid").innerText=user.uid;
-document.getElementById("balance").innerText=parseFloat(user.bal).toFixed(2);
-
-if(user.role==="ADMIN") document.getElementById("adminBtn").classList.remove("hidden");
-
-sync();
+  const btn=document.getElementById('authBtn'); btn.disabled=true; btn.innerText="Validating...";
+  call(isReg?'register':'login',{email,pass,name},res=>{
+    btn.disabled=false; btn.innerText="Connect Node";
+    if(res.success){
+      if(isReg){ alert("Identity Secured. Please Login."); toggleAuth(); }
+      else { user=res.user; localStorage.setItem('rida_v13_1',JSON.stringify(user)); sync(); }
+    } else alert(res.msg||"Authentication Failed");
+  });
 }
 
 function sync(){
-call("sync",{uid:user.uid,email:user.email},res=>{
-if(!res.success) return logout();
-
-user=res.user;
-localStorage.setItem("rida_user",JSON.stringify(user));
-
-document.getElementById("balance").innerText=parseFloat(user.bal).toFixed(2);
-
-if(res.announcements)
-document.getElementById("announcement").innerText=res.announcements[0][1];
-
-loadChat();
-if(user.role==="ADMIN") loadAdmin();
-});
+  if(!user) return;
+  call('sync',{email:user.email,uid:user.uid},res=>{
+    if(res.success){ user=res.user; localStorage.setItem('rida_v13_1',JSON.stringify(user)); renderUI(res); }
+    else logout();
+  });
 }
 
-function startMining(){call("startMining",{uid:user.uid},sync);}
-function claim(){call("claimMining",{uid:user.uid},sync);}
-
-function transfer(){
-call("p2pTransfer",{
-from:user.uid,
-to:document.getElementById("to").value,
-amount:document.getElementById("amount").value
-},sync);
+function renderUI(res){
+  document.getElementById('authPage').style.display='none';
+  document.getElementById('mainApp').style.display='block';
+  document.getElementById('viewName').innerText=user.name;
+  document.getElementById('viewUid').innerText=user.uid;
+  document.getElementById('viewBal').innerText=parseFloat(user.bal||0).toFixed(2);
+  document.getElementById('refLink').value=window.location.origin + window.location.pathname+"?ref="+user.uid;
+  let badge=document.getElementById('viewStatus');
+  if(String(user.verified).toUpperCase()==="TRUE"){ badge.className="badge-v"; badge.innerText="VERIFIED"; } else { badge.className="badge-u"; badge.innerText="UNVERIFIED"; }
+  if(user.role==="ADMIN") document.getElementById('adminTab').style.display='block';
+  document.getElementById('annText').innerText=(res.announcements&&res.announcements.length>0)?res.announcements[0][1]:"Syncing node data...";
 }
 
-function send(){
-call("sendMessage",{
-uid:user.uid,
-sender:user.name,
-text:document.getElementById("msg").value
-},()=>{
-document.getElementById("msg").value="";
-loadChat();
-});
+function switchTab(t,el){
+  document.querySelectorAll('.page').forEach(p=>p.style.display='none');
+  document.getElementById('page-'+t).style.display='block';
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('nav-active'));
+  el.classList.add('nav-active');
 }
 
-function loadChat(){
-call("getMessages",{uid:user.uid},res=>{
-document.getElementById("chat").innerHTML=
-res.history.map(m=>`<p>${m.sender}: ${m.text}</p>`).join("");
-});
+function call(action,payload,callback){
+  const cb='cb_'+Math.round(Math.random()*10000);
+  window[cb]=(d)=>{ delete window[cb]; document.body.removeChild(s); callback(d); };
+  const s=document.createElement('script');
+  s.src=`${API}?callback=${cb}&action=${action}&payload=${encodeURIComponent(JSON.stringify(payload))}`;
+  document.body.appendChild(s);
 }
 
-function loadAdmin(){
-call("getMessages",{isAdmin:true},res=>{
-document.getElementById("adminChats").innerHTML=
-res.history.map(m=>`<p>${m.uid}: ${m.text}</p>`).join("");
-});
+function logout(){ localStorage.clear(); location.reload(); }
+
+function processMining(){ call('startMining',{uid:user.uid},sync); }
+function processP2P(){ 
+  const t=document.getElementById('p2pTarget').value.trim();
+  const a=parseFloat(document.getElementById('p2pAmount').value);
+  if(!t||a<10)return alert("Min transfer 10 RIDA"); if(a>user.bal)return alert("Insufficient balance");
+  call('p2pTransfer',{from:user.uid,to:t,amount:a},res=>{ if(res.success){ alert("Transfer Successful"); sync(); } else alert(res.msg||"Error"); });
 }
 
-function postAnn(){
-call("adminAction",{
-type:"postAnnouncement",
-text:document.getElementById("annInput").value,
-uid:user.uid
-},sync);
+function postAnnouncement(){
+  const msg=document.getElementById('adminAnnInp').value.trim();
+  if(!msg) return alert("Enter message");
+  call('postAnnouncement',{uid:user.uid,text:msg},res=>{ alert("Broadcast Sent"); document.getElementById('adminAnnInp').value=""; sync(); });
 }
-
-function tab(t){
-document.querySelectorAll(".page").forEach(p=>p.classList.add("hidden"));
-document.getElementById(t).classList.remove("hidden");
-}
-
-function logout(){
-localStorage.clear();
-location.reload();
-}
-
-function call(action,payload,cb){
-const c="cb"+Math.random();
-window[c]=res=>{delete window[c];cb(res)};
-const s=document.createElement("script");
-s.src=`${API}?action=${action}&payload=${encodeURIComponent(JSON.stringify(payload))}&callback=${c}`;
-document.body.appendChild(s);
-}
-
-if(user) init();
 </script>
-
 </body>
 </html>
