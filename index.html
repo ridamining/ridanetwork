@@ -1,254 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RIDA Network</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;700;900&display=swap" rel="stylesheet">
+
+<style>
+body {
+  background: #050508;
+  color: #fff;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  margin:0;
+}
+
+.container {
+  max-width: 420px;
+  margin:auto;
+  padding:20px;
+}
+
+.glass {
+  background: rgba(255,255,255,0.03);
+  border:1px solid rgba(255,255,255,0.08);
+  border-radius:20px;
+  padding:20px;
+}
+
+input {
+  width:100%;
+  padding:12px;
+  margin-top:10px;
+  background:#111;
+  border:1px solid #333;
+  color:#fff;
+  border-radius:10px;
+}
+
+button {
+  width:100%;
+  padding:14px;
+  margin-top:15px;
+  background:#6366f1;
+  border:none;
+  color:white;
+  font-weight:bold;
+  border-radius:10px;
+  cursor:pointer;
+}
+
+.hidden { display:none; }
+.center { text-align:center; }
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<!-- AUTH -->
+<div id="authBox" class="glass">
+  <h2 class="center">RIDA Network</h2>
+
+  <div id="regFields" class="hidden">
+    <input id="name" placeholder="Full Name">
+  </div>
+
+  <input id="email" placeholder="Email">
+  <input id="pass" type="password" placeholder="Password">
+
+  <button onclick="auth()">Login / Register</button>
+
+  <p class="center" onclick="toggle()">Switch Mode</p>
+</div>
+
+<!-- APP -->
+<div id="app" class="hidden">
+
+  <div class="glass">
+    <h3 id="username"></h3>
+    <p>ID: <span id="uid"></span></p>
+    <h2 id="balance">0</h2>
+  </div>
+
+  <div class="glass">
+    <button onclick="mine()">Start Mining</button>
+    <button onclick="claim()">Claim Reward</button>
+  </div>
+
+  <div class="glass">
+    <input id="to" placeholder="Receiver UID">
+    <input id="amount" type="number" placeholder="Amount">
+    <button onclick="transfer()">Send</button>
+  </div>
+
+  <div class="glass">
+    <h4>Chat</h4>
+    <div id="chat" style="height:150px;overflow:auto;"></div>
+    <input id="msg">
+    <button onclick="send()">Send</button>
+  </div>
+
+  <button onclick="logout()">Logout</button>
+
+</div>
+
+</div>
+
 <script>
-const API = "https://script.google.com/macros/s/AKfycbxi-O3HM35ytPK_Hic8R5eJibliPih8b3gsNNvkU62Bk62n4npIAz9DZShx_ECpKATyVg/exec";
 
-let user = JSON.parse(localStorage.getItem('rida_v13_1'));
-let mineInterval = null;
+const API = "https://script.google.com/macros/s/AKfycbyiFwRP2P_jPMvntHypZv3RVuk0VTXED5EmTazozpQotmSiOTcIL-omEC9UUU6HmanN2w/exec";
 
-// ---------------- INIT ----------------
-window.onload = () => {
-    if (user) {
-        sync();
-        setInterval(sync, 30000);
-    } else {
-        document.getElementById('authPage').classList.remove('hidden');
-    }
-};
+let user = JSON.parse(localStorage.getItem("rida_user"));
 
-// ---------------- API ----------------
-function call(action, payload, callback) {
-    const cb = 'cb_' + Date.now();
+let isRegister = false;
 
-    window[cb] = (data) => {
-        delete window[cb];
-        script.remove();
-        callback(data);
-    };
-
-    const script = document.createElement('script');
-    script.src = `${API}?callback=${cb}&action=${action}&payload=${encodeURIComponent(JSON.stringify(payload))}`;
-
-    document.body.appendChild(script);
+function toggle(){
+  isRegister = !isRegister;
+  document.getElementById("regFields").classList.toggle("hidden");
 }
 
-// ---------------- SYNC ----------------
-function sync() {
-    if (!user) return;
+function auth(){
+  let email = document.getElementById("email").value;
+  let pass = document.getElementById("pass").value;
+  let name = document.getElementById("name").value;
 
-    call('sync', { email: user.email, uid: user.uid }, (res) => {
-        if (res.success) {
-            user = res.user;
-            localStorage.setItem('rida_v13_1', JSON.stringify(user));
-            renderUI(res);
-        } else logout();
-    });
+  call(isRegister ? "register" : "login", {email, pass, name}, (res)=>{
+    if(res.success){
+      user = res.user;
+      localStorage.setItem("rida_user", JSON.stringify(user));
+      loadApp();
+    } else {
+      alert(res.msg);
+    }
+  });
 }
 
-// ---------------- UI ----------------
-function renderUI(fullRes) {
-    document.getElementById('authPage').classList.add('hidden');
-    document.getElementById('mainApp').classList.remove('hidden');
+function loadApp(){
+  document.getElementById("authBox").classList.add("hidden");
+  document.getElementById("app").classList.remove("hidden");
 
-    document.getElementById('viewName').innerText = user.name;
-    document.getElementById('viewUid').innerText = user.uid;
-    document.getElementById('viewBal').innerText = Number(user.bal || 0).toFixed(2);
+  document.getElementById("username").innerText = user.name;
+  document.getElementById("uid").innerText = user.uid;
+  document.getElementById("balance").innerText = user.bal;
 
-    document.getElementById('refLink').value =
-        window.location.origin + window.location.pathname + "?ref=" + user.uid;
+  loadChat();
+}
 
-    const badge = document.getElementById('viewStatus');
+function mine(){
+  call("startMining",{uid:user.uid},sync);
+}
 
-    if (String(user.verified).toUpperCase() === "TRUE") {
-        badge.className = "badge-v";
-        badge.innerText = "VERIFIED";
-    } else {
-        badge.className = "badge-u";
-        badge.innerText = "UNVERIFIED";
-    }
+function claim(){
+  call("claimMining",{uid:user.uid},sync);
+}
 
-    if (user.role === "ADMIN") {
-        document.getElementById('adminTab').classList.remove('hidden');
-    }
+function transfer(){
+  let to = document.getElementById("to").value;
+  let amount = document.getElementById("amount").value;
 
-    if (fullRes.announcements?.length) {
-        document.getElementById('annText').innerText = fullRes.announcements[0][1];
-    }
+  call("p2pTransfer",{from:user.uid,to,amount},sync);
+}
 
-    checkMiningStatus();
+function send(){
+  let text = document.getElementById("msg").value;
+
+  call("sendMessage",{uid:user.uid,sender:user.name,text},()=>{
+    document.getElementById("msg").value="";
     loadChat();
-
-    if (user.role === "ADMIN") loadAdminChats();
+  });
 }
 
-// ---------------- AUTH ----------------
-function handleAuth() {
-    const email = document.getElementById('uEmail').value.trim();
-    const pass = document.getElementById('uPass').value.trim();
-    const name = document.getElementById('uName').value.trim();
-    const isReg = !document.getElementById('regInputs').classList.contains('hidden');
+function loadChat(){
+  call("getMessages",{uid:user.uid},(res)=>{
+    let box = document.getElementById("chat");
+    box.innerHTML = "";
 
-    if (!email || !pass || (isReg && !name)) {
-        alert("All fields required");
-        return;
-    }
-
-    const btn = document.getElementById('authBtn');
-    btn.disabled = true;
-    btn.innerText = "Processing...";
-
-    call(isReg ? 'register' : 'login',
-        { email, pass, name },
-        (res) => {
-            btn.disabled = false;
-            btn.innerText = "Connect Node";
-
-            if (res.success) {
-                if (isReg) {
-                    alert("Registered! Login now.");
-                    toggleAuth();
-                } else {
-                    user = res.user;
-                    localStorage.setItem('rida_v13_1', JSON.stringify(user));
-                    sync();
-                }
-            } else {
-                alert(res.msg || "Error");
-            }
-        }
-    );
-}
-
-// ---------------- MINING ----------------
-function checkMiningStatus() {
-    const btn = document.getElementById('mineBtn');
-
-    if (mineInterval) clearInterval(mineInterval);
-
-    if (user.lastMine > 0) {
-        const diff = Date.now() - user.lastMine;
-
-        if (diff < 86400000) {
-            btn.disabled = true;
-            updateCountdown(86400000 - diff);
-        } else {
-            btn.innerText = "Claim 0.2 RIDA";
-            btn.onclick = claim;
-        }
-    } else {
-        btn.innerText = "Start Mining";
-        btn.onclick = processMining;
-    }
-}
-
-function updateCountdown(ms) {
-    const btn = document.getElementById('mineBtn');
-
-    mineInterval = setInterval(() => {
-        ms -= 1000;
-
-        if (ms <= 0) {
-            clearInterval(mineInterval);
-            sync();
-            return;
-        }
-
-        const h = Math.floor(ms / 3600000);
-        const m = Math.floor((ms % 3600000) / 60000);
-        const s = Math.floor((ms % 60000) / 1000);
-
-        btn.innerText = `${h}H ${m}M ${s}S`;
-    }, 1000);
-}
-
-function processMining() {
-    call('startMining', { uid: user.uid }, sync);
-}
-
-function claim() {
-    call('claimMining', { uid: user.uid }, sync);
-}
-
-// ---------------- CHAT ----------------
-function sendMsg() {
-    const input = document.getElementById('chatInp');
-    const text = input.value;
-
-    if (!text) return;
-
-    call('sendMessage',
-        { uid: user.uid, sender: user.name, text },
-        () => {
-            input.value = "";
-            loadChat();
-        });
-}
-
-function loadChat() {
-    call('getMessages', { uid: user.uid }, (res) => {
-        if (!res.history) return;
-
-        const box = document.getElementById('chatBox');
-
-        box.innerHTML = res.history.map(m => `
-            <div class="p-2 rounded-xl ${m.sender === 'ADMIN' ? 'bg-white/5' : 'bg-indigo-500/10 text-right'}">
-                <p class="text-[8px] opacity-40">${m.sender}</p>
-                <p>${m.text}</p>
-            </div>
-        `).join('');
-
-        box.scrollTop = box.scrollHeight;
+    res.history.forEach(m=>{
+      box.innerHTML += `<p><b>${m.sender}:</b> ${m.text}</p>`;
     });
+  });
 }
 
-// ---------------- ADMIN ----------------
-function loadAdminChats() {
-    call('getMessages', { isAdmin: true }, (res) => {
-        if (!res.history) return;
-
-        const hub = document.getElementById('adminChatHub');
-
-        const groups = {};
-
-        res.history.forEach(m => {
-            if (!groups[m.uid]) groups[m.uid] = [];
-            groups[m.uid].push(m);
-        });
-
-        hub.innerHTML = Object.entries(groups).map(([uid, msgs]) => `
-            <div class="glass p-4 text-xs">
-                <b>${uid}</b>
-                ${msgs.map(m => `<p><b>${m.sender}:</b> ${m.text}</p>`).join('')}
-                <input id="reply-${uid}" placeholder="Reply..." />
-                <button onclick="adminReply('${uid}')">Reply</button>
-            </div>
-        `).join('');
-    });
+function sync(){
+  call("sync",{uid:user.uid,email:user.email},(res)=>{
+    if(res.success){
+      user = res.user;
+      localStorage.setItem("rida_user", JSON.stringify(user));
+      loadApp();
+    }
+  });
 }
 
-function adminReply(uid) {
-    const text = document.getElementById(`reply-${uid}`).value;
-    if (!text) return;
-
-    call('sendMessage',
-        { uid, sender: "ADMIN", text },
-        loadAdminChats
-    );
+function logout(){
+  localStorage.clear();
+  location.reload();
 }
 
-// ---------------- UTIL ----------------
-function logout() {
-    localStorage.clear();
-    location.reload();
+function call(action, payload, cb){
+  const callbackName = "cb_" + Math.random().toString(36).substring(2);
+
+  window[callbackName] = function(res){
+    delete window[callbackName];
+    cb(res);
+  };
+
+  const script = document.createElement("script");
+  script.src = `${API}?action=${action}&payload=${encodeURIComponent(JSON.stringify(payload))}&callback=${callbackName}`;
+
+  document.body.appendChild(script);
 }
 
-function toggleAuth() {
-    document.getElementById('regInputs').classList.toggle('hidden');
+if(user){
+  loadApp();
 }
 
-function switchTab(t, el) {
-    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-    document.getElementById('page-' + t).classList.add('active');
+</script>
 
-    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('nav-active'));
-    el.classList.add('nav-active');
-}
-                    </script>
+</body>
+</html>
