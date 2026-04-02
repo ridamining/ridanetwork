@@ -7,198 +7,176 @@
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://unpkg.com/lucide@latest"></script>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
-  body { font-family: 'Plus Jakarta Sans', sans-serif; background: #0f1118; color: #fff; margin:0; }
-  .glass { background: rgba(20,24,31,0.85); backdrop-filter: blur(25px); border: 1px solid rgba(255,255,255,0.05); }
-  .hidden { display: none !important; }
-  button:disabled { opacity:0.5; cursor:not-allowed; }
+    body { background:#0B0F1A; color:white; font-family:'Plus Jakarta Sans',sans-serif; margin:0; }
+    .glass { background: rgba(20,25,35,0.85); backdrop-filter: blur(20px); border-radius:1.5rem; border:1px solid rgba(255,255,255,0.05); }
+    .hidden { display:none !important; }
+    .btn { transition: all 0.2s ease; }
+    .btn:active { transform: scale(0.95); }
 </style>
 </head>
-<body class="min-h-screen flex flex-col items-center justify-center p-4">
+<body class="min-h-screen flex items-center justify-center p-4">
 
-<!-- ===== LOGIN / REGISTER ===== -->
-<div id="authView" class="w-full max-w-md space-y-6">
-  <div class="glass p-8 rounded-3xl shadow-2xl text-center">
-    <h1 class="text-4xl font-black text-blue-500 mb-2">RIDA</h1>
-    <p class="text-[10px] uppercase tracking-widest opacity-40 mb-6">Crypto Network v5.0</p>
-    <input type="email" id="authEmail" placeholder="Email" class="w-full p-4 mb-4 rounded-xl bg-white/5 border border-white/10 outline-none text-sm">
-    <input type="password" id="authPass" placeholder="Password" class="w-full p-4 mb-4 rounded-xl bg-white/5 border border-white/10 outline-none text-sm">
-    <input type="text" id="authName" placeholder="Full Name (Register only)" class="w-full p-4 mb-4 rounded-xl bg-white/5 border border-white/10 outline-none text-sm hidden">
-    <div class="flex justify-between mb-4">
-      <button id="loginBtn" class="bg-blue-600 px-6 py-3 rounded-xl font-bold text-sm tracking-widest hover:bg-blue-500">Login</button>
-      <button id="registerBtn" class="bg-green-600 px-6 py-3 rounded-xl font-bold text-sm tracking-widest hover:bg-green-500">Register</button>
+<div id="loginView" class="w-full max-w-md space-y-6">
+    <div class="glass p-8 text-center">
+        <h1 class="text-4xl font-bold text-blue-500 mb-2">RIDA Network</h1>
+        <p class="text-xs text-white/50 mb-6">Crypto Mining & Wallet Dashboard</p>
+        <input type="email" id="email" placeholder="Email" class="w-full p-4 rounded-xl bg-white/5 mb-3 focus:outline-none focus:border-blue-500 border border-white/10">
+        <input type="password" id="pass" placeholder="Password" class="w-full p-4 rounded-xl bg-white/5 mb-6 focus:outline-none focus:border-blue-500 border border-white/10">
+        <button onclick="handleLogin()" class="w-full bg-blue-600 py-4 rounded-xl font-bold uppercase btn">Login</button>
+        <p class="text-xs text-white/50 mt-4">Don't have an account? <a href="#" onclick="showRegister()" class="text-blue-400 underline">Register</a></p>
     </div>
-    <button id="toggleAuth" class="text-xs opacity-50 hover:opacity-100">Switch to Register</button>
-  </div>
 </div>
 
-<!-- ===== USER DASHBOARD ===== -->
-<div id="userView" class="hidden w-full max-w-3xl space-y-6">
-  <header class="flex justify-between items-center glass p-6 rounded-2xl">
-    <h2 class="text-xl font-black italic">RIDA <span class="text-blue-500 text-sm">Miner</span></h2>
-    <button onclick="logout()" class="p-2 bg-white/5 rounded-xl"><i data-lucide="log-out"></i></button>
-  </header>
-  <div class="glass p-6 rounded-3xl text-center">
-    <p class="text-[10px] uppercase opacity-50">Network Balance</p>
-    <h1 id="userBalance" class="text-5xl font-black my-4">0.000000</h1>
-    <button id="mineBtn" class="w-full py-4 rounded-xl bg-blue-600 font-bold uppercase text-sm tracking-widest shadow-lg">Start Mining</button>
-  </div>
-  <div class="glass p-6 rounded-3xl">
-    <h2 class="font-black mb-4">Your Details</h2>
-    <ul class="space-y-2 text-sm">
-      <li><strong>Name:</strong> <span id="userName">-</span></li>
-      <li><strong>Email:</strong> <span id="userEmail">-</span></li>
-      <li><strong>UID:</strong> <span id="userUID">-</span></li>
-      <li><strong>Role:</strong> <span id="userRole">-</span></li>
-    </ul>
-  </div>
+<div id="registerView" class="w-full max-w-md space-y-6 hidden">
+    <div class="glass p-8 text-center">
+        <h1 class="text-4xl font-bold text-green-400 mb-2">Register</h1>
+        <input type="text" id="rname" placeholder="Full Name" class="w-full p-4 rounded-xl bg-white/5 mb-3 focus:outline-none border border-white/10">
+        <input type="email" id="remail" placeholder="Email" class="w-full p-4 rounded-xl bg-white/5 mb-3 focus:outline-none border border-white/10">
+        <input type="password" id="rpass" placeholder="Password" class="w-full p-4 rounded-xl bg-white/5 mb-6 focus:outline-none border border-white/10">
+        <button onclick="handleRegister()" class="w-full bg-green-500 py-4 rounded-xl font-bold uppercase btn">Register</button>
+        <p class="text-xs text-white/50 mt-4">Already have an account? <a href="#" onclick="showLogin()" class="text-blue-400 underline">Login</a></p>
+    </div>
 </div>
 
-<!-- ===== ADMIN DASHBOARD ===== -->
-<div id="adminView" class="hidden w-full max-w-4xl space-y-6">
-  <header class="flex justify-between items-center glass p-6 rounded-2xl">
-    <h2 class="text-xl font-black italic text-blue-500">Admin Panel</h2>
-    <button onclick="logout()" class="p-2 bg-white/5 rounded-xl"><i data-lucide="power"></i></button>
-  </header>
-  <div class="flex space-x-4">
-    <button onclick="fetchUsers()" class="flex-1 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 font-bold text-sm">Sync Users</button>
-    <button onclick="fetchAnnouncements()" class="flex-1 py-3 rounded-xl bg-green-600 hover:bg-green-500 font-bold text-sm">View Announcements</button>
-  </div>
-  <div class="glass p-6 rounded-3xl mt-4 overflow-x-auto">
-    <table class="w-full text-left text-sm">
-      <thead class="bg-white/10 font-bold text-[10px] uppercase">
-        <tr><th class="p-2">UID</th><th class="p-2">Name</th><th class="p-2">Email</th><th class="p-2">Balance</th><th class="p-2">Role</th></tr>
-      </thead>
-      <tbody id="adminUsers">
-        <tr><td colspan="5" class="text-center py-4 opacity-30">No data synced yet</td></tr>
-      </tbody>
-    </table>
-  </div>
-  <div class="glass p-6 rounded-3xl mt-4">
-    <h2 class="font-black mb-2">Broadcast Announcement</h2>
-    <textarea id="adminAnnText" class="w-full p-4 rounded-xl bg-white/5 border border-white/10 outline-none" placeholder="Your message..."></textarea>
-    <button onclick="postAnnouncement()" class="mt-2 w-full py-3 rounded-xl bg-purple-600 hover:bg-purple-500 font-bold">Broadcast</button>
-  </div>
+<div id="userDashboard" class="hidden w-full max-w-4xl mx-auto p-4 space-y-6">
+    <header class="flex justify-between items-center glass p-4 rounded-xl">
+        <h2 class="text-xl font-bold">RIDA Miner</h2>
+        <div>
+            <span id="userEmail" class="text-sm text-white/60 mr-4"></span>
+            <button onclick="logout()" class="bg-red-500 px-3 py-2 rounded-xl btn">Logout</button>
+        </div>
+    </header>
+
+    <div class="glass p-6 rounded-xl text-center space-y-4">
+        <p class="text-xs text-white/50">Network Yield</p>
+        <h2 id="balanceDisplay" class="text-5xl font-bold">0.000000</h2>
+        <button id="mineBtn" onclick="startMining()" class="bg-blue-600 py-3 px-8 rounded-xl btn font-bold uppercase">Start Mining</button>
+        <p id="mineMsg" class="text-xs text-green-400 hidden mt-2">Mining Active</p>
+    </div>
+
+    <div class="glass p-6 rounded-xl space-y-4">
+        <h3 class="font-bold mb-2">P2P Transfer</h3>
+        <input type="text" id="toUid" placeholder="Recipient UID" class="w-full p-3 rounded-xl bg-white/5 mb-2">
+        <input type="number" id="amount" placeholder="Amount" class="w-full p-3 rounded-xl bg-white/5 mb-2">
+        <button onclick="transfer()" class="bg-purple-600 py-3 px-6 rounded-xl btn font-bold uppercase">Send</button>
+        <p id="transferMsg" class="text-xs text-green-400 hidden mt-1"></p>
+    </div>
+
+    <div id="adminPanel" class="hidden glass p-6 rounded-xl space-y-4">
+        <h3 class="font-bold text-blue-400">Admin Panel</h3>
+        <textarea id="announcement" placeholder="Broadcast Announcement" class="w-full p-3 rounded-xl bg-white/5"></textarea>
+        <button onclick="postAnnouncement()" class="bg-blue-500 py-3 px-6 rounded-xl btn font-bold uppercase">Broadcast</button>
+        <p id="announceMsg" class="text-xs text-green-400 hidden mt-1"></p>
+    </div>
 </div>
 
 <script>
-const API_URL = "https://script.google.com/macros/s/AKfycbztmx9pPM_9pmlNpxQaYjxevPCQLUWzg-8njG-bsvC7CiPplOGqSO3h057i0x0Y0BZe/exec";
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyhy80jodgIbcau1VRL1Gr_6m2NfflNHvAPSvy3h3RzScyRYTAphOoVbTZgnjut0Nk95A/exec";
 
-let currentUser = null;
+function showRegister(){ document.getElementById('loginView').classList.add('hidden'); document.getElementById('registerView').classList.remove('hidden'); }
+function showLogin(){ document.getElementById('registerView').classList.add('hidden'); document.getElementById('loginView').classList.remove('hidden'); }
 
-// --- AUTH TOGGLE ---
-let isLogin = true;
-document.getElementById("toggleAuth").onclick = () => {
-  isLogin = !isLogin;
-  document.getElementById("authName").classList.toggle("hidden", isLogin);
-  document.getElementById("loginBtn").classList.toggle("hidden", !isLogin);
-  document.getElementById("registerBtn").classList.toggle("hidden", isLogin);
-  document.getElementById("toggleAuth").innerText = isLogin ? "Switch to Register" : "Switch to Login";
-};
+function handleRegister(){
+    const name = document.getElementById('rname').value.trim();
+    const email = document.getElementById('remail').value.trim();
+    const pass = document.getElementById('rpass').value.trim();
+    if(!name||!email||!pass){ alert("All fields required"); return; }
 
-// --- LOGIN ---
-document.getElementById("loginBtn").onclick = async () => {
-  const email = document.getElementById("authEmail").value;
-  const pass = document.getElementById("authPass").value;
-  if(!email || !pass) return alert("All fields required");
-  const payload = {email, pass};
-  const res = await fetch(`${API_URL}?action=login&payload=${encodeURIComponent(JSON.stringify(payload))}`);
-  const data = await res.json();
-  if(data.success){
-    currentUser = data.user;
-    localStorage.setItem("rida_user", JSON.stringify(currentUser));
-    renderView();
-  } else alert(data.msg);
-};
-
-// --- REGISTER ---
-document.getElementById("registerBtn").onclick = async () => {
-  const email = document.getElementById("authEmail").value;
-  const pass = document.getElementById("authPass").value;
-  const name = document.getElementById("authName").value;
-  if(!email || !pass || !name) return alert("All fields required");
-  const payload = {email, pass, name};
-  const res = await fetch(`${API_URL}?action=register&payload=${encodeURIComponent(JSON.stringify(payload))}`);
-  const data = await res.json();
-  if(data.success){
-    alert("Registration successful. Please login!");
-    isLogin = true;
-    document.getElementById("toggleAuth").click();
-  } else alert(data.msg);
-};
-
-// --- MINING ---
-document.getElementById("mineBtn").onclick = async () => {
-  if(!currentUser) return;
-  const payload = {uid: currentUser.uid};
-  const res = await fetch(`${API_URL}?action=startMining&payload=${encodeURIComponent(JSON.stringify(payload))}`);
-  const data = await res.json();
-  if(data.success){
-    currentUser.bal = data.newBalance;
-    localStorage.setItem("rida_user", JSON.stringify(currentUser));
-    document.getElementById("userBalance").innerText = currentUser.bal.toFixed(6);
-    alert("Mining successful! +0.2 Rida");
-  } else alert(data.msg);
-};
-
-// --- ADMIN FUNCTIONS ---
-async function fetchUsers(){
-  const res = await fetch(`${API_URL}?action=getUsers`);
-  const data = await res.json();
-  if(data.success){
-    const tbody = document.getElementById("adminUsers");
-    tbody.innerHTML = data.users.map(u=>`
-      <tr class="border-b border-white/10">
-        <td class="p-2">${u.uid}</td>
-        <td class="p-2">${u.name}</td>
-        <td class="p-2">${u.email}</td>
-        <td class="p-2">${u.bal}</td>
-        <td class="p-2">${u.role}</td>
-      </tr>
-    `).join('');
-  }
+    fetch(`${WEB_APP_URL}?action=register&payload=${encodeURIComponent(JSON.stringify({name,email,pass}))}`)
+    .then(res=>res.json())
+    .then(res=>{
+        if(res.success){ alert("Registered successfully! Login now."); showLogin(); } 
+        else alert(res.msg||"Registration failed");
+    });
 }
 
-async function postAnnouncement(){
-  const text = document.getElementById("adminAnnText").value;
-  if(!text) return alert("Enter message");
-  const payload = {uid: currentUser.uid, text};
-  const res = await fetch(`${API_URL}?action=postAnnouncement&payload=${encodeURIComponent(JSON.stringify(payload))}`);
-  const data = await res.json();
-  if(data.success){
-    alert("Broadcast successful!");
-    document.getElementById("adminAnnText").value = "";
-  } else alert(data.msg);
+function handleLogin(){
+    const email = document.getElementById('email').value.trim();
+    const pass = document.getElementById('pass').value.trim();
+    if(!email||!pass){ alert("All fields required"); return; }
+
+    fetch(`${WEB_APP_URL}?action=login&payload=${encodeURIComponent(JSON.stringify({email,pass}))}`)
+    .then(res=>res.json())
+    .then(res=>{
+        if(res.success){ 
+            localStorage.setItem('ridaUser', JSON.stringify(res.user));
+            renderDashboard();
+        } else alert(res.msg||"Invalid login");
+    });
 }
 
-function renderView(){
-  currentUser = JSON.parse(localStorage.getItem("rida_user"));
-  document.getElementById("authView").classList.add("hidden");
-  document.getElementById("userView").classList.add("hidden");
-  document.getElementById("adminView").classList.add("hidden");
+function renderDashboard(){
+    const user = JSON.parse(localStorage.getItem('ridaUser'));
+    if(!user) return;
+    document.getElementById('loginView').classList.add('hidden');
+    document.getElementById('registerView').classList.add('hidden');
+    document.getElementById('userDashboard').classList.remove('hidden');
+    document.getElementById('userEmail').innerText = user.email;
+    document.getElementById('balanceDisplay').innerText = parseFloat(user.bal||0).toFixed(6);
 
-  if(!currentUser) {
-    document.getElementById("authView").classList.remove("hidden");
-  } else if(currentUser.role==="ADMIN"){
-    document.getElementById("adminView").classList.remove("hidden");
-    fetchUsers();
-  } else {
-    document.getElementById("userView").classList.remove("hidden");
-    document.getElementById("userBalance").innerText = currentUser.bal.toFixed(6);
-    document.getElementById("userName").innerText = currentUser.name;
-    document.getElementById("userEmail").innerText = currentUser.email;
-    document.getElementById("userUID").innerText = currentUser.uid;
-    document.getElementById("userRole").innerText = currentUser.role;
-  }
-  lucide.createIcons();
+    if(user.role==='ADMIN') document.getElementById('adminPanel').classList.remove('hidden');
 }
 
-function logout(){
-  localStorage.removeItem("rida_user");
-  location.reload();
+function logout(){ localStorage.removeItem('ridaUser'); location.reload(); }
+
+let miningActive=false;
+function startMining(){
+    if(miningActive){ alert("Mining already active"); return; }
+    miningActive=true;
+    const user = JSON.parse(localStorage.getItem('ridaUser'));
+    fetch(`${WEB_APP_URL}?action=startMining&payload=${encodeURIComponent(JSON.stringify({uid:user.uid}))}`)
+    .then(res=>res.json())
+    .then(res=>{
+        if(res.success){
+            document.getElementById('mineMsg').classList.remove('hidden');
+            updateBalance(0.2); 
+        } else alert(res.msg||"Mining failed");
+        miningActive=false;
+    });
 }
 
-window.onload = renderView;
+function updateBalance(amount){
+    const user = JSON.parse(localStorage.getItem('ridaUser'));
+    user.bal = parseFloat(user.bal||0)+amount;
+    localStorage.setItem('ridaUser', JSON.stringify(user));
+    document.getElementById('balanceDisplay').innerText = parseFloat(user.bal).toFixed(6);
+}
+
+function transfer(){
+    const to = document.getElementById('toUid').value.trim();
+    const amount = parseFloat(document.getElementById('amount').value);
+    if(!to||!amount){ alert("Fill all fields"); return; }
+
+    const user = JSON.parse(localStorage.getItem('ridaUser'));
+    fetch(`${WEB_APP_URL}?action=p2pTransfer&payload=${encodeURIComponent(JSON.stringify({from:user.uid,to,amount}))}`)
+    .then(res=>res.json())
+    .then(res=>{
+        if(res.success){ 
+            updateBalance(-amount);
+            document.getElementById('transferMsg').innerText="Transfer successful"; 
+            document.getElementById('transferMsg').classList.remove('hidden');
+        } else alert(res.msg||"Transfer failed");
+    });
+}
+
+function postAnnouncement(){
+    const text = document.getElementById('announcement').value.trim();
+    if(!text){ alert("Enter text"); return; }
+    const user = JSON.parse(localStorage.getItem('ridaUser'));
+    fetch(`${WEB_APP_URL}?action=postAnnouncement&payload=${encodeURIComponent(JSON.stringify({uid:user.uid,text}))}`)
+    .then(res=>res.json())
+    .then(res=>{
+        if(res.success){
+            document.getElementById('announceMsg').innerText="Announcement posted!";
+            document.getElementById('announceMsg').classList.remove('hidden');
+            document.getElementById('announcement').value='';
+        } else alert(res.msg||"Failed");
+    });
+}
+
+// Auto load dashboard if logged in
+if(localStorage.getItem('ridaUser')) renderDashboard();
 </script>
+
 </body>
-</html>
+          </html>
