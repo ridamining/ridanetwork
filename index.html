@@ -2,125 +2,121 @@
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>RIDA Engine 4.0</title>
+<title>RIDA Engine 5.0</title>
 
 <style>
-body {margin:0;font-family:sans-serif;background:#0f172a;color:white;}
-.container{padding:15px;}
-.card{background:#1e293b;padding:15px;margin-bottom:10px;border-radius:10px;}
-input,button{width:100%;padding:10px;margin:5px 0;border:none;border-radius:6px;}
+body{margin:0;font-family:sans-serif;background:#020617;color:white;}
+.screen{display:none;padding:15px;}
+.active{display:block;}
+.card{background:#0f172a;padding:15px;margin:10px 0;border-radius:12px;}
+input,button{width:100%;padding:12px;margin:6px 0;border:none;border-radius:8px;}
 button{background:#22c55e;color:white;font-weight:bold;}
-.hidden{display:none;}
-.top{background:#020617;padding:15px;text-align:center;font-size:20px;}
-.loader{position:fixed;top:0;left:0;width:100%;height:100%;background:#0008;display:none;align-items:center;justify-content:center;}
+.nav{position:fixed;bottom:0;width:100%;display:flex;background:#020617;}
+.nav button{flex:1;background:none;color:white;padding:10px;}
+.top{text-align:center;padding:10px;font-size:20px;background:#020617;}
+.balance{font-size:28px;font-weight:bold;color:#22c55e;}
+.loader{position:fixed;top:0;left:0;width:100%;height:100%;background:#0009;display:none;align-items:center;justify-content:center;}
 </style>
 </head>
 
 <body>
 
-<div class="top">🚀 RIDA Engine 4.0</div>
-
-<div class="container">
+<div class="top">🚀 RIDA Engine 5.0</div>
 
 <!-- AUTH -->
-<div id="auth" class="card">
+<div id="auth" class="screen active">
+<div class="card">
 <h3 id="authTitle">Login</h3>
-
-<input id="name" placeholder="Name" class="hidden">
+<input id="name" placeholder="Name" style="display:none">
 <input id="email" placeholder="Email">
 <input id="pass" type="password" placeholder="Password">
-
 <button onclick="submitAuth()">Continue</button>
 <button onclick="toggleAuth()">Switch</button>
 </div>
-
-<!-- APP -->
-<div id="app" class="hidden">
-
-<div class="card">
-<h3>User</h3>
-<p id="info"></p>
-<button onclick="sync()">Sync</button>
 </div>
 
+<!-- DASHBOARD -->
+<div id="dashboard" class="screen">
 <div class="card">
-<h3>Mining</h3>
-<button onclick="mine()">Start Mining</button>
+<div id="userInfo"></div>
+<div class="balance" id="bal">0</div>
+<button onclick="sync()">Refresh</button>
+</div>
 </div>
 
+<!-- MINING -->
+<div id="mining" class="screen">
 <div class="card">
-<h3>Transfer</h3>
+<h3>⛏ Mining</h3>
+<div id="mineStatus">Inactive</div>
+<div class="balance" id="liveBal">0</div>
+<button onclick="startMining()">Start Mining</button>
+</div>
+</div>
+
+<!-- TRANSFER -->
+<div id="transfer" class="screen">
+<div class="card">
+<h3>💸 Transfer</h3>
 <input id="to" placeholder="Receiver UID">
 <input id="amt" placeholder="Amount">
-<button onclick="transfer()">Send</button>
+<button onclick="send()">Send</button>
+</div>
 </div>
 
-<div id="admin" class="card hidden">
-<h3>Admin</h3>
+<!-- ADMIN -->
+<div id="admin" class="screen">
+<div class="card">
+<h3>📢 Admin</h3>
 <input id="ann" placeholder="Announcement">
 <button onclick="postAnn()">Post</button>
 </div>
-
-<button onclick="logout()">Logout</button>
-
 </div>
 
+<!-- NAV -->
+<div class="nav">
+<button onclick="show('dashboard')">Home</button>
+<button onclick="show('mining')">Mine</button>
+<button onclick="show('transfer')">Send</button>
+<button onclick="show('admin')">Admin</button>
 </div>
 
-<div id="loader" class="loader">⏳ Processing...</div>
+<div id="loader" class="loader">⏳</div>
 
 <script>
 var API="https://script.google.com/macros/s/AKfycbxhwFo2ycjOPDunKdrtgjo4uO769ZDqR6ZAyhuhpgG5eL0OxYSpRvnXLSZu0P5Bbp-1uQ/exec";
 
-var isLogin=true;
-var user=null;
+var user=null,isLogin=true,mining=false,live=0,interval;
 
-// LOADER
-function load(on){document.getElementById("loader").style.display=on?"flex":"none";}
-
-// JSONP FIXED
+// JSONP
 function api(action,data,cb){
-  load(true);
+  loader.style.display="flex";
   var name="cb_"+Date.now();
-
   window[name]=function(res){
-    load(false);
+    loader.style.display="none";
     cb(res);
     delete window[name];
     script.remove();
   };
-
   var script=document.createElement("script");
-  script.onerror=function(){
-    load(false);
-    alert("Network error");
-  };
-
-  script.src=API+"?callback="+name+
-    "&action="+action+
-    "&payload="+encodeURIComponent(JSON.stringify(data));
-
+  script.src=API+"?callback="+name+"&action="+action+"&payload="+encodeURIComponent(JSON.stringify(data));
   document.body.appendChild(script);
 }
 
-// TOGGLE
+// AUTH
 function toggleAuth(){
   isLogin=!isLogin;
-  document.getElementById("authTitle").innerText=isLogin?"Login":"Register";
-  document.getElementById("name").classList.toggle("hidden",isLogin);
+  authTitle.innerText=isLogin?"Login":"Register";
+  name.style.display=isLogin?"none":"block";
 }
 
-// AUTH
 function submitAuth(){
-  var data={
+  api(isLogin?"login":"register",{
     email:email.value,
     pass:pass.value,
     name:name.value
-  };
-
-  api(isLogin?"login":"register",data,function(res){
+  },res=>{
     if(!res.success)return alert(res.msg);
-
     if(isLogin){
       user=res.user;
       openApp();
@@ -133,28 +129,27 @@ function submitAuth(){
 
 // OPEN APP
 function openApp(){
-  auth.classList.add("hidden");
-  app.classList.remove("hidden");
-
+  auth.classList.remove("active");
+  show("dashboard");
   render();
+  if(user.role!=="ADMIN") document.querySelector('[onclick="show(\'admin\')"]').style.display="none";
+}
 
-  if(user.role==="ADMIN"){
-    admin.classList.remove("hidden");
-  }
+// NAV
+function show(id){
+  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
 }
 
 // RENDER
 function render(){
-  info.innerText=
-    "Name: "+user.name+
-    "\nUID: "+user.uid+
-    "\nBalance: "+user.bal+
-    "\nRole: "+user.role;
+  userInfo.innerText="👤 "+user.name+" | "+user.uid;
+  bal.innerText=user.bal;
 }
 
 // SYNC
 function sync(){
-  api("sync",{uid:user.uid},function(res){
+  api("sync",{uid:user.uid},res=>{
     if(res.success){
       user=res.user;
       render();
@@ -162,41 +157,43 @@ function sync(){
   });
 }
 
-// MINING FIXED
-function mine(){
-  api("startMining",{uid:user.uid},function(res){
+// MINING SYSTEM
+function startMining(){
+  if(mining)return;
+  mining=true;
+  mineStatus.innerText="Active";
+
+  api("startMining",{uid:user.uid},res=>{
     if(res.success){
-      alert("Mining Reward Added");
       sync();
-    }else{
-      alert("Mining failed");
     }
   });
+
+  live=parseFloat(user.bal);
+  interval=setInterval(()=>{
+    live+=0.0001;
+    liveBal.innerText=live.toFixed(4);
+  },1000);
 }
 
-// TRANSFER FIXED
-function transfer(){
+// TRANSFER
+function send(){
   api("p2pTransfer",{
     from:user.uid,
     to:to.value,
     amount:parseFloat(amt.value)
-  },function(res){
-    alert(res.msg||"Transfer done");
+  },res=>{
+    alert(res.msg||"Done");
     sync();
   });
 }
 
-// ADMIN FIXED
+// ADMIN
 function postAnn(){
-  api("postAnnouncement",{
-    uid:user.uid,
-    text:ann.value
-  },function(res){
+  api("postAnnouncement",{uid:user.uid,text:ann.value},res=>{
     alert(res.msg||"Posted");
   });
 }
-
-function logout(){location.reload();}
 </script>
 
 </body>
