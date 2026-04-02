@@ -3,187 +3,200 @@
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>RIDA Engine 4.0</title>
+
 <style>
-body { margin:0; font-family:Arial; background:#0f172a; color:white;}
-.card {background:#1e293b; padding:15px; margin:10px; border-radius:10px;}
-input,button {width:100%; padding:10px; margin:5px 0; border:none; border-radius:5px;}
-button {background:#22c55e; color:white; font-weight:bold;}
-.hidden {display:none;}
-.topbar {background:#020617; padding:15px; text-align:center; font-size:20px;}
+body {margin:0;font-family:sans-serif;background:#0f172a;color:white;}
+.container{padding:15px;}
+.card{background:#1e293b;padding:15px;margin-bottom:10px;border-radius:10px;}
+input,button{width:100%;padding:10px;margin:5px 0;border:none;border-radius:6px;}
+button{background:#22c55e;color:white;font-weight:bold;}
+.hidden{display:none;}
+.top{background:#020617;padding:15px;text-align:center;font-size:20px;}
+.loader{position:fixed;top:0;left:0;width:100%;height:100%;background:#0008;display:none;align-items:center;justify-content:center;}
 </style>
 </head>
 
 <body>
 
-<div class="topbar">🚀 RIDA Engine 4.0</div>
+<div class="top">🚀 RIDA Engine 4.0</div>
 
-<!-- LOGIN -->
+<div class="container">
+
+<!-- AUTH -->
 <div id="auth" class="card">
 <h3 id="authTitle">Login</h3>
 
-<input id="name" placeholder="Name (for register)" class="hidden">
+<input id="name" placeholder="Name" class="hidden">
 <input id="email" placeholder="Email">
-<input id="pass" placeholder="Password" type="password">
+<input id="pass" type="password" placeholder="Password">
 
 <button onclick="submitAuth()">Continue</button>
-<button onclick="toggleAuth()">Switch to Register</button>
+<button onclick="toggleAuth()">Switch</button>
 </div>
 
 <!-- APP -->
 <div id="app" class="hidden">
 
 <div class="card">
-<h3>👤 User Info</h3>
-<p>Name: <span id="uName"></span></p>
-<p>UID: <span id="uUID"></span></p>
-<p>Balance: <span id="uBal"></span></p>
-<p>Role: <span id="uRole"></span></p>
-<button onclick="sync()">🔄 Sync</button>
+<h3>User</h3>
+<p id="info"></p>
+<button onclick="sync()">Sync</button>
 </div>
 
 <div class="card">
-<h3>⛏ Mining</h3>
-<button onclick="mine()">Start Mining (+0.2)</button>
+<h3>Mining</h3>
+<button onclick="mine()">Start Mining</button>
 </div>
 
 <div class="card">
-<h3>💸 Transfer</h3>
-<input id="toUID" placeholder="Receiver UID">
-<input id="amount" placeholder="Amount">
-<button onclick="send()">Send</button>
+<h3>Transfer</h3>
+<input id="to" placeholder="Receiver UID">
+<input id="amt" placeholder="Amount">
+<button onclick="transfer()">Send</button>
 </div>
 
-<!-- ADMIN -->
-<div id="adminPanel" class="card hidden">
-<h3>📢 Admin Panel</h3>
-<input id="annText" placeholder="Announcement">
-<button onclick="announce()">Post</button>
+<div id="admin" class="card hidden">
+<h3>Admin</h3>
+<input id="ann" placeholder="Announcement">
+<button onclick="postAnn()">Post</button>
 </div>
 
 <button onclick="logout()">Logout</button>
 
 </div>
 
-<script>
-var API = "https://script.google.com/macros/s/AKfycbxhwFo2ycjOPDunKdrtgjo4uO769ZDqR6ZAyhuhpgG5eL0OxYSpRvnXLSZu0P5Bbp-1uQ/exec";
-var isLogin = true;
-var currentUser = null;
+</div>
 
-// JSONP CALL
-function api(action, data, callback){
-  var cb = "cb_" + Date.now();
-  window[cb] = function(res){
-    callback(res);
-    delete window[cb];
+<div id="loader" class="loader">⏳ Processing...</div>
+
+<script>
+var API="https://script.google.com/macros/s/AKfycbxhwFo2ycjOPDunKdrtgjo4uO769ZDqR6ZAyhuhpgG5eL0OxYSpRvnXLSZu0P5Bbp-1uQ/exec";
+
+var isLogin=true;
+var user=null;
+
+// LOADER
+function load(on){document.getElementById("loader").style.display=on?"flex":"none";}
+
+// JSONP FIXED
+function api(action,data,cb){
+  load(true);
+  var name="cb_"+Date.now();
+
+  window[name]=function(res){
+    load(false);
+    cb(res);
+    delete window[name];
     script.remove();
   };
 
-  var script = document.createElement("script");
-  script.src = API + "?callback=" + cb +
-               "&action=" + action +
-               "&payload=" + encodeURIComponent(JSON.stringify(data));
+  var script=document.createElement("script");
+  script.onerror=function(){
+    load(false);
+    alert("Network error");
+  };
+
+  script.src=API+"?callback="+name+
+    "&action="+action+
+    "&payload="+encodeURIComponent(JSON.stringify(data));
 
   document.body.appendChild(script);
 }
 
-// TOGGLE LOGIN/REGISTER
+// TOGGLE
 function toggleAuth(){
-  isLogin = !isLogin;
-  document.getElementById("authTitle").innerText = isLogin ? "Login" : "Register";
-  document.getElementById("name").classList.toggle("hidden", isLogin);
+  isLogin=!isLogin;
+  document.getElementById("authTitle").innerText=isLogin?"Login":"Register";
+  document.getElementById("name").classList.toggle("hidden",isLogin);
 }
 
-// SUBMIT AUTH
+// AUTH
 function submitAuth(){
-  var data = {
-    email: document.getElementById("email").value,
-    pass: document.getElementById("pass").value,
-    name: document.getElementById("name").value
+  var data={
+    email:email.value,
+    pass:pass.value,
+    name:name.value
   };
 
-  var action = isLogin ? "login" : "register";
+  api(isLogin?"login":"register",data,function(res){
+    if(!res.success)return alert(res.msg);
 
-  api(action, data, function(res){
-    if(res.success){
-      if(isLogin){
-        currentUser = res.user;
-        openApp();
-      } else {
-        alert("Registered! Now login");
-        toggleAuth();
-      }
-    } else {
-      alert(res.msg);
+    if(isLogin){
+      user=res.user;
+      openApp();
+    }else{
+      alert("Registered");
+      toggleAuth();
     }
   });
 }
 
 // OPEN APP
 function openApp(){
-  document.getElementById("auth").classList.add("hidden");
-  document.getElementById("app").classList.remove("hidden");
+  auth.classList.add("hidden");
+  app.classList.remove("hidden");
 
-  renderUser();
+  render();
 
-  if(currentUser.role === "ADMIN"){
-    document.getElementById("adminPanel").classList.remove("hidden");
+  if(user.role==="ADMIN"){
+    admin.classList.remove("hidden");
   }
 }
 
-// RENDER USER
-function renderUser(){
-  document.getElementById("uName").innerText = currentUser.name;
-  document.getElementById("uUID").innerText = currentUser.uid;
-  document.getElementById("uBal").innerText = currentUser.bal;
-  document.getElementById("uRole").innerText = currentUser.role;
+// RENDER
+function render(){
+  info.innerText=
+    "Name: "+user.name+
+    "\nUID: "+user.uid+
+    "\nBalance: "+user.bal+
+    "\nRole: "+user.role;
 }
 
 // SYNC
 function sync(){
-  api("sync", {uid: currentUser.uid}, function(res){
+  api("sync",{uid:user.uid},function(res){
     if(res.success){
-      currentUser = res.user;
-      renderUser();
+      user=res.user;
+      render();
     }
   });
 }
 
-// MINING
+// MINING FIXED
 function mine(){
-  api("startMining", {uid: currentUser.uid}, function(res){
+  api("startMining",{uid:user.uid},function(res){
     if(res.success){
-      alert("Mining success");
+      alert("Mining Reward Added");
       sync();
+    }else{
+      alert("Mining failed");
     }
   });
 }
 
-// TRANSFER
-function send(){
-  api("p2pTransfer", {
-    from: currentUser.uid,
-    to: document.getElementById("toUID").value,
-    amount: parseFloat(document.getElementById("amount").value)
-  }, function(res){
-    alert(res.msg || "Done");
+// TRANSFER FIXED
+function transfer(){
+  api("p2pTransfer",{
+    from:user.uid,
+    to:to.value,
+    amount:parseFloat(amt.value)
+  },function(res){
+    alert(res.msg||"Transfer done");
     sync();
   });
 }
 
-// ANNOUNCE
-function announce(){
-  api("postAnnouncement", {
-    uid: currentUser.uid,
-    text: document.getElementById("annText").value
-  }, function(res){
-    alert(res.msg || "Posted");
+// ADMIN FIXED
+function postAnn(){
+  api("postAnnouncement",{
+    uid:user.uid,
+    text:ann.value
+  },function(res){
+    alert(res.msg||"Posted");
   });
 }
 
-// LOGOUT
-function logout(){
-  location.reload();
-}
+function logout(){location.reload();}
 </script>
 
 </body>
