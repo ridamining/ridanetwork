@@ -3,205 +3,285 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>RIDA Crypto Dashboard</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<script src="https://unpkg.com/lucide@latest"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<title>Rida Mining</title>
+
 <style>
-body { font-family:'Plus Jakarta Sans',sans-serif; background:#010409;color:white;margin:0; }
-.glass { background: rgba(13,17,23,0.85); backdrop-filter: blur(20px); border:1px solid rgba(255,255,255,0.05); }
-.hidden { display:none !important; }
-.button { transition: all 0.2s; }
-.button:hover { transform: scale(1.02); }
+body{
+  margin:0;
+  font-family:Arial;
+  background:#0f172a;
+  color:#fff;
+}
+
+.container{
+  max-width:500px;
+  margin:auto;
+  padding:15px;
+}
+
+.card{
+  background:#1e293b;
+  padding:15px;
+  border-radius:12px;
+  margin-bottom:12px;
+}
+
+input,button{
+  width:100%;
+  padding:12px;
+  margin:5px 0;
+  border:none;
+  border-radius:8px;
+}
+
+button{
+  background:#06b6d4;
+  color:#fff;
+  font-weight:bold;
+}
+
+h2{text-align:center;}
+
+.nav{
+  position:fixed;
+  bottom:0;
+  width:100%;
+  display:flex;
+  background:#020617;
+}
+
+.nav button{
+  flex:1;
+  background:none;
+  color:#fff;
+}
+
+.hidden{display:none;}
+
+.mining{
+  text-align:center;
+  font-size:22px;
+  color:#22c55e;
+  animation:blink 1s infinite;
+}
+
+@keyframes blink{
+  50%{opacity:0.5;}
+}
 </style>
 </head>
-<body class="min-h-screen">
 
-<!-- LOGIN / REGISTER -->
-<div id="authView" class="flex flex-col items-center justify-center min-h-screen p-6">
-  <div class="glass p-10 rounded-3xl w-full max-w-sm text-center">
-    <h1 class="text-4xl font-black text-blue-500 mb-2">RIDA</h1>
-    <p class="text-xs opacity-40 mb-6">Neural Link v33.5</p>
-    <input type="email" id="email" placeholder="Email" class="w-full p-4 mb-4 rounded-lg bg-white/10 border border-white/20 outline-none text-sm">
-    <input type="password" id="pass" placeholder="Password" class="w-full p-4 mb-4 rounded-lg bg-white/10 border border-white/20 outline-none text-sm">
-    <input type="text" id="name" placeholder="Full Name (register only)" class="w-full p-4 mb-4 rounded-lg bg-white/10 border border-white/20 outline-none text-sm">
-    <div class="flex gap-2">
-      <button onclick="handleLogin()" class="button w-1/2 bg-blue-600 py-3 rounded-xl font-bold">Login</button>
-      <button onclick="handleRegister()" class="button w-1/2 bg-green-600 py-3 rounded-xl font-bold">Register</button>
-    </div>
-    <p id="authMsg" class="text-xs mt-2 opacity-50"></p>
-  </div>
+<body>
+
+<div class="container">
+
+<!-- LOGIN -->
+<div id="auth">
+<h2>Rida Mining</h2>
+<input id="name" placeholder="Name">
+<input id="email" placeholder="Email">
+<input id="ref" placeholder="Referral Code (optional)">
+<button onclick="register()">Register</button>
+<button onclick="login()">Login</button>
 </div>
 
-<!-- USER DASHBOARD -->
-<div id="userView" class="hidden p-6 space-y-6">
-  <header class="flex justify-between items-center glass p-4 rounded-2xl">
-    <h2 class="text-xl font-black italic">RIDA <span class="text-blue-500">Miner</span></h2>
-    <button onclick="logout()" class="p-2 bg-white/10 rounded-xl"><i data-lucide="log-out"></i></button>
-  </header>
-  <main class="space-y-6">
+<!-- DASHBOARD -->
+<div id="app" class="hidden">
 
-    <!-- Mining Panel -->
-    <div class="glass p-8 rounded-3xl text-center">
-      <p class="text-xs opacity-40 mb-2">Network Yield</p>
-      <h2 class="text-4xl font-black mb-4" id="balance">0.0000</h2>
-      <button id="mineBtn" onclick="startMining()" class="w-full py-3 rounded-xl bg-blue-600 font-bold">Start Mining</button>
-      <p id="mineMsg" class="text-xs mt-2 opacity-50"></p>
-    </div>
-
-    <!-- Mining Graph -->
-    <div class="glass p-6 rounded-2xl">
-      <h3 class="font-bold mb-2">Mining History</h3>
-      <canvas id="miningChart" height="150"></canvas>
-    </div>
-
-    <!-- P2P Transfer -->
-    <div class="glass p-6 rounded-2xl">
-      <h3 class="font-bold mb-2">Send RIDA</h3>
-      <input type="text" id="p2pTo" placeholder="Recipient UID" class="w-full p-2 mb-2 rounded-lg bg-white/10 border border-white/20 outline-none text-sm">
-      <input type="number" id="p2pAmount" placeholder="Amount" class="w-full p-2 mb-2 rounded-lg bg-white/10 border border-white/20 outline-none text-sm">
-      <button onclick="sendRida()" class="w-full py-2 bg-purple-600 rounded-lg font-bold">Send</button>
-      <p id="p2pMsg" class="text-xs mt-2 opacity-50"></p>
-    </div>
-
-  </main>
+<div class="card">
+<h3>Welcome</h3>
+<p id="userEmail"></p>
+<p>Balance: <span id="balance">0</span></p>
+<p>Status: <span id="status"></span></p>
 </div>
 
-<!-- ADMIN DASHBOARD -->
-<div id="adminView" class="hidden p-6 space-y-6">
-  <header class="flex justify-between items-center glass p-4 rounded-2xl">
-    <h2 class="text-xl font-black italic text-blue-500">Admin Panel</h2>
-    <button onclick="logout()" class="p-2 bg-red-500/10 rounded-xl"><i data-lucide="power"></i></button>
-  </header>
-  <main class="space-y-6">
-    <div class="glass p-6 rounded-2xl">
-      <h3 class="font-bold mb-2">Broadcast Announcement</h3>
-      <textarea id="announcementText" placeholder="Type announcement" class="w-full p-2 mb-2 rounded-lg bg-white/10 border border-white/20 outline-none text-sm"></textarea>
-      <button onclick="postAnnouncement()" class="w-full py-2 bg-green-600 rounded-lg font-bold">Post Announcement</button>
-      <p id="adminMsg" class="text-xs mt-2 opacity-50"></p>
-    </div>
+<div class="card">
+<h3>Mining</h3>
+<div id="miningStatus">Inactive</div>
+<button onclick="startMining()">Start Mining</button>
+</div>
 
-    <div class="glass p-4 rounded-2xl overflow-x-auto">
-      <h3 class="font-bold mb-2">User Registry</h3>
-      <table class="w-full text-left text-sm" id="registryTable">
-        <thead class="uppercase text-xs text-gray-400">
-          <tr><th>UID</th><th>Email</th><th>Balance</th><th>Status</th></tr>
-        </thead>
-        <tbody><tr><td colspan="4" class="text-center opacity-50">Loading...</td></tr></tbody>
-      </table>
-    </div>
-  </main>
+<div class="card">
+<h3>Referral</h3>
+<p id="refLink"></p>
+</div>
+
+<div class="card">
+<h3>Broadcast</h3>
+<div id="broadcast"></div>
+</div>
+
+<div class="card">
+<h3>Chat</h3>
+<div id="chatBox" style="height:120px;overflow:auto;"></div>
+<input id="msg">
+<button onclick="sendMsg()">Send</button>
+</div>
+
+</div>
+
+</div>
+
+<div class="nav hidden" id="nav">
+<button onclick="show('home')">Home</button>
+<button onclick="logout()">Logout</button>
 </div>
 
 <script>
-const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwMePzluhodKOPkbH2Z1Kg88lbMdP-D6ANIjHNC-vybMiwDJ37fKMkuYsQMRUPIpoQZ3A/exec";
-let session=null, miningHistory=[];
+const API="https://script.google.com/macros/s/AKfycbxrHtPv6FhJ3NkxdO--A15tCxtezL0R8B65tCWnIlLrl9ByJzHvjK7uo2DtD5GxD6715Q/exec";
 
-// ---------- AUTH ----------
-function handleLogin(){
-  const email=document.getElementById('email').value.trim();
-  const pass=document.getElementById('pass').value.trim();
-  if(!email||!pass)return showMsg('authMsg','Fill all fields');
+let user=null;
 
-  fetch(`${WEB_APP_URL}?action=login&payload=${encodeURIComponent(JSON.stringify({email,pass}))}`)
-  .then(r=>r.json())
-  .then(res=>{
-    if(res.success){ session=res.user; localStorage.setItem('rida_session',JSON.stringify(session)); renderView(); } 
-    else showMsg('authMsg',res.msg);
-  });
+// =====================
+// REGISTER
+// =====================
+function register(){
+fetch(API,{
+method:"POST",
+body:JSON.stringify({
+action:"registerUser",
+name:name.value,
+email:email.value,
+ref:ref.value
+})
+})
+.then(r=>r.json())
+.then(d=>{
+alert(d.status);
+});
 }
 
-function handleRegister(){
-  const email=document.getElementById('email').value.trim();
-  const pass=document.getElementById('pass').value.trim();
-  const name=document.getElementById('name').value.trim();
-  if(!email||!pass||!name)return showMsg('authMsg','Fill all fields');
-
-  fetch(`${WEB_APP_URL}?action=register&payload=${encodeURIComponent(JSON.stringify({email,pass,name}))}`)
-  .then(r=>r.json()).then(res=>showMsg('authMsg',res.msg));
+// =====================
+// LOGIN
+// =====================
+function login(){
+fetch(API,{
+method:"POST",
+body:JSON.stringify({
+action:"getUser",
+email:email.value
+})
+})
+.then(r=>r.json())
+.then(d=>{
+if(d.status==="success"){
+user=d.user;
+localStorage.setItem("user",JSON.stringify(user));
+startApp();
+}else{
+alert("User not found");
+}
+});
 }
 
-function logout(){ localStorage.removeItem('rida_session'); session=null; renderView(); }
+// =====================
+// START APP
+// =====================
+function startApp(){
+document.getElementById("auth").classList.add("hidden");
+document.getElementById("app").classList.remove("hidden");
+document.getElementById("nav").classList.remove("hidden");
 
-// ---------- MINING ----------
+user=JSON.parse(localStorage.getItem("user"));
+
+userEmail.innerText=user[1];
+balance.innerText=user[4];
+status.innerText=user[7];
+
+refLink.innerText=location.origin+"?ref="+user[6];
+
+loadBroadcast();
+loadChat();
+
+// AUTO mining
+startMining();
+}
+
+// =====================
+// MINING
+// =====================
 function startMining(){
-  if(!session) return;
-  fetch(`${WEB_APP_URL}?action=startMining&payload=${encodeURIComponent(JSON.stringify({uid:session.uid}))}`)
-  .then(r=>r.json())
-  .then(res=>{
-    if(res.success){
-      session.bal=res.newBalance; document.getElementById('balance').innerText=session.bal.toFixed(4);
-      miningHistory.push({time:new Date().toLocaleTimeString(),value:session.bal}); updateChart();
-      showMsg('mineMsg','Mining successful!');
-    } else showMsg('mineMsg',res.msg);
-  });
+miningStatus.innerHTML='<div class="mining">Mining Active ⚡</div>';
+
+setInterval(()=>{
+fetch(API,{
+method:"POST",
+body:JSON.stringify({
+action:"checkIn",
+userId:user[0]
+})
+})
+.then(r=>r.json())
+.then(d=>{
+if(d.status==="success"){
+balance.innerText=d.balance;
+}
+});
+},5000);
 }
 
-// ---------- P2P ----------
-function sendRida(){
-  const to=document.getElementById('p2pTo').value.trim();
-  const amount=parseFloat(document.getElementById('p2pAmount').value);
-  if(!to||!amount) return showMsg('p2pMsg','Fill recipient and amount');
-
-  fetch(`${WEB_APP_URL}?action=p2pTransfer&payload=${encodeURIComponent(JSON.stringify({from:session.uid,to,amount}))}`)
-  .then(r=>r.json())
-  .then(res=>{
-    if(res.success){ session.bal-=amount; document.getElementById('balance').innerText=session.bal.toFixed(4); showMsg('p2pMsg','Transfer successful!'); }
-    else showMsg('p2pMsg',res.msg);
-  });
+// =====================
+// BROADCAST
+// =====================
+function loadBroadcast(){
+fetch(API,{
+method:"POST",
+body:JSON.stringify({action:"getBroadcasts"})
+})
+.then(r=>r.json())
+.then(d=>{
+if(d.status==="success"){
+broadcast.innerHTML=d.data.map(x=>`<p>${x[1]}</p>`).join("");
+}
+});
 }
 
-// ---------- ADMIN ----------
-function postAnnouncement(){
-  const text=document.getElementById('announcementText').value.trim();
-  if(!text) return showMsg('adminMsg','Type announcement');
-
-  fetch(`${WEB_APP_URL}?action=postAnnouncement&payload=${encodeURIComponent(JSON.stringify({uid:session.uid,text}))}`)
-  .then(r=>r.json()).then(res=>showMsg('adminMsg',res.msg));
+// =====================
+// CHAT
+// =====================
+function sendMsg(){
+fetch(API,{
+method:"POST",
+body:JSON.stringify({
+action:"sendMessage",
+userId:user[0],
+msg:msg.value
+})
+});
+msg.value="";
 }
 
-function fetchRegistry(){
-  const table=document.getElementById('registryTable').querySelector('tbody');
-  table.innerHTML='<tr><td colspan="4" class="text-center opacity-50">Loading...</td></tr>';
-  fetch(`${WEB_APP_URL}?action=sync&payload=${encodeURIComponent(JSON.stringify({uid:session.uid}))}`)
-  .then(r=>r.json())
-  .then(res=>{
-    if(!res.success) return;
-    table.innerHTML=res.users.map(u=>`<tr><td>${u.uid}</td><td>${u.email}</td><td>${u.balance.toFixed(4)}</td><td>${u.verified}</td></tr>`).join('');
-  });
+function loadChat(){
+setInterval(()=>{
+fetch(API,{
+method:"POST",
+body:JSON.stringify({
+action:"getMessages",
+userId:user[0]
+})
+})
+.then(r=>r.json())
+.then(d=>{
+if(d.status==="success"){
+chatBox.innerHTML=d.data.map(x=>`<p>${x[3]}</p>`).join("");
+}
+});
+},3000);
 }
 
-// ---------- CHART ----------
-let chart=null;
-function updateChart(){
-  const ctx=document.getElementById('miningChart').getContext('2d');
-  const labels=miningHistory.map(m=>m.time);
-  const data=miningHistory.map(m=>m.value);
-  if(chart) chart.destroy();
-  chart=new Chart(ctx,{type:'line',data:{labels, datasets:[{label:'Balance',data,borderColor:'rgb(59,130,246)',backgroundColor:'rgba(59,130,246,0.2)',tension:0.3}]}});
+// =====================
+// LOGOUT
+// =====================
+function logout(){
+localStorage.clear();
+location.reload();
 }
 
-// ---------- VIEW ----------
-function renderView(){
-  session=JSON.parse(localStorage.getItem('rida_session')||"null");
-  document.getElementById('authView').classList.add('hidden');
-  document.getElementById('userView').classList.add('hidden');
-  document.getElementById('adminView').classList.add('hidden');
-
-  if(!session) return document.getElementById('authView').classList.remove('hidden');
-  if(session.role==='ADMIN'){ document.getElementById('adminView').classList.remove('hidden'); fetchRegistry(); }
-  else { document.getElementById('userView').classList.remove('hidden'); document.getElementById('balance').innerText=session.bal.toFixed(4); }
-
-  lucide.createIcons();
+// AUTO LOGIN
+if(localStorage.getItem("user")){
+startApp();
 }
-
-function showMsg(id,msg){
-  const el=document.getElementById(id);
-  el.innerText=msg;
-  setTimeout(()=>el.innerText='',3000);
-}
-
-window.onload=renderView;
 </script>
+
 </body>
 </html>
