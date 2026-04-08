@@ -5,71 +5,18 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Rida Network</title>
 <style>
-body {
-  margin:0;
-  font-family:system-ui;
-  background:#020617;
-  color:#fff;
-}
-.container{
-  max-width:500px;
-  margin:auto;
-  padding:15px;
-}
-.card{
-  background:#0f172a;
-  padding:15px;
-  border-radius:14px;
-  margin-bottom:12px;
-  box-shadow:0 0 15px rgba(0,0,0,0.5);
-}
-input,button{
-  width:100%;
-  padding:12px;
-  margin:6px 0;
-  border:none;
-  border-radius:10px;
-}
-button{
-  background:linear-gradient(45deg,#06b6d4,#3b82f6);
-  color:#fff;
-  font-weight:bold;
-  cursor:pointer;
-}
-.nav{
-  position:fixed;
-  bottom:0;
-  width:100%;
-  display:flex;
-  background:#020617;
-  z-index:10;
-}
-.nav button{
-  flex:1;
-  background:none;
-  color:#fff;
-}
+body {margin:0; font-family:system-ui; background:#020617; color:#fff;}
+.container{max-width:500px;margin:auto;padding:15px;}
+.card{background:#0f172a; padding:15px; border-radius:14px; margin-bottom:12px; box-shadow:0 0 15px rgba(0,0,0,0.5);}
+input,button{width:100%; padding:12px; margin:6px 0; border:none; border-radius:10px;}
+button{background:linear-gradient(45deg,#06b6d4,#3b82f6); color:#fff; font-weight:bold; cursor:pointer;}
+.nav{position:fixed; bottom:0; width:100%; display:flex; background:#020617; z-index:10;}
+.nav button{flex:1; background:none; color:#fff;}
 .hidden{display:none;}
-.mining{
-  text-align:center;
-  color:#22c55e;
-  font-size:20px;
-  animation:pulse 1s infinite;
-}
-@keyframes pulse{
-  50%{opacity:0.5;}
-}
-.chat{
-  height:150px;
-  overflow:auto;
-  background:#020617;
-  padding:10px;
-  border-radius:10px;
-}
-.broadcast-box{
-  max-height:150px;
-  overflow:auto;
-}
+.mining{text-align:center; color:#22c55e; font-size:20px; animation:pulse 1s infinite;}
+@keyframes pulse{50%{opacity:0.5;}}
+.chat{height:150px; overflow:auto; background:#020617; padding:10px; border-radius:10px;}
+.broadcast-box{max-height:150px; overflow:auto;}
 </style>
 </head>
 <body>
@@ -123,6 +70,7 @@ button{
 <p>Wallet: <span id="pwallet"></span></p>
 <p>UID: <span id="puid"></span></p>
 <p>Referral: <span id="pref"></span></p>
+<p>Referral Yield Today: <span id="refYield">0</span> RIDA</p>
 </div>
 
 <!-- TRANSFER -->
@@ -203,12 +151,12 @@ userEmail.innerText=user.email;
 balance.innerText=user.balance;
 status.innerText=user.isVerified ? "Verified" : "Unverified";
 
-// PROFILE
 pname.innerText=user.name;
 pemail.innerText=user.email;
 pwallet.innerText=user.wallet;
 puid.innerText=user.uid;
 pref.innerText=user.referralCode || "None";
+refYield.innerText=user.refYield || 0;
 
 loadBroadcast();
 loadChat();
