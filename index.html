@@ -1,279 +1,658 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Rida Network</title>
-<style>
-body {margin:0; font-family:system-ui; background:#020617; color:#fff;}
-.container{max-width:500px;margin:auto;padding:15px;}
-.card{background:#0f172a; padding:15px; border-radius:14px; margin-bottom:12px; box-shadow:0 0 15px rgba(0,0,0,0.5);}
-input,button{width:100%; padding:12px; margin:6px 0; border:none; border-radius:10px;}
-button{background:linear-gradient(45deg,#06b6d4,#3b82f6); color:#fff; font-weight:bold; cursor:pointer;}
-.nav{position:fixed; bottom:0; width:100%; display:flex; background:#020617; z-index:10;}
-.nav button{flex:1; background:none; color:#fff;}
-.hidden{display:none;}
-.mining{text-align:center; color:#22c55e; font-size:20px; animation:pulse 1s infinite;}
-@keyframes pulse{50%{opacity:0.5;}}
-.chat{height:150px; overflow:auto; background:#020617; padding:10px; border-radius:10px;}
-.broadcast-box{max-height:150px; overflow:auto;}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rida Network • Mine RIDA</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap');
+        
+        :root { --primary: #00ff9d; }
+        
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background: linear-gradient(180deg, #0a0a0a 0%, #111113 100%);
+        }
+        
+        .title-font {
+            font-family: 'Space Grotesk', sans-serif;
+        }
+        
+        .neon-text {
+            text-shadow: 0 0 10px #00ff9d, 0 0 30px #00ff9d;
+        }
+        
+        .glass {
+            background: rgba(15, 23, 42, 0.92);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+        
+        .mining-ring {
+            animation: miningPulse 3s infinite ease-in-out;
+        }
+        
+        @keyframes miningPulse {
+            0%, 100% { transform: scale(1); opacity: 0.9; }
+            50% { transform: scale(1.12); opacity: 1; }
+        }
+        
+        .tab-active {
+            color: #00ff9d;
+            border-bottom: 3px solid #00ff9d;
+            font-weight: 600;
+        }
+        
+        .toast {
+            animation: toastSlide 0.4s ease forwards;
+        }
+    </style>
 </head>
-<body>
+<body class="text-white min-h-screen pb-24">
 
-<div class="container">
+    <!-- HEADER -->
+    <nav class="bg-[#111113] border-b border-white/10 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+            <div class="flex items-center gap-x-3">
+                <div class="w-9 h-9 bg-[#00ff9d] text-black font-bold text-3xl flex items-center justify-center rounded-2xl rotate-12">R</div>
+                <h1 class="title-font text-3xl font-semibold tracking-tighter neon-text">RIDA NETWORK</h1>
+            </div>
 
-<!-- AUTH -->
-<div id="auth">
-<h2>Rida Network</h2>
-<input id="name" placeholder="Name">
-<input id="email" placeholder="Email">
-<input id="password" type="password" placeholder="Password">
-<input id="wallet" placeholder="BSC Wallet">
-<input id="ref" placeholder="Referral Code (Optional)">
-<button onclick="register()">Register</button>
-<hr>
-<input id="lemail" placeholder="Email">
-<input id="lpassword" type="password" placeholder="Password">
-<button onclick="login()">Login</button>
-</div>
+            <div class="flex items-center gap-x-6">
+                <div onclick="navigateTo('profile')" class="flex items-center gap-x-3 cursor-pointer hover:opacity-90">
+                    <div id="header-avatar" class="w-9 h-9 bg-gradient-to-br from-[#00ff9d] to-emerald-500 rounded-2xl flex items-center justify-center font-bold text-black">U</div>
+                    <div>
+                        <p id="header-name" class="font-medium text-sm">Loading...</p>
+                        <p id="header-uid" class="font-mono text-xs text-white/50"></p>
+                    </div>
+                </div>
 
-<!-- APP -->
-<div id="app" class="hidden">
+                <div id="header-balance" onclick="navigateTo('profile')" 
+                     class="bg-[#1a1a1f] hover:bg-[#00ff9d]/10 border border-white/10 px-5 py-2.5 rounded-3xl flex items-center gap-x-2 cursor-pointer">
+                    <i class="fa-solid fa-coins text-[#00ff9d]"></i>
+                    <span id="header-balance-value" class="font-mono font-semibold text-lg">0.00</span>
+                    <span class="text-xs text-white/60">RIDA</span>
+                </div>
 
-<!-- HOME -->
-<div id="home" class="card">
-<h3 id="userName"></h3>
-<p>Email: <span id="userEmail"></span></p>
-<p>Balance: <span id="balance">0</span> RIDA</p>
-<p>Status: <span id="status"></span></p>
+                <button onclick="logout()" class="flex items-center gap-x-2 text-red-400 hover:text-red-500 text-sm font-medium">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                    <span>Logout</span>
+                </button>
+            </div>
+        </div>
 
-<div class="card">
-<h3>Mining</h3>
-<div id="miningBox" class="mining">Inactive</div>
-<p id="timer"></p>
-<button onclick="mine()">Claim & Start Mining</button>
-</div>
+        <!-- TABS -->
+        <div class="max-w-7xl mx-auto px-6">
+            <div id="tab-bar" class="flex gap-x-8 text-sm border-t border-white/10 overflow-x-auto">
+                <!-- Dynamically populated by JS -->
+            </div>
+        </div>
+    </nav>
 
-<div class="card">
-<h3>Broadcast</h3>
-<div class="broadcast-box" id="broadcast"></div>
-<button onclick="archiveBroadcast()">Archive</button>
-</div>
-</div>
+    <div class="max-w-7xl mx-auto px-6 pt-8">
 
-<!-- PROFILE -->
-<div id="profile" class="card hidden">
-<h3>Profile</h3>
-<p>Name: <span id="pname"></span></p>
-<p>Email: <span id="pemail"></span></p>
-<p>Wallet: <span id="pwallet"></span></p>
-<p>UID: <span id="puid"></span></p>
-<p>Referral: <span id="pref"></span></p>
-<p>Referral Yield Today: <span id="refYield">0</span> RIDA</p>
-</div>
+        <!-- HOME SCREEN -->
+        <div id="screen-home" class="screen">
+            <h2 class="text-5xl font-semibold title-font neon-text mb-2">Welcome back, <span id="welcome-name" class="text-[#00ff9d]"></span></h2>
+            <p class="text-white/60 mb-10">1 RIDA = 1 USDT • Total Supply: 5,000,000 RIDA</p>
 
-<!-- TRANSFER -->
-<div id="transfer" class="card hidden">
-<h3>Send RIDA</h3>
-<input id="toUID" placeholder="Receiver UID">
-<input id="amount" type="number" placeholder="Amount (min 10)">
-<button onclick="send()">Send</button>
-</div>
+            <!-- Stats Grid -->
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-5 mb-10">
+                <div class="glass rounded-3xl p-6">
+                    <p class="text-white/50 text-sm">Your Balance</p>
+                    <p id="home-balance" class="text-5xl font-mono font-bold mt-3">0.00</p>
+                    <p class="text-[#00ff9d] text-sm">RIDA • <span id="home-usdt">0.00 USDT</span></p>
+                </div>
+                <div class="glass rounded-3xl p-6">
+                    <p class="text-white/50 text-sm">Verification</p>
+                    <p id="home-verification" class="text-3xl font-semibold mt-3 flex items-center gap-2"></p>
+                </div>
+                <div class="glass rounded-3xl p-6">
+                    <p class="text-white/50 text-sm">Daily Mining</p>
+                    <p class="text-3xl font-semibold text-[#00ff9d] mt-3">0.20 RIDA</p>
+                </div>
+                <div class="glass rounded-3xl p-6">
+                    <p class="text-white/50 text-sm">Referral Bonus</p>
+                    <p class="text-3xl font-semibold text-[#00ff9d] mt-3">0.01 RIDA / day</p>
+                </div>
+            </div>
 
-<!-- CHAT -->
-<div id="chatPage" class="card hidden">
-<h3>Support Chat</h3>
-<div class="chat" id="chatBox"></div>
-<input id="msg">
-<button onclick="sendMsg()">Send</button>
-</div>
+            <!-- Latest Broadcast -->
+            <div onclick="showBroadcastModal()" id="broadcast-card"
+                 class="glass rounded-3xl p-6 mb-10 cursor-pointer hover:border-[#00ff9d]/50 border border-transparent">
+                <div class="flex items-center gap-2 text-[#00ff9d] text-xs mb-2">
+                    <i class="fa-solid fa-bullhorn"></i>
+                    <span>NETWORK ANNOUNCEMENT</span>
+                </div>
+                <p id="latest-broadcast" class="line-clamp-2"></p>
+                <p id="broadcast-time" class="text-xs text-white/40 mt-4"></p>
+            </div>
+        </div>
 
-</div>
+        <!-- PROFILE SCREEN -->
+        <div id="screen-profile" class="screen hidden">
+            <h2 class="text-4xl font-semibold mb-8">My Profile</h2>
+            <div class="glass rounded-3xl p-8 max-w-2xl">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-5">
+                        <div id="profile-avatar" class="w-20 h-20 bg-gradient-to-br from-[#00ff9d] to-emerald-500 rounded-3xl flex items-center justify-center text-5xl font-bold text-black"></div>
+                        <div>
+                            <h3 id="profile-name" class="text-3xl font-semibold"></h3>
+                            <p id="profile-email" class="text-white/60"></p>
+                            <p id="profile-uid" class="font-mono text-[#00ff9d]"></p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-sm text-white/50">Balance</p>
+                        <p id="profile-balance" class="text-5xl font-mono font-bold text-[#00ff9d]"></p>
+                    </div>
+                </div>
 
-<!-- NAV -->
-<div class="nav hidden" id="navBar">
-<button onclick="nav('home')">Home</button>
-<button onclick="nav('profile')">Profile</button>
-<button onclick="nav('transfer')">Transfer</button>
-<button onclick="nav('chatPage')">Chat</button>
-<button onclick="logout()">Logout</button>
-</div>
+                <div class="mt-10 grid grid-cols-2 gap-6">
+                    <div class="border border-white/10 rounded-3xl p-6">
+                        <p class="text-xs text-white/50 mb-1">BEP20 Wallet</p>
+                        <p id="profile-wallet" class="font-mono break-all text-sm"></p>
+                    </div>
+                    <div class="border border-white/10 rounded-3xl p-6">
+                        <p class="text-xs text-white/50 mb-1">Referral Code</p>
+                        <div class="flex items-center justify-between">
+                            <p id="profile-referral" class="font-mono text-2xl font-bold text-[#00ff9d]"></p>
+                            <button onclick="copyToClipboard()" class="px-5 py-2 bg-[#00ff9d]/10 text-[#00ff9d] rounded-2xl text-sm">COPY</button>
+                        </div>
+                    </div>
+                </div>
 
-<script>
-const API="https://script.google.com/macros/s/AKfycby72ufm-zdJVDeuz3QWewT4wJF4NLVHw6yGKyHBtRHSvwur-Nu6Z3SCxl8yGcGlzgfeMA/exec";
+                <button onclick="showUpdateWalletModal()" 
+                        class="mt-8 w-full py-5 bg-white/10 hover:bg-white/20 rounded-3xl text-lg font-medium flex items-center justify-center gap-3">
+                    <i class="fa-solid fa-wallet"></i>
+                    Update Wallet Address
+                </button>
+            </div>
+        </div>
 
-let user=null;
+        <!-- MINING SCREEN -->
+        <div id="screen-mining" class="screen hidden text-center">
+            <h2 class="text-5xl font-semibold title-font neon-text mb-3">RIDA MINER</h2>
+            <p class="text-white/60 mb-12">Mine 0.20 RIDA every 24 hours</p>
 
-// REGISTER
-function register(){
-fetch(API,{
-method:"POST",
-body:JSON.stringify({
-action:"register",
-name:name.value,
-email:email.value,
-password:password.value,
-wallet:wallet.value,
-ref:ref.value
-})
-}).then(r=>r.json()).then(d=>alert(d.status));
-}
+            <div class="relative mx-auto w-72 h-72 mb-12">
+                <div id="mining-circle" class="absolute inset-0 border-[14px] border-[#00ff9d]/30 rounded-full flex items-center justify-center mining-ring">
+                    <div class="text-center">
+                        <i id="mining-icon" class="fa-solid fa-cube text-8xl text-[#00ff9d]"></i>
+                        <p id="mining-status" class="mt-6 text-2xl font-semibold"></p>
+                    </div>
+                </div>
+                <div id="countdown-overlay" class="hidden absolute inset-0 flex items-center justify-center">
+                    <div class="text-center">
+                        <div id="big-timer" class="font-mono text-6xl font-bold">23:59:59</div>
+                        <p class="text-xs tracking-widest text-white/40 mt-2">UNTIL NEXT CLAIM</p>
+                    </div>
+                </div>
+            </div>
 
-// LOGIN
-function login(){
-fetch(API,{
-method:"POST",
-body:JSON.stringify({
-action:"login",
-email:lemail.value,
-password:lpassword.value
-})
-}).then(r=>r.json()).then(d=>{
-if(d.status==="success"){
-user=d.user;
-localStorage.setItem("user",JSON.stringify(user));
-startApp();
-}else alert("Invalid login");
-});
-}
+            <div id="mining-action" class="max-w-sm mx-auto"></div>
+        </div>
 
-// START APP
-function startApp(){
-auth.classList.add("hidden");
-app.classList.remove("hidden");
-navBar.classList.remove("hidden");
+        <!-- TRANSFER SCREEN -->
+        <div id="screen-transfer" class="screen hidden">
+            <h2 class="text-4xl font-semibold mb-8">P2P Transfer</h2>
+            <div class="glass rounded-3xl p-8 max-w-lg mx-auto">
+                <div class="mb-6">
+                    <label class="block text-xs text-white/50 mb-2">Recipient RIDA UID</label>
+                    <input id="transfer-uid" type="text" placeholder="RIDA-XXXXXXXX" 
+                           class="w-full bg-[#1a1a1f] border border-white/10 rounded-3xl px-6 py-5 text-xl font-mono focus:border-[#00ff9d] outline-none">
+                </div>
+                <div class="mb-8">
+                    <label class="block text-xs text-white/50 mb-2">Amount (min 10 RIDA)</label>
+                    <div class="relative">
+                        <input id="transfer-amount" type="number" placeholder="100" 
+                               class="w-full bg-[#1a1a1f] border border-white/10 rounded-3xl px-6 py-5 text-4xl font-mono focus:border-[#00ff9d] outline-none">
+                        <span class="absolute right-6 top-1/2 -translate-y-1/2 text-white/40">RIDA</span>
+                    </div>
+                </div>
+                <button onclick="executeTransfer()" 
+                        class="w-full py-7 text-xl font-semibold bg-gradient-to-r from-[#00ff9d] to-cyan-400 text-black rounded-3xl hover:shadow-2xl hover:shadow-[#00ff9d]/40">
+                    SEND RIDA
+                </button>
+            </div>
+        </div>
 
-user=JSON.parse(localStorage.getItem("user"));
+        <!-- CHAT SCREEN -->
+        <div id="screen-chat" class="screen hidden">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-4xl font-semibold">Support Chat</h2>
+                <div class="px-5 py-2 bg-emerald-500/10 text-emerald-400 rounded-3xl text-sm">Admin Online</div>
+            </div>
+            <div id="chat-window" class="glass h-96 rounded-3xl p-6 overflow-y-auto mb-4 space-y-4"></div>
+            <div class="flex gap-3">
+                <input id="chat-input" type="text" placeholder="Type message to admin..." 
+                       class="flex-1 bg-[#1a1a1f] border border-white/10 rounded-3xl px-6 py-5 focus:border-[#00ff9d] outline-none">
+                <button onclick="sendChatMessage()" 
+                        class="w-14 h-14 bg-[#00ff9d] text-black rounded-3xl flex items-center justify-center text-2xl">
+                    <i class="fa-solid fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
 
-userName.innerText=user.name;
-userEmail.innerText=user.email;
-balance.innerText=user.balance;
-status.innerText=user.isVerified ? "Verified" : "Unverified";
+        <!-- ADMIN SCREEN -->
+        <div id="screen-admin" class="screen hidden">
+            <h2 class="text-4xl font-semibold mb-8">Admin Control Panel</h2>
+            <div class="glass rounded-3xl p-8">
+                <button onclick="refreshAdminData()" class="mb-6 px-6 py-3 bg-white/10 hover:bg-white/20 rounded-3xl">Refresh Data</button>
+                <div id="admin-users" class="overflow-auto max-h-96"></div>
+            </div>
+        </div>
+    </div>
 
-pname.innerText=user.name;
-pemail.innerText=user.email;
-pwallet.innerText=user.wallet;
-puid.innerText=user.uid;
-pref.innerText=user.referralCode || "None";
-refYield.innerText=user.refYield || 0;
+    <!-- AUTH MODAL -->
+    <div id="auth-modal" class="fixed inset-0 bg-black/90 flex items-center justify-center z-[10000] hidden">
+        <div class="glass w-full max-w-md mx-4 rounded-3xl p-8">
+            <div class="flex justify-center mb-8">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-[#00ff9d] rounded-2xl flex items-center justify-center text-4xl text-black rotate-12">R</div>
+                    <h1 class="title-font text-4xl font-bold neon-text">RIDA</h1>
+                </div>
+            </div>
 
-loadBroadcast();
-loadChat();
-updateTimer();
-}
+            <!-- Login Form -->
+            <div id="login-form">
+                <h3 class="text-2xl text-center mb-8">Sign In</h3>
+                <input id="login-email" type="email" placeholder="Email" class="w-full mb-4 bg-[#1a1a1f] border border-white/10 rounded-3xl px-6 py-5">
+                <input id="login-password" type="password" placeholder="Password" class="w-full mb-8 bg-[#1a1a1f] border border-white/10 rounded-3xl px-6 py-5">
+                <button onclick="performLogin()" class="w-full py-6 bg-[#00ff9d] text-black font-semibold rounded-3xl text-xl">LOGIN</button>
+                <p onclick="switchToRegister()" class="text-center mt-6 text-[#00ff9d] cursor-pointer">Don't have an account? Register</p>
+            </div>
 
-// NAV
-function nav(p){
-['home','profile','transfer','chatPage'].forEach(x=>{
-document.getElementById(x).classList.add('hidden');
-});
-document.getElementById(p).classList.remove('hidden');
-}
+            <!-- Register Form -->
+            <div id="register-form" class="hidden">
+                <h3 class="text-2xl text-center mb-8">Create Account</h3>
+                <input id="reg-name" placeholder="Full Name" class="w-full mb-4 bg-[#1a1a1f] border border-white/10 rounded-3xl px-6 py-5">
+                <input id="reg-email" type="email" placeholder="Email" class="w-full mb-4 bg-[#1a1a1f] border border-white/10 rounded-3xl px-6 py-5">
+                <input id="reg-password" type="password" placeholder="Password" class="w-full mb-4 bg-[#1a1a1f] border border-white/10 rounded-3xl px-6 py-5">
+                <input id="reg-ref" placeholder="Referral Code (optional)" class="w-full mb-4 bg-[#1a1a1f] border border-white/10 rounded-3xl px-6 py-5">
+                <input id="reg-wallet" placeholder="BSC BEP20 Wallet (0x...)" class="w-full mb-8 bg-[#1a1a1f] border border-white/10 rounded-3xl px-6 py-5">
+                <button onclick="performRegister()" class="w-full py-6 bg-[#00ff9d] text-black font-semibold rounded-3xl text-xl">REGISTER</button>
+                <p onclick="switchToLogin()" class="text-center mt-6 text-[#00ff9d] cursor-pointer">Already have an account? Login</p>
+            </div>
+        </div>
+    </div>
 
-// MINING
-function mine(){
-fetch(API,{
-method:"POST",
-body:JSON.stringify({action:"mine",uid:user.uid})
-})
-.then(r=>r.json())
-.then(d=>{
-if(d.status==="success"){
-balance.innerText=d.balance;
-user.lastCheckIn=d.lastCheckIn;
-alert("Mining success!");
-}else alert(d.status);
-});
-}
+    <!-- Toast -->
+    <div id="toast" class="hidden fixed bottom-6 right-6 glass px-6 py-4 rounded-3xl flex items-center gap-3 shadow-2xl toast">
+        <i id="toast-icon" class="fa-solid fa-circle-check text-2xl"></i>
+        <span id="toast-text" class="font-medium"></span>
+    </div>
 
-// TIMER
-function updateTimer(){
-setInterval(()=>{
-if(!user.lastCheckIn) {timer.innerText="Ready to mine!"; return;}
-let last=new Date(user.lastCheckIn);
-let now=new Date();
-let diff=86400000-(now-last);
-if(diff>0){
-let h=Math.floor(diff/3600000);
-let m=Math.floor((diff%3600000)/60000);
-timer.innerText="Next claim in "+h+"h "+m+"m";
-}else{
-timer.innerText="Ready to mine!";
-}
-},1000);
-}
+    <script>
+        // ================== CONFIG ==================
+        const API_URL = "https://script.google.com/macros/s/AKfycbz0pA1buOZ86yNLFbSEzyCfKt2kHdp9XHdIQzLdr8Rjqf5VRLpwg88uReezNIpm3tM8cA/exec";
 
-// TRANSFER
-function send(){
-let amt = Number(amount.value);
-if(amt<10){alert("Minimum 10 RIDA"); return;}
-fetch(API,{
-method:"POST",
-body:JSON.stringify({
-action:"transfer",
-from:user.uid,
-to:toUID.value,
-amount:amt
-})
-})
-.then(r=>r.json())
-.then(d=>{
-alert(d.status);
-if(d.status==="Success") balance.innerText=d.newBalance;
-});
-}
+        let currentUser = null;
+        let sessionToken = null;
+        let currentScreen = "home";
+        let miningTimer = null;
+        let chatTimer = null;
 
-// BROADCAST
-function loadBroadcast(){
-fetch(API,{
-method:"POST",
-body:JSON.stringify({action:"getBroadcasts"})
-})
-.then(r=>r.json())
-.then(d=>{
-if(d.status==="success"){
-broadcast.innerHTML=d.data.map(x=>`<p>📢 ${x.msg}</p>`).join("");
-}
-});
-}
+        // ================== API CALLER ==================
+        async function callAPI(action, payload = {}) {
+            const body = { action, ...payload };
+            if (currentUser) {
+                body.email = currentUser.email;
+            }
 
-function archiveBroadcast(){
-alert("Broadcast archive is a placeholder (implement archive view in backend).");
-}
+            try {
+                const res = await fetch(API_URL, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(body)
+                });
+                const data = await res.json();
+                if (!data.success) {
+                    showToast(data.error || "Operation failed", true);
+                    return null;
+                }
+                return data;
+            } catch (e) {
+                showToast("Network error. Please try again.", true);
+                return null;
+            }
+        }
 
-// CHAT
-function sendMsg(){
-if(msg.value.trim()==="") return;
-fetch(API,{
-method:"POST",
-body:JSON.stringify({action:"sendMsg",uid:user.uid,msg:msg.value})
-});
-msg.value="";
-}
+        // ================== SESSION ==================
+        function saveSession(user, token) {
+            currentUser = user;
+            sessionToken = token;
+            localStorage.setItem("rida_user", JSON.stringify(user));
+            localStorage.setItem("rida_token", token);
+        }
 
-function loadChat(){
-setInterval(()=>{
-fetch(API,{
-method:"POST",
-body:JSON.stringify({action:"getMsg",uid:user.uid})
-})
-.then(r=>r.json())
-.then(d=>{
-chatBox.innerHTML=d.data.map(x=>`<p><b>${x.from}:</b> ${x.msg}</p>`).join("");
-});
-},3000);
-}
+        function loadSession() {
+            const userStr = localStorage.getItem("rida_user");
+            const token = localStorage.getItem("rida_token");
+            if (userStr && token) {
+                currentUser = JSON.parse(userStr);
+                sessionToken = token;
+                return true;
+            }
+            return false;
+        }
 
-// LOGOUT
-function logout(){
-localStorage.clear();
-location.reload();
-}
+        function logout() {
+            localStorage.clear();
+            currentUser = null;
+            sessionToken = null;
+            location.reload();
+        }
 
-// AUTO LOGIN
-if(localStorage.getItem("user")) startApp();
-</script>
+        // ================== RENDER HEADER & TABS ==================
+        function renderHeader() {
+            if (!currentUser) return;
+            document.getElementById("header-name").textContent = currentUser.name.split(" ")[0];
+            document.getElementById("header-uid").textContent = currentUser.uid;
+            document.getElementById("header-balance-value").textContent = parseFloat(currentUser.balance || 0).toFixed(2);
+            document.getElementById("header-avatar").textContent = currentUser.name[0].toUpperCase();
+        }
 
+        function renderTabs() {
+            const isAdmin = currentUser && currentUser.email === "admin@rida.com";
+            let html = `
+                <button onclick="navigateTo('home')" class="tab px-6 py-4 flex-1 md:flex-none ${currentScreen==='home'?'tab-active':''}"><i class="fa-solid fa-house mr-2"></i>Home</button>
+                <button onclick="navigateTo('profile')" class="tab px-6 py-4 flex-1 md:flex-none ${currentScreen==='profile'?'tab-active':''}"><i class="fa-solid fa-user mr-2"></i>Profile</button>
+                <button onclick="navigateTo('mining')" class="tab px-6 py-4 flex-1 md:flex-none ${currentScreen==='mining'?'tab-active':''}"><i class="fa-solid fa-cube mr-2"></i>Mine</button>
+                <button onclick="navigateTo('transfer')" class="tab px-6 py-4 flex-1 md:flex-none ${currentScreen==='transfer'?'tab-active':''}"><i class="fa-solid fa-arrow-right-arrow-left mr-2"></i>Transfer</button>
+                <button onclick="navigateTo('chat')" class="tab px-6 py-4 flex-1 md:flex-none ${currentScreen==='chat'?'tab-active':''}"><i class="fa-solid fa-comment-dots mr-2"></i>Chat</button>
+            `;
+            if (isAdmin) {
+                html += `<button onclick="navigateTo('admin')" class="tab px-6 py-4 flex-1 md:flex-none ${currentScreen==='admin'?'tab-active':''} text-[#00ff9d]"><i class="fa-solid fa-shield-halved mr-2"></i>Admin</button>`;
+            }
+            document.getElementById("tab-bar").innerHTML = html;
+        }
+
+        function navigateTo(screen) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+            document.getElementById(`screen-${screen}`).classList.remove('hidden');
+            currentScreen = screen;
+            renderTabs();
+
+            if (screen === 'profile') renderProfile();
+     if (screen === 'mining') renderMining();
+            if (screen === 'chat') startChatPolling();
+            if (screen === 'admin' && currentUser.email === 'admin@rida.com') refreshAdminData();
+        }
+
+        // ================== AUTH ==================
+        function showAuthModal() {
+            document.getElementById("auth-modal").classList.remove("hidden");
+            switchToLogin();
+        }
+
+        function hideAuthModal() {
+            document.getElementById("auth-modal").classList.add("hidden");
+        }
+
+        function switchToLogin() {
+            document.getElementById("login-form").classList.remove("hidden");
+            document.getElementById("register-form").classList.add("hidden");
+        }
+
+        function switchToRegister() {
+            document.getElementById("login-form").classList.add("hidden");
+            document.getElementById("register-form").classList.remove("hidden");
+        }
+
+        async function performRegister() {
+            const name = document.getElementById("reg-name").value.trim();
+            const email = document.getElementById("reg-email").value.trim().toLowerCase();
+            const password = document.getElementById("reg-password").value;
+            const refCode = document.getElementById("reg-ref").value.trim();
+            const wallet = document.getElementById("reg-wallet").value.trim();
+
+            if (!name || !email || !password) return showToast("Please fill all required fields", true);
+
+            const result = await callAPI("register", { name, email, password, referralCode: refCode, walletAddress: wallet });
+            if (result) {
+                showToast("Registration successful! Please login.", false);
+                switchToLogin();
+            }
+        }
+
+        async function performLogin() {
+            const email = document.getElementById("login-email").value.trim().toLowerCase();
+            const password = document.getElementById("login-password").value;
+
+            const result = await callAPI("login", { email, password });
+            if (result && result.user) {
+                saveSession(result.user, result.sessionToken || "temp-token");
+                hideAuthModal();
+                renderHeader();
+                renderTabs();
+                navigateTo("home");
+                loadInitialData();
+                showToast("Welcome to Rida Network!", false);
+            }
+        }
+
+        // ================== DATA LOADING ==================
+        async function loadInitialData() {
+            if (!currentUser) return;
+            const profileData = await callAPI("getprofile");
+            if (profileData && profileData.profile) {
+                currentUser = profileData.profile;
+                saveSession(currentUser, sessionToken);
+                renderHeader();
+            }
+            renderProfile();
+        }
+
+        function renderProfile() {
+            if (!currentUser) return;
+            document.getElementById("profile-name").textContent = currentUser.name;
+            document.getElementById("profile-email").textContent = currentUser.email;
+            document.getElementById("profile-uid").textContent = currentUser.uid;
+            document.getElementById("profile-wallet").textContent = currentUser.walletAddress || "Not set";
+            document.getElementById("profile-referral").textContent = currentUser.referralCode || "N/A";
+            document.getElementById("profile-balance").innerHTML = `${parseFloat(currentUser.balance || 0).toFixed(4)} <span class="text-2xl text-white/60">RIDA</span>`;
+            document.getElementById("profile-avatar").textContent = currentUser.name[0].toUpperCase();
+        }
+
+        // ================== MINING ==================
+        function renderMining() {
+            clearInterval(miningTimer);
+            const actionDiv = document.getElementById("mining-action");
+            const statusDiv = document.getElementById("mining-status");
+            const countdownDiv = document.getElementById("countdown-overlay");
+
+            if (!currentUser.lastMiningStart || currentUser.lastMiningStart === "") {
+                actionDiv.innerHTML = `
+                    <button onclick="startMining()" class="w-full py-8 text-2xl font-bold bg-gradient-to-r from-[#00ff9d] to-cyan-400 text-black rounded-3xl">
+                        START MINING SESSION
+                    </button>`;
+                statusDiv.textContent = "Ready to Mine";
+                countdownDiv.classList.add("hidden");
+            } else {
+                const elapsed = Date.now() - parseInt(currentUser.lastMiningStart);
+                if (elapsed < 86400000) {
+                    const remaining = 86400000 - elapsed;
+                    actionDiv.innerHTML = `<p class="text-[#00ff9d] text-2xl font-medium">Mining in progress...</p>`;
+                    countdownDiv.classList.remove("hidden");
+                    startCountdown(remaining);
+                    statusDiv.textContent = "Mining Active";
+                } else {
+                    actionDiv.innerHTML = `
+                        <button onclick="claimMining()" class="w-full py-8 text-2xl font-bold bg-gradient-to-r from-amber-400 to-orange-500 text-black rounded-3xl">
+                            CLAIM 0.20 RIDA
+                        </button>`;
+                    statusDiv.textContent = "Ready to Claim";
+                    countdownDiv.classList.add("hidden");
+                }
+            }
+        }
+
+        function startCountdown(ms) {
+            clearInterval(miningTimer);
+            miningTimer = setInterval(() => {
+                ms -= 1000;
+                if (ms <= 0) {
+                    clearInterval(miningTimer);
+                    renderMining();
+                    return;
+                }
+                const h = Math.floor(ms / 3600000);
+                const m = Math.floor((ms % 3600000) / 60000);
+                const s = Math.floor((ms % 60000) / 1000);
+                document.getElementById("big-timer").textContent = 
+                    `\( {h.toString().padStart(2,'0')}: \){m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+            }, 1000);
+        }
+
+        async function startMining() {
+            const result = await callAPI("startmining");
+            if (result) {
+                currentUser.lastMiningStart = Date.now().toString();
+                showToast("Mining session started!", false);
+                renderMining();
+            }
+        }
+
+        async function claimMining() {
+            const result = await callAPI("claimmining");
+            if (result) {
+                currentUser.balance = (parseFloat(currentUser.balance) + 0.20).toFixed(2);
+                currentUser.lastMiningStart = "";
+                showToast("0.20 RIDA claimed successfully!", false);
+                renderMining();
+                renderHeader();
+            }
+        }
+
+        // ================== TRANSFER ==================
+        async function executeTransfer() {
+            const toUID = document.getElementById("transfer-uid").value.trim();
+            const amount = parseFloat(document.getElementById("transfer-amount").value);
+
+            if (!toUID || amount < 10) {
+                showToast("Invalid UID or amount (minimum 10 RIDA)", true);
+                return;
+            }
+
+            const result = await callAPI("transfer", { toUID, amount });
+            if (result) {
+                currentUser.balance = (parseFloat(currentUser.balance) - amount).toFixed(2);
+                showToast(result.message || "Transfer successful!", false);
+                document.getElementById("transfer-uid").value = "";
+                document.getElementById("transfer-amount").value = "";
+                renderHeader();
+            }
+        }
+
+        // ================== CHAT ==================
+        async function sendChatMessage() {
+            const input = document.getElementById("chat-input");
+            const msg = input.value.trim();
+            if (!msg) return;
+
+            await callAPI("sendmessage", { message: msg });
+            input.value = "";
+            loadChatMessages();
+        }
+
+        async function loadChatMessages() {
+            const data = await callAPI("getchats");
+            if (!data || !data.chats) return;
+
+            const container = document.getElementById("chat-window");
+            container.innerHTML = "";
+
+            data.chats.forEach(chat => {
+                const isMe = chat.FromEmail === currentUser.email;
+                const bubble = document.createElement("div");
+                bubble.className = `flex ${isMe ? 'justify-end' : 'justify-start'}`;
+                bubble.innerHTML = `
+                    <div class="${isMe ? 'bg-[#00ff9d] text-black' : 'bg-white/10'} max-w-[80%] px-5 py-3 rounded-3xl ${isMe ? 'rounded-tr-none' : 'rounded-tl-none'}">
+                        <p>${chat.Message}</p>
+                        <p class="text-[10px] opacity-70 text-right mt-1">${new Date(chat.Timestamp).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</p>
+                    </div>`;
+                container.appendChild(bubble);
+            });
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function startChatPolling() {
+            clearInterval(chatTimer);
+            loadChatMessages();
+            chatTimer = setInterval(() => {
+                if (currentScreen === "chat") loadChatMessages();
+            }, 5000);
+        }
+
+        // ================== ADMIN ==================
+        async function refreshAdminData() {
+            const data = await callAPI("adminaction", { subAction: "getAllUsers" });
+            if (!data || !data.users) return;
+
+            let html = `<table class="w-full"><thead><tr class="border-b"><th class="text-left py-4">UID</th><th>Name</th><th>Email</th><th>Balance</th><th>Status</th></tr></thead><tbody>`;
+            data.users.forEach(user => {
+                html += `<tr class="border-b border-white/10">
+                    <td class="py-4 font-mono">${user.uid}</td>
+                    <td>${user.name}</td>
+                    <td class="text-white/70">${user.email}</td>
+                    <td class="font-mono">${parseFloat(user.balance).toFixed(2)}</td>
+                    <td><span class="px-4 py-1 rounded-full text-xs \( {user.verificationStatus==='verified' ? 'bg-emerald-500 text-black' : 'bg-yellow-500 text-black'}"> \){user.verificationStatus}</span></td>
+                </tr>`;
+            });
+            html += `</tbody></table>`;
+            document.getElementById("admin-users").innerHTML = html;
+        }
+
+        // ================== BROADCAST & TOAST ==================
+        async function showBroadcastModal() {
+            const data = await callAPI("getbroadcasts");
+            if (!data || !data.broadcasts || data.broadcasts.length === 0) {
+                showToast("No announcements yet", false);
+                return;
+            }
+            alert("Latest: " + data.broadcasts[0].Message); // Simple alert for now
+        }
+
+        function showToast(message, isError = false) {
+            const toast = document.getElementById("toast");
+            document.getElementById("toast-text").textContent = message;
+            toast.style.backgroundColor = isError ? "#f43f5e" : "#00ff9d";
+            toast.style.color = isError ? "#fff" : "#000";
+            toast.classList.remove("hidden");
+            setTimeout(() => toast.classList.add("hidden"), 4000);
+        }
+
+        function copyToClipboard() {
+            if (currentUser && currentUser.referralCode) {
+                navigator.clipboard.writeText(currentUser.referralCode);
+                showToast("Referral code copied!", false);
+            }
+        }
+
+        function showUpdateWalletModal() {
+            const newWallet = prompt("Enter your new BSC BEP20 Wallet Address:");
+            if (newWallet) {
+                showToast("Wallet update feature coming soon in next update.", false);
+            }
+        }
+
+        // ================== INIT APP ==================
+        async function initApp() {
+            if (loadSession()) {
+                renderHeader();
+                renderTabs();
+                navigateTo("home");
+                await loadInitialData();
+            } else {
+                showAuthModal();
+            }
+            console.log("%cRida Network Frontend Loaded Successfully", "color:#00ff9d; font-size:14px");
+        }
+
+        window.onload = initApp;
+    </script>
 </body>
 </html>
