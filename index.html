@@ -66,6 +66,10 @@ button{
   padding:10px;
   border-radius:10px;
 }
+.broadcast-box{
+  max-height:150px;
+  overflow:auto;
+}
 </style>
 </head>
 <body>
@@ -99,14 +103,15 @@ button{
 
 <div class="card">
 <h3>Mining</h3>
-<div id="miningBox">Inactive</div>
+<div id="miningBox" class="mining">Inactive</div>
 <p id="timer"></p>
 <button onclick="mine()">Claim & Start Mining</button>
 </div>
 
 <div class="card">
 <h3>Broadcast</h3>
-<div id="broadcast"></div>
+<div class="broadcast-box" id="broadcast"></div>
+<button onclick="archiveBroadcast()">Archive</button>
 </div>
 </div>
 
@@ -228,6 +233,7 @@ body:JSON.stringify({action:"mine",uid:user.uid})
 .then(d=>{
 if(d.status==="success"){
 balance.innerText=d.balance;
+user.lastCheckIn=d.lastCheckIn;
 alert("Mining success!");
 }else alert(d.status);
 });
@@ -236,7 +242,8 @@ alert("Mining success!");
 // TIMER
 function updateTimer(){
 setInterval(()=>{
-let last=new Date(user.lastCheckIn||0);
+if(!user.lastCheckIn) {timer.innerText="Ready to mine!"; return;}
+let last=new Date(user.lastCheckIn);
 let now=new Date();
 let diff=86400000-(now-last);
 if(diff>0){
@@ -283,6 +290,10 @@ broadcast.innerHTML=d.data.map(x=>`<p>📢 ${x.msg}</p>`).join("");
 });
 }
 
+function archiveBroadcast(){
+alert("Broadcast archive is a placeholder (implement archive view in backend).");
+}
+
 // CHAT
 function sendMsg(){
 if(msg.value.trim()==="") return;
@@ -301,7 +312,7 @@ body:JSON.stringify({action:"getMsg",uid:user.uid})
 })
 .then(r=>r.json())
 .then(d=>{
-chatBox.innerHTML=d.data.map(x=>`<p>${x.from}: ${x.msg}</p>`).join("");
+chatBox.innerHTML=d.data.map(x=>`<p><b>${x.from}:</b> ${x.msg}</p>`).join("");
 });
 },3000);
 }
