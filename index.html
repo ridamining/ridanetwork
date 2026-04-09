@@ -358,4 +358,26 @@
         }
 
         function executeTransfer() {
-            show
+            showshowToast("Transfer feature is in demo mode", false);
+        }
+
+        function sendChatMessage() {
+            const input = document.getElementById("chat-input");
+            if (input.value.trim()) {
+                showToast("Message sent to admin (Demo)", false);
+                input.value = "";
+            }
+        }
+
+        // Initialize
+        window.onload = () => {
+            if (loadSession()) {
+                initAfterLogin();
+            } else {
+                document.getElementById("auth-modal").classList.remove("hidden");
+            }
+            console.log("%cRida Network - Final Polished Version Loaded", "color:#00ff9d");
+        };
+    </script>
+</body>
+</html>
