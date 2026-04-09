@@ -14,30 +14,24 @@
         .neon-text { text-shadow: 0 0 15px #00ff9d, 0 0 35px #00ff9d; }
         .glass { background: rgba(15,23,42,0.92); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.08); }
         .mining-ring { animation: miningPulse 3s infinite ease-in-out; }
-        .mining-active .mining-ring { animation: miningActive 2.2s infinite linear; }
-        @keyframes miningPulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.1); } }
-        @keyframes miningActive { from { transform: rotate(0deg) scale(1); } to { transform: rotate(360deg) scale(1.08); } }
+        .mining-active .mining-ring { animation: miningActive 2s infinite linear; }
+        @keyframes miningPulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.08); } }
+        @keyframes miningActive { from { transform: rotate(0deg) scale(1); } to { transform: rotate(360deg) scale(1.05); } }
         .tab-active { color: #00ff9d; border-bottom: 3px solid #00ff9d; font-weight: 600; }
         .spinner { animation: spin 1s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
-        
-        /* Mobile Improvements */
-        @media (max-width: 640px) {
-            .tab { padding: 12px 16px; font-size: 13px; }
-            .screen { padding-top: 20px; }
-        }
     </style>
 </head>
 <body class="text-white min-h-screen pb-20">
 
     <!-- HEADER -->
     <nav class="bg-[#111113] border-b border-white/10 sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+        <div class="max-w-7xl mx-auto px-5 py-4 flex items-center justify-between">
             <div class="flex items-center gap-x-3">
                 <div class="w-9 h-9 bg-[#00ff9d] text-black font-bold text-3xl flex items-center justify-center rounded-2xl rotate-12">R</div>
                 <h1 class="title-font text-3xl font-semibold tracking-tighter neon-text">RIDA NETWORK</h1>
             </div>
-            <div class="flex items-center gap-x-5">
+            <div class="flex items-center gap-x-6">
                 <div onclick="navigateTo('profile')" class="flex items-center gap-x-3 cursor-pointer">
                     <div id="header-avatar" class="w-9 h-9 bg-gradient-to-br from-[#00ff9d] to-emerald-500 rounded-2xl flex items-center justify-center font-bold text-black">U</div>
                     <div>
@@ -50,22 +44,29 @@
                     <span id="header-balance-value" class="font-mono font-semibold">0.00</span>
                     <span class="text-xs text-white/60">RIDA</span>
                 </div>
-                <button onclick="logout()" class="text-red-400 hover:text-red-500 text-sm font-medium">Logout</button>
+                <button onclick="logout()" class="text-red-400 hover:text-red-500">Logout</button>
             </div>
         </div>
-        <div class="max-w-7xl mx-auto px-4 border-t border-white/10 overflow-x-auto">
-            <div id="tab-bar" class="flex gap-x-6 text-sm whitespace-nowrap pb-2"></div>
+        <div class="max-w-7xl mx-auto px-5 border-t border-white/10 overflow-x-auto">
+            <div id="tab-bar" class="flex gap-x-8 text-sm pb-2"></div>
         </div>
     </nav>
 
-    <div class="max-w-7xl mx-auto px-4 pt-8">
+    <div class="max-w-7xl mx-auto px-5 pt-8">
 
         <!-- HOME -->
         <div id="screen-home" class="screen">
             <h2 class="text-5xl font-semibold title-font neon-text mb-1">Welcome back, <span id="welcome-name"></span></h2>
             <p class="text-white/60 mb-10">1 RIDA = 1 USDT • Total Supply: 5,000,000 RIDA</p>
 
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
+            <div class="glass rounded-3xl p-6 mb-8" onclick="showBroadcastModal()">
+                <div class="flex items-center gap-2 text-[#00ff9d] text-xs uppercase mb-2">
+                    <i class="fa-solid fa-bullhorn"></i> Announcement
+                </div>
+                <p id="latest-broadcast" class="text-sm"></p>
+            </div>
+
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div class="glass rounded-3xl p-6">
                     <p class="text-white/50 text-sm">Balance</p>
                     <p id="home-balance" class="text-5xl font-mono font-bold mt-2">0.00</p>
@@ -152,6 +153,16 @@
                 <button onclick="sendChatMessage()" class="w-14 h-14 bg-[#00ff9d] text-black rounded-3xl">Send</button>
             </div>
         </div>
+
+        <!-- ADMIN PANEL -->
+        <div id="screen-admin" class="screen hidden">
+            <h2 class="text-4xl font-semibold mb-8">Admin Control Panel</h2>
+            <div class="glass rounded-3xl p-8">
+                <p class="text-[#00ff9d] mb-4">Welcome Admin! You have full control.</p>
+                <button onclick="refreshAdminData()" class="mb-6 px-6 py-3 bg-white/10 hover:bg-white/20 rounded-3xl">Refresh All Users</button>
+                <div id="admin-content" class="min-h-[400px]"></div>
+            </div>
+        </div>
     </div>
 
     <!-- AUTH MODAL -->
@@ -222,26 +233,31 @@
             renderTabs();
             if (screen === 'profile') renderProfile();
             if (screen === 'mining') renderMining();
+            if (screen === 'admin') renderAdmin();
         }
 
         function renderTabs() {
-            const html = `
+            const isAdmin = currentUser && currentUser.email === "admin@rida.com";
+            let html = `
                 <button onclick="navigateTo('home')" class="tab px-6 py-4 ${currentScreen==='home'?'tab-active':''}">Home</button>
                 <button onclick="navigateTo('profile')" class="tab px-6 py-4 ${currentScreen==='profile'?'tab-active':''}">Profile</button>
                 <button onclick="navigateTo('mining')" class="tab px-6 py-4 ${currentScreen==='mining'?'tab-active':''}">Mine</button>
                 <button onclick="navigateTo('transfer')" class="tab px-6 py-4 ${currentScreen==='transfer'?'tab-active':''}">Transfer</button>
                 <button onclick="navigateTo('chat')" class="tab px-6 py-4 ${currentScreen==='chat'?'tab-active':''}">Chat</button>
             `;
+            if (isAdmin) {
+                html += `<button onclick="navigateTo('admin')" class="tab px-6 py-4 ${currentScreen==='admin'?'tab-active':''} text-[#00ff9d]">Admin</button>`;
+            }
             document.getElementById("tab-bar").innerHTML = html;
         }
 
         function performLogin() {
-            const email = document.getElementById("login-email").value.trim() || "user@rida.com";
+            const email = document.getElementById("login-email").value.trim().toLowerCase() || "user@rida.com";
             const user = {
                 name: email.split('@')[0] || "User",
                 email: email,
                 uid: "RIDA-" + Math.random().toString(36).substring(2, 10).toUpperCase(),
-                balance: 245.75,
+                balance: 0,
                 referralCode: "RIDA" + Math.random().toString(36).substring(2, 6).toUpperCase(),
                 walletAddress: "0x742d35Cc6634C0532925a3b8D7f8e3c8f8e3c8",
                 verificationStatus: "verified",
@@ -260,14 +276,14 @@
                 name: name,
                 email: email,
                 uid: "RIDA-" + Math.random().toString(36).substring(2, 10).toUpperCase(),
-                balance: 50.00,
+                balance: 0,
                 referralCode: "RIDA" + Math.random().toString(36).substring(2, 6).toUpperCase(),
                 walletAddress: "0x742d35Cc6634C0532925a3b8D7f8e3c8f8e3c8",
                 verificationStatus: "pending",
                 lastMiningStart: ""
             };
             saveSession(user);
-            showToast("Account created successfully!", false);
+            showToast("Account created! Please login.", false);
             switchToLogin();
         }
 
@@ -311,9 +327,10 @@
             if (!currentUser || !currentUser.referralCode) return;
             const link = `https://ridamining.github.io/ridanetwork/?ref=${currentUser.referralCode}`;
             navigator.clipboard.writeText(link);
-            showToast("Referral link copied! Share with friends.", false);
+            showToast("Referral link copied!", false);
         }
 
+        // Mining Logic (Fixed)
         function renderMining() {
             const actionArea = document.getElementById("mining-action-area");
             const countdownOverlay = document.getElementById("countdown-overlay");
@@ -357,12 +374,12 @@
         function startMining() {
             currentUser.lastMiningStart = Date.now().toString();
             saveSession(currentUser);
-            showToast("Mining session started! Come back after 24 hours to claim.", false);
+            showToast("Mining session started! Come back after 24 hours.", false);
             renderMining();
         }
 
         function claimMining() {
-            currentUser.balance = (parseFloat(currentUser.balance) + 0.20).toFixed(2);
+            currentUser.balance = (parseFloat(currentUser.balance || 0) + 0.20).toFixed(2);
             currentUser.lastMiningStart = "";
             saveSession(currentUser);
             showToast("0.20 RIDA claimed successfully!", false);
@@ -371,7 +388,7 @@
         }
 
         function executeTransfer() {
-            showToast("P2P Transfer completed successfully (Demo)", false);
+            showToast("P2P Transfer completed (Demo)", false);
         }
 
         function sendChatMessage() {
@@ -382,6 +399,16 @@
             }
         }
 
+        function showBroadcastModal() {
+            showToast("Network Announcement: Welcome to Rida Network! Mine daily and refer friends.", false);
+        }
+
+        function renderAdmin() {
+            const content = document.getElementById("admin-content") || document.createElement("div");
+            content.innerHTML = `<p class="text-[#00ff9d] text-xl">Admin Panel Active</p><p class="mt-4">You can manage users here (Demo).</p>`;
+            navigateTo('admin');
+        }
+
         // Initialize
         window.onload = () => {
             if (loadSession()) {
@@ -389,7 +416,7 @@
             } else {
                 document.getElementById("auth-modal").classList.remove("hidden");
             }
-            console.log("%cRida Network - Master Upgrade Complete", "color:#00ff9d");
+            console.log("%cRida Network - Final Master Version Loaded", "color:#00ff9d");
         };
     </script>
 </body>
