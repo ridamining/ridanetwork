@@ -18,6 +18,8 @@
         @keyframes miningPulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.1); } }
         @keyframes miningActive { from { transform: rotate(0deg) scale(1); } to { transform: rotate(360deg) scale(1.08); } }
         .tab-active { color: #00ff9d; border-bottom: 3px solid #00ff9d; font-weight: 600; }
+        .spinner { animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body class="text-white min-h-screen pb-20">
@@ -93,7 +95,7 @@
                         <p id="profile-wallet" class="font-mono break-all mt-2"></p>
                     </div>
                     <div class="glass rounded-3xl p-6">
-                        <p class="text-xs text-white/50">Referral Link</p>
+                        <p class="text-xs text-white/50">Your Referral Link</p>
                         <div class="flex justify-between items-center mt-2">
                             <p id="profile-referral" class="font-mono text-2xl font-bold text-[#00ff9d]"></p>
                             <button onclick="copyReferral()" class="px-5 py-2 bg-[#00ff9d]/10 text-[#00ff9d] rounded-2xl text-sm">COPY LINK</button>
@@ -131,7 +133,11 @@
                     <input id="transfer-amount" type="number" placeholder="Amount (min 10)" class="w-full bg-[#1a1a1f] border border-white/10 rounded-3xl px-6 py-5 text-4xl font-mono">
                     <span class="absolute right-6 top-1/2 -translate-y-1/2 text-white/40">RIDA</span>
                 </div>
-                <button onclick="executeTransfer()" class="w-full py-7 text-xl font-semibold bg-gradient-to-r from-[#00ff9d] to-cyan-400 text-black rounded-3xl">SEND RIDA</button>
+                <button onclick="executeTransfer()" id="transfer-btn" 
+                        class="w-full py-7 text-xl font-semibold bg-gradient-to-r from-[#00ff9d] to-cyan-400 text-black rounded-3xl flex items-center justify-center gap-3">
+                    <span id="transfer-text">SEND RIDA</span>
+                    <i id="transfer-spinner" class="fa-solid fa-spinner spinner hidden"></i>
+                </button>
             </div>
         </div>
 
@@ -140,8 +146,10 @@
             <h2 class="text-4xl font-semibold mb-6">Support Chat</h2>
             <div id="chat-window" class="glass h-96 rounded-3xl p-6 overflow-y-auto mb-4"></div>
             <div class="flex gap-3">
-                <input id="chat-input" placeholder="Type message..." class="flex-1 bg-[#1a1a1f] border border-white/10 rounded-3xl px-6 py-5">
-                <button onclick="sendChatMessage()" class="w-14 h-14 bg-[#00ff9d] text-black rounded-3xl">Send</button>
+                <input id="chat-input" placeholder="Type message to admin..." class="flex-1 bg-[#1a1a1f] border border-white/10 rounded-3xl px-6 py-5">
+                <button onclick="sendChatMessage()" id="chat-btn" class="w-14 h-14 bg-[#00ff9d] text-black rounded-3xl flex items-center justify-center">
+                    <i class="fa-solid fa-paper-plane"></i>
+                </button>
             </div>
         </div>
     </div>
@@ -158,15 +166,21 @@
             <div id="login-form">
                 <input id="login-email" type="email" placeholder="Email" class="w-full mb-4 bg-[#1a1a1f] border border-white/10 rounded-3xl px-6 py-5">
                 <input id="login-password" type="password" placeholder="Password" class="w-full mb-8 bg-[#1a1a1f] border border-white/10 rounded-3xl px-6 py-5">
-                <button onclick="performLogin()" class="w-full py-6 bg-[#00ff9d] text-black font-semibold rounded-3xl">LOGIN</button>
-                <p onclick="switchToRegister()" class="text-center mt-6 text-[#00ff9d] cursor-pointer">Register</p>
+                <button onclick="performLogin()" id="login-btn" class="w-full py-6 bg-[#00ff9d] text-black font-semibold rounded-3xl flex items-center justify-center gap-3">
+                    <span id="login-text">LOGIN</span>
+                    <i id="login-spinner" class="fa-solid fa-spinner spinner hidden"></i>
+                </button>
+                <p onclick="switchToRegister()" class="text-center mt-6 text-[#00ff9d] cursor-pointer">Don't have an account? Register</p>
             </div>
             <div id="register-form" class="hidden">
                 <input id="reg-name" placeholder="Full Name" class="w-full mb-4 bg-[#1a1a1f] border border-white/10 rounded-3xl px-6 py-5">
                 <input id="reg-email" type="email" placeholder="Email" class="w-full mb-4 bg-[#1a1a1f] border border-white/10 rounded-3xl px-6 py-5">
                 <input id="reg-password" type="password" placeholder="Password" class="w-full mb-8 bg-[#1a1a1f] border border-white/10 rounded-3xl px-6 py-5">
-                <button onclick="performRegister()" class="w-full py-6 bg-[#00ff9d] text-black font-semibold rounded-3xl">REGISTER</button>
-                <p onclick="switchToLogin()" class="text-center mt-6 text-[#00ff9d] cursor-pointer">Login</p>
+                <button onclick="performRegister()" id="register-btn" class="w-full py-6 bg-[#00ff9d] text-black font-semibold rounded-3xl flex items-center justify-center gap-3">
+                    <span id="register-text">REGISTER</span>
+                    <i id="register-spinner" class="fa-solid fa-spinner spinner hidden"></i>
+                </button>
+                <p onclick="switchToLogin()" class="text-center mt-6 text-[#00ff9d] cursor-pointer">Already have an account? Login</p>
             </div>
         </div>
     </div>
@@ -177,6 +191,8 @@
     </div>
 
     <script>
+        const API_URL = "https://script.google.com/macros/s/AKfycbxbLpBFvHBlJhsko6DjDHnCs4KhMykP_f8bLeEn5TzknFxaQQhfHa-JR5EBD6ixCtVJ/exec";
+
         let currentUser = null;
         let currentScreen = "home";
 
@@ -226,44 +242,67 @@
             document.getElementById("tab-bar").innerHTML = html;
         }
 
+        // Login with loading spinner
         async function performLogin() {
+            const btn = document.getElementById("login-btn");
+            const text = document.getElementById("login-text");
+            const spinner = document.getElementById("login-spinner");
+            text.classList.add("hidden");
+            spinner.classList.remove("hidden");
+
             const email = document.getElementById("login-email").value.trim() || "user@rida.com";
             const password = document.getElementById("login-password").value || "123";
-            
-            // Simulate successful login with dynamic data
+
+            // Simulate API call
+            await new Promise(r => setTimeout(r, 800));
+
             const user = {
                 name: email.split('@')[0] || "User",
                 email: email,
                 uid: "RIDA-" + Math.random().toString(36).substring(2, 10).toUpperCase(),
-                balance: 125.50,
+                balance: 245.75,
                 referralCode: "RIDA" + Math.random().toString(36).substring(2, 6).toUpperCase(),
-                walletAddress: "0x" + Math.random().toString(36).substring(2, 10) + "...",
+                walletAddress: "0x742d35Cc6634C0532925a3b8D7f8e3c8f8e3c8f8",
                 verificationStatus: "verified"
             };
-            
+
             saveSession(user);
             document.getElementById("auth-modal").classList.add("hidden");
             initAfterLogin();
             showToast("Login successful!", false);
+
+            text.classList.remove("hidden");
+            spinner.classList.add("hidden");
         }
 
         async function performRegister() {
+            const btn = document.getElementById("register-btn");
+            const text = document.getElementById("register-text");
+            const spinner = document.getElementById("register-spinner");
+            text.classList.add("hidden");
+            spinner.classList.remove("hidden");
+
             const name = document.getElementById("reg-name").value.trim() || "New User";
             const email = document.getElementById("reg-email").value.trim() || "new@rida.com";
-            
+
+            await new Promise(r => setTimeout(r, 800));
+
             const user = {
                 name: name,
                 email: email,
                 uid: "RIDA-" + Math.random().toString(36).substring(2, 10).toUpperCase(),
-                balance: 25.00,
+                balance: 50.00,
                 referralCode: "RIDA" + Math.random().toString(36).substring(2, 6).toUpperCase(),
-                walletAddress: "0x" + Math.random().toString(36).substring(2, 10) + "...",
+                walletAddress: "0x742d35Cc6634C0532925a3b8D7f8e3c8f8e3c8f8",
                 verificationStatus: "pending"
             };
-            
+
             saveSession(user);
-            showToast("Account created successfully! Please login.", false);
+            showToast("Account created! Please login.", false);
             switchToLogin();
+
+            text.classList.remove("hidden");
+            spinner.classList.add("hidden");
         }
 
         function switchToRegister() {
@@ -306,7 +345,7 @@
             if (!currentUser || !currentUser.referralCode) return;
             const link = `https://ridamining.github.io/ridanetwork/?ref=${currentUser.referralCode}`;
             navigator.clipboard.writeText(link);
-            showToast("Referral link copied to clipboard!", false);
+            showToast("Referral link copied! Share it with friends.", false);
         }
 
         function renderMining() {
@@ -315,18 +354,8 @@
         }
 
         function startMiningDemo() {
-            showToast("Mining session started (demo)", false);
+            showToast("Mining session started! (Demo mode - 0.20 RIDA will be added after 24h)", false);
         }
 
-        // Initialize
-        window.onload = () => {
-            if (loadSession()) {
-                initAfterLogin();
-            } else {
-                document.getElementById("auth-modal").classList.remove("hidden");
-            }
-            console.log("%cRida Network - Upgraded UI Loaded", "color:#00ff9d");
-        };
-    </script>
-</body>
-</html>
+        function executeTransfer() {
+            show
