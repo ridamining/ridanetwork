@@ -93,7 +93,7 @@
                         <p id="profile-wallet" class="font-mono break-all mt-2"></p>
                     </div>
                     <div class="glass rounded-3xl p-6">
-                        <p class="text-xs text-white/50">Your Referral Link</p>
+                        <p class="text-xs text-white/50">Referral Link</p>
                         <div class="flex justify-between items-center mt-2">
                             <p id="profile-referral" class="font-mono text-2xl font-bold text-[#00ff9d]"></p>
                             <button onclick="copyReferral()" class="px-5 py-2 bg-[#00ff9d]/10 text-[#00ff9d] rounded-2xl text-sm">COPY LINK</button>
@@ -177,30 +177,8 @@
     </div>
 
     <script>
-        const API_URL = "https://script.google.com/macros/s/AKfycbxbLpBFvHBlJhsko6DjDHnCs4KhMykP_f8bLeEn5TzknFxaQQhfHa-JR5EBD6ixCtVJ/exec";
-
         let currentUser = null;
-
-        async function callAPI(action, payload = {}) {
-            try {
-                const body = { action, ...payload };
-                if (currentUser) body.email = currentUser.email;
-
-                const res = await fetch(API_URL, {
-                    method: "POST",
-                    mode: "no-cors",
-                    headers: { "Content-Type": "text/plain" },
-                    body: JSON.stringify(body)
-                });
-
-                // With no-cors we can't read response, so we assume success for demo
-                showToast("Request sent to backend", false);
-                return { success: true };
-            } catch (e) {
-                showToast("Cannot reach backend", true);
-                return { success: false };
-            }
-        }
+        let currentScreen = "home";
 
         function showToast(msg, isError = false) {
             const toast = document.getElementById("toast");
@@ -231,23 +209,60 @@
             document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
             const target = document.getElementById(`screen-${screen}`);
             if (target) target.classList.remove('hidden');
+            currentScreen = screen;
+            renderTabs();
+            if (screen === 'profile') renderProfile();
+            if (screen === 'mining') renderMining();
+        }
+
+        function renderTabs() {
+            const html = `
+                <button onclick="navigateTo('home')" class="tab px-6 py-4 ${currentScreen==='home'?'tab-active':''}">Home</button>
+                <button onclick="navigateTo('profile')" class="tab px-6 py-4 ${currentScreen==='profile'?'tab-active':''}">Profile</button>
+                <button onclick="navigateTo('mining')" class="tab px-6 py-4 ${currentScreen==='mining'?'tab-active':''}">Mine</button>
+                <button onclick="navigateTo('transfer')" class="tab px-6 py-4 ${currentScreen==='transfer'?'tab-active':''}">Transfer</button>
+                <button onclick="navigateTo('chat')" class="tab px-6 py-4 ${currentScreen==='chat'?'tab-active':''}">Chat</button>
+            `;
+            document.getElementById("tab-bar").innerHTML = html;
         }
 
         async function performLogin() {
-            const email = document.getElementById("login-email").value.trim().toLowerCase() || "test@rida.com";
+            const email = document.getElementById("login-email").value.trim() || "user@rida.com";
             const password = document.getElementById("login-password").value || "123";
-            await callAPI("login", { email, password });
-            saveSession({ name: "Test User", email, uid: "RIDA-TEST123", balance: 250, referralCode: "RIDA1234" });
+            
+            // Simulate successful login with dynamic data
+            const user = {
+                name: email.split('@')[0] || "User",
+                email: email,
+                uid: "RIDA-" + Math.random().toString(36).substring(2, 10).toUpperCase(),
+                balance: 125.50,
+                referralCode: "RIDA" + Math.random().toString(36).substring(2, 6).toUpperCase(),
+                walletAddress: "0x" + Math.random().toString(36).substring(2, 10) + "...",
+                verificationStatus: "verified"
+            };
+            
+            saveSession(user);
             document.getElementById("auth-modal").classList.add("hidden");
             initAfterLogin();
+            showToast("Login successful!", false);
         }
 
         async function performRegister() {
-            const name = document.getElementById("reg-name").value.trim() || "Test User";
-            const email = document.getElementById("reg-email").value.trim().toLowerCase() || "test@rida.com";
-            const password = document.getElementById("reg-password").value || "123";
-            await callAPI("register", { name, email, password });
-            showToast("Registration successful! Please login.", false);
+            const name = document.getElementById("reg-name").value.trim() || "New User";
+            const email = document.getElementById("reg-email").value.trim() || "new@rida.com";
+            
+            const user = {
+                name: name,
+                email: email,
+                uid: "RIDA-" + Math.random().toString(36).substring(2, 10).toUpperCase(),
+                balance: 25.00,
+                referralCode: "RIDA" + Math.random().toString(36).substring(2, 6).toUpperCase(),
+                walletAddress: "0x" + Math.random().toString(36).substring(2, 10) + "...",
+                verificationStatus: "pending"
+            };
+            
+            saveSession(user);
+            showToast("Account created successfully! Please login.", false);
             switchToLogin();
         }
 
@@ -265,7 +280,6 @@
             renderHeader();
             renderTabs();
             navigateTo("home");
-            showToast("Logged in successfully!", false);
         }
 
         function renderHeader() {
@@ -277,20 +291,9 @@
             document.getElementById("welcome-name").textContent = currentUser.name ? currentUser.name.split(" ")[0] : "";
         }
 
-        function renderTabs() {
-            const html = `
-                <button onclick="navigateTo('home')" class="tab px-6 py-4 ${currentScreen==='home'?'tab-active':''}">Home</button>
-                <button onclick="navigateTo('profile')" class="tab px-6 py-4 ${currentScreen==='profile'?'tab-active':''}">Profile</button>
-                <button onclick="navigateTo('mining')" class="tab px-6 py-4 ${currentScreen==='mining'?'tab-active':''}">Mine</button>
-                <button onclick="navigateTo('transfer')" class="tab px-6 py-4 ${currentScreen==='transfer'?'tab-active':''}">Transfer</button>
-                <button onclick="navigateTo('chat')" class="tab px-6 py-4 ${currentScreen==='chat'?'tab-active':''}">Chat</button>
-            `;
-            document.getElementById("tab-bar").innerHTML = html;
-        }
-
         function renderProfile() {
             if (!currentUser) return;
-            document.getElementById("profile-name").textContent = currentUser.name || "User";
+            document.getElementById("profile-name").textContent = currentUser.name || "";
             document.getElementById("profile-email").textContent = currentUser.email || "";
             document.getElementById("profile-uid").textContent = currentUser.uid || "";
             document.getElementById("profile-wallet").textContent = currentUser.walletAddress || "Not set";
@@ -303,28 +306,26 @@
             if (!currentUser || !currentUser.referralCode) return;
             const link = `https://ridamining.github.io/ridanetwork/?ref=${currentUser.referralCode}`;
             navigator.clipboard.writeText(link);
-            showToast("Referral link copied!", false);
+            showToast("Referral link copied to clipboard!", false);
         }
 
-        // Mining (demo)
         function renderMining() {
             const actionArea = document.getElementById("mining-action-area");
-            actionArea.innerHTML = `<button onclick="startMiningDemo()" class="w-full py-8 text-2xl font-bold bg-gradient-to-r from-[#00ff9d] to-cyan-400 text-black rounded-3xl">START MINING (Demo)</button>`;
+            actionArea.innerHTML = `<button onclick="startMiningDemo()" class="w-full py-8 text-2xl font-bold bg-gradient-to-r from-[#00ff9d] to-cyan-400 text-black rounded-3xl">START MINING SESSION</button>`;
         }
 
         function startMiningDemo() {
-            showToast("Mining started (demo mode)", false);
+            showToast("Mining session started (demo)", false);
         }
 
         // Initialize
-        let currentScreen = "home";
         window.onload = () => {
             if (loadSession()) {
                 initAfterLogin();
             } else {
                 document.getElementById("auth-modal").classList.remove("hidden");
             }
-            console.log("%cRida Network Final UI Loaded", "color:#00ff9d");
+            console.log("%cRida Network - Upgraded UI Loaded", "color:#00ff9d");
         };
     </script>
 </body>
