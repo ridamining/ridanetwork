@@ -9,29 +9,19 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap');
         :root { --primary: #00ff9d; }
-        body { 
-            font-family: 'Inter', system-ui, sans-serif; 
-            background: linear-gradient(180deg, #0a0a0a 0%, #111113 100%);
-        }
+        body { font-family: 'Inter', system-ui, sans-serif; background: linear-gradient(180deg, #0a0a0a, #111113); }
         .title-font { font-family: 'Space Grotesk', sans-serif; }
         .neon-text { text-shadow: 0 0 15px #00ff9d, 0 0 35px #00ff9d; }
-        .glass { 
-            background: rgba(15, 23, 42, 0.92); 
-            backdrop-filter: blur(20px); 
-            border: 1px solid rgba(255,255,255,0.08); 
-        }
+        .glass { background: rgba(15,23,42,0.92); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.08); }
         .mining-ring { animation: miningPulse 3s infinite ease-in-out; }
         .mining-active .mining-ring { animation: miningActive 2.2s infinite linear; }
         @keyframes miningPulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.1); } }
         @keyframes miningActive { from { transform: rotate(0deg) scale(1); } to { transform: rotate(360deg) scale(1.08); } }
         .tab-active { color: #00ff9d; border-bottom: 3px solid #00ff9d; font-weight: 600; }
-        .spinner { animation: spin 1s linear infinite; }
-        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body class="text-white min-h-screen pb-20">
 
-    <!-- HEADER -->
     <nav class="bg-[#111113] border-b border-white/10 sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-5 py-4 flex items-center justify-between">
             <div class="flex items-center gap-x-3">
@@ -41,413 +31,58 @@
             <div class="flex items-center gap-x-6">
                 <div onclick="navigateTo('profile')" class="flex items-center gap-x-3 cursor-pointer">
                     <div id="header-avatar" class="w-9 h-9 bg-gradient-to-br from-[#00ff9d] to-emerald-500 rounded-2xl flex items-center justify-center font-bold text-black">U</div>
-                    <div>
-                        <p id="header-name" class="font-medium text-sm">User</p>
-                        <p id="header-uid" class="font-mono text-xs text-white/50"></p>
-                    </div>
+                    <div><p id="header-name" class="font-medium text-sm">User</p></div>
                 </div>
-                <div onclick="navigateTo('profile')" class="bg-[#1a1a1f] hover:bg-[#00ff9d]/10 border border-white/10 px-5 py-2.5 rounded-3xl flex items-center gap-x-2 cursor-pointer">
-                    <i class="fa-solid fa-coins text-[#00ff9d]"></i>
-                    <span id="header-balance-value" class="font-mono font-semibold">0.00</span>
-                    <span class="text-xs text-white/60">RIDA</span>
-                </div>
-                <button onclick="logout()" class="text-red-400 hover:text-red-500">Logout</button>
+                <button onclick="logout()" class="text-red-400">Logout</button>
             </div>
-        </div>
-        <div class="max-w-7xl mx-auto px-5 border-t border-white/10 overflow-x-auto">
-            <div id="tab-bar" class="flex gap-x-8 text-sm pb-2"></div>
         </div>
     </nav>
 
-    <div class="max-w-7xl mx-auto px-5 pt-8">
-
-        <!-- HOME -->
-        <div id="screen-home" class="screen">
-            <h2 class="text-5xl font-semibold title-font neon-text mb-1">Welcome back, <span id="welcome-name"></span></h2>
-            <p class="text-white/60 mb-10">1 RIDA = 1 USDT • Total Supply: 5,000,000 RIDA</p>
-
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-5 mb-10">
-                <div class="glass rounded-3xl p-6">
-                    <p class="text-white/50 text-sm">Balance</p>
-                    <p id="home-balance" class="text-5xl font-mono font-bold mt-2">0.00</p>
-                    <p class="text-[#00ff9d]">RIDA • <span id="home-usdt">0.00 USDT</span></p>
-                </div>
-                <div class="glass rounded-3xl p-6">
-                    <p class="text-white/50 text-sm">Daily Mining</p>
-                    <p class="text-4xl font-semibold text-[#00ff9d]">0.20 RIDA</p>
-                </div>
-            </div>
-
-            <div onclick="showBroadcastModal()" class="glass rounded-3xl p-6 cursor-pointer">
-                <p id="latest-broadcast" class="text-sm"></p>
-            </div>
-        </div>
-
-        <!-- PROFILE -->
-        <div id="screen-profile" class="screen hidden">
-            <h2 class="text-4xl font-semibold mb-8">My Profile</h2>
-            <div class="glass rounded-3xl p-8 max-w-2xl">
-                <div class="flex items-center gap-6">
-                    <div id="profile-avatar" class="w-24 h-24 bg-gradient-to-br from-[#00ff9d] to-emerald-500 rounded-3xl flex items-center justify-center text-6xl font-bold text-black"></div>
-                    <div class="flex-1">
-                        <h3 id="profile-name" class="text-3xl font-semibold"></h3>
-                        <p id="profile-email" class="text-white/60"></p>
-                        <p id="profile-uid" class="font-mono text-[#00ff9d]"></p>
-                    </div>
-                    <div class="text-right">
-                        <p class="text-white/50 text-sm">Balance</p>
-                        <p id="profile-balance" class="text-5xl font-mono font-bold text-[#00ff9d]"></p>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-10">
-                    <div class="glass rounded-3xl p-6">
-                        <p class="text-xs text-white/50">Wallet Address</p>
-                        <p id="profile-wallet" class="font-mono break-all mt-2"></p>
-                    </div>
-                    <div class="glass rounded-3xl p-6">
-                        <p class="text-xs text-white/50">Referral Code</p>
-                        <div class="flex justify-between items-center mt-2">
-                            <p id="profile-referral" class="font-mono text-2xl font-bold text-[#00ff9d]"></p>
-                            <button onclick="copyReferral()" class="px-5 py-2 bg-[#00ff9d]/10 text-[#00ff9d] rounded-2xl text-sm">COPY LINK</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- MINING -->
-        <div id="screen-mining" class="screen hidden text-center">
-            <h2 class="text-5xl title-font neon-text mb-3">RIDA MINER</h2>
-            <p class="text-white/60 mb-10">Mine 0.20 RIDA every 24 hours</p>
-
-            <div id="mining-container" class="relative mx-auto w-80 h-80 mb-12">
-                <div id="mining-circle" class="absolute inset-0 border-8 border-[#00ff9d]/30 rounded-full flex items-center justify-center mining-ring">
-                    <i id="mining-icon" class="fa-solid fa-cube text-8xl text-[#00ff9d]"></i>
-                </div>
-                <div id="countdown-overlay" class="hidden absolute inset-0 flex items-center justify-center bg-black/40 rounded-full">
-                    <div class="text-center">
-                        <div id="big-timer" class="font-mono text-7xl font-bold">23:59:59</div>
-                        <p class="text-xs text-white/50 mt-2">UNTIL CLAIM</p>
-                    </div>
-                </div>
-            </div>
-            <div id="mining-action-area" class="max-w-sm mx-auto"></div>
-        </div>
-
-        <!-- TRANSFER -->
-        <div id="screen-transfer" class="screen hidden">
-            <h2 class="text-4xl font-semibold mb-8">P2P Transfer</h2>
-            <div class="glass rounded-3xl p-8 max-w-lg mx-auto">
-                <input id="transfer-uid" placeholder="Recipient UID (RIDA-...)" class="w-full mb-6 bg-[#1a1a1f] border border-white/10 rounded-3xl px-6 py-5 text-lg font-mono">
-                <div class="relative mb-8">
-                    <input id="transfer-amount" type="number" placeholder="Amount (min 10)" class="w-full bg-[#1a1a1f] border border-white/10 rounded-3xl px-6 py-5 text-4xl font-mono">
-                    <span class="absolute right-6 top-1/2 -translate-y-1/2 text-white/40">RIDA</span>
-                </div>
-                <button onclick="executeTransfer()" class="w-full py-7 text-xl font-semibold bg-gradient-to-r from-[#00ff9d] to-cyan-400 text-black rounded-3xl">SEND RIDA</button>
-            </div>
-        </div>
-
-        <!-- CHAT -->
-        <div id="screen-chat" class="screen hidden">
-            <h2 class="text-4xl font-semibold mb-6">Support Chat</h2>
-            <div id="chat-window" class="glass h-96 rounded-3xl p-6 overflow-y-auto mb-4"></div>
-            <div class="flex gap-3">
-                <input id="chat-input" placeholder="Type message to admin..." class="flex-1 bg-[#1a1a1f] border border-white/10 rounded-3xl px-6 py-5">
-                <button onclick="sendChatMessage()" class="w-14 h-14 bg-[#00ff9d] text-black rounded-3xl flex items-center justify-center">
-                    <i class="fa-solid fa-paper-plane"></i>
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- AUTH MODAL -->
-    <div id="auth-modal" class="fixed inset-0 bg-black/90 flex items-center justify-center z-[9999]">
-        <div class="glass max-w-md w-full mx-4 rounded-3xl p-8">
-            <div class="flex justify-center mb-8">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 bg-[#00ff9d] rounded-2xl flex items-center justify-center text-4xl text-black rotate-12">R</div>
-                    <h1 class="title-font text-4xl font-bold neon-text">RIDA NETWORK</h1>
-                </div>
-            </div>
-            <div id="login-form">
-                <input id="login-email" type="email" placeholder="Email" class="w-full mb-4 bg-[#1a1a1f] border border-white/10 rounded-3xl px-6 py-5">
-                <input id="login-password" type="password" placeholder="Password" class="w-full mb-8 bg-[#1a1a1f] border border-white/10 rounded-3xl px-6 py-5">
-                <button onclick="performLogin()" class="w-full py-6 bg-[#00ff9d] text-black font-semibold rounded-3xl">LOGIN</button>
-                <p onclick="switchToRegister()" class="text-center mt-6 text-[#00ff9d] cursor-pointer">Don't have an account? Register</p>
-            </div>
-            <div id="register-form" class="hidden">
-                <input id="reg-name" placeholder="Full Name" class="w-full mb-4 bg-[#1a1a1f] border border-white/10 rounded-3xl px-6 py-5">
-                <input id="reg-email" type="email" placeholder="Email" class="w-full mb-4 bg-[#1a1a1f] border border-white/10 rounded-3xl px-6 py-5">
-                <input id="reg-password" type="password" placeholder="Password" class="w-full mb-8 bg-[#1a1a1f] border border-white/10 rounded-3xl px-6 py-5">
-                <button onclick="performRegister()" class="w-full py-6 bg-[#00ff9d] text-black font-semibold rounded-3xl">REGISTER</button>
-                <p onclick="switchToLogin()" class="text-center mt-6 text-[#00ff9d] cursor-pointer">Already have an account? Login</p>
-            </div>
-        </div>
-    </div>
-
-    <!-- Toast -->
-    <div id="toast" class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 glass px-8 py-4 rounded-3xl shadow-2xl z-[11000]">
-        <span id="toast-text"></span>
+    <div class="max-w-7xl mx-auto px-5 pt-8 text-center">
+        <button onclick="testConnection()" 
+                class="bg-yellow-400 hover:bg-yellow-300 text-black px-10 py-5 rounded-3xl font-bold text-lg mb-8">
+            🔄 TEST BACKEND CONNECTION (Click this first)
+        </button>
+        <p id="status" class="text-lg font-medium"></p>
     </div>
 
     <script>
         const API_URL = "https://script.google.com/macros/s/AKfycbxbLpBFvHBlJhsko6DjDHnCs4KhMykP_f8bLeEn5TzknFxaQQhfHa-JR5EBD6ixCtVJ/exec";
 
-        let currentUser = null;
-        let currentScreen = "home";
-        let miningTimer = null;
+        async function testConnection() {
+            const status = document.getElementById("status");
+            status.innerHTML = "Testing connection...";
 
-        async function callAPI(action, payload = {}) {
             try {
-                const body = { action, ...payload };
-                if (currentUser) body.email = currentUser.email;
-
-                const res = await fetch(API_URL, {
+                const response = await fetch(API_URL, {
                     method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(body)
+                    headers: { "Content-Type": "text/plain;charset=utf-8" },   // This fixes CORS
+                    body: JSON.stringify({ action: "login", email: "test@rida.com", password: "123" })
                 });
 
-                const data = await res.json();
-                if (!data.success) {
-                    showToast(data.error || "Operation failed", true);
-                    return null;
-                }
-                return data;
-            } catch (e) {
-                showToast("Cannot connect to backend. Please check deployment.", true);
-                return null;
-            }
-        }
+                const text = await response.text();
+                console.log("Backend raw response:", text);
 
-        function showToast(msg, isError = false) {
-            const toast = document.getElementById("toast");
-            document.getElementById("toast-text").textContent = msg;
-            toast.style.background = isError ? "#ef4444" : "#00ff9d";
-            toast.style.color = isError ? "#fff" : "#000";
-            toast.classList.remove("hidden");
-            setTimeout(() => toast.classList.add("hidden"), 4000);
-        }
+                let data = {};
+                try { data = JSON.parse(text); } catch(e) {}
 
-        function saveSession(user) {
-            currentUser = user;
-            localStorage.setItem("rida_user", JSON.stringify(user));
-        }
-
-        function loadSession() {
-            const saved = localStorage.getItem("rida_user");
-            if (saved) {
-                currentUser = JSON.parse(saved);
-                return true;
-            }
-            return false;
-        }
-
-        function logout() {
-            localStorage.clear();
-            location.reload();
-        }
-
-        function navigateTo(screen) {
-            document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
-            const target = document.getElementById(`screen-${screen}`);
-            if (target) target.classList.remove('hidden');
-            currentScreen = screen;
-            renderTabs();
-            if (screen === 'profile') renderProfile();
-            if (screen === 'mining') renderMining();
-        }
-
-        function renderTabs() {
-            const html = `
-                <button onclick="navigateTo('home')" class="tab px-6 py-4 ${currentScreen==='home'?'tab-active':''}">Home</button>
-                <button onclick="navigateTo('profile')" class="tab px-6 py-4 ${currentScreen==='profile'?'tab-active':''}">Profile</button>
-                <button onclick="navigateTo('mining')" class="tab px-6 py-4 ${currentScreen==='mining'?'tab-active':''}">Mine</button>
-                <button onclick="navigateTo('transfer')" class="tab px-6 py-4 ${currentScreen==='transfer'?'tab-active':''}">Transfer</button>
-                <button onclick="navigateTo('chat')" class="tab px-6 py-4 ${currentScreen==='chat'?'tab-active':''}">Chat</button>
-            `;
-            document.getElementById("tab-bar").innerHTML = html;
-        }
-
-        async function performLogin() {
-            const email = document.getElementById("login-email").value.trim().toLowerCase();
-            const password = document.getElementById("login-password").value;
-
-            const result = await callAPI("login", { email, password });
-            if (result && result.user) {
-                saveSession(result.user);
-                document.getElementById("auth-modal").classList.add("hidden");
-                initAfterLogin();
-                showToast("Welcome to Rida Network!", false);
-            }
-        }
-
-        async function performRegister() {
-            const name = document.getElementById("reg-name").value.trim();
-            const email = document.getElementById("reg-email").value.trim().toLowerCase();
-            const password = document.getElementById("reg-password").value;
-
-            const result = await callAPI("register", { name, email, password });
-            if (result && result.success) {
-                showToast("Registration successful! Please login.", false);
-                switchToLogin();
-            }
-        }
-
-        function switchToRegister() {
-            document.getElementById("login-form").classList.add("hidden");
-            document.getElementById("register-form").classList.remove("hidden");
-        }
-
-        function switchToLogin() {
-            document.getElementById("register-form").classList.add("hidden");
-            document.getElementById("login-form").classList.remove("hidden");
-        }
-
-        function initAfterLogin() {
-            renderHeader();
-            renderTabs();
-            navigateTo("home");
-            loadDashboardData();
-        }
-
-        function renderHeader() {
-            if (!currentUser) return;
-            document.getElementById("header-name").textContent = currentUser.name ? currentUser.name.split(" ")[0] : "User";
-            document.getElementById("header-uid").textContent = currentUser.uid || "";
-            document.getElementById("header-balance-value").textContent = parseFloat(currentUser.balance || 0).toFixed(2);
-            document.getElementById("header-avatar").textContent = currentUser.name ? currentUser.name[0].toUpperCase() : "U";
-            document.getElementById("welcome-name").textContent = currentUser.name ? currentUser.name.split(" ")[0] : "";
-        }
-
-        async function loadDashboardData() {
-            const result = await callAPI("getprofile");
-            if (result && result.profile) {
-                currentUser = result.profile;
-                saveSession(currentUser);
-                renderHeader();
-            }
-        }
-
-        function renderProfile() {
-            if (!currentUser) return;
-            document.getElementById("profile-name").textContent = currentUser.name || "";
-            document.getElementById("profile-email").textContent = currentUser.email || "";
-            document.getElementById("profile-uid").textContent = currentUser.uid || "";
-            document.getElementById("profile-wallet").textContent = currentUser.walletAddress || "Not set";
-            document.getElementById("profile-referral").textContent = currentUser.referralCode || "N/A";
-            document.getElementById("profile-balance").innerHTML = `${parseFloat(currentUser.balance || 0).toFixed(4)} <span class="text-2xl text-white/60">RIDA</span>`;
-            document.getElementById("profile-avatar").textContent = currentUser.name ? currentUser.name[0].toUpperCase() : "U";
-        }
-
-        // Mining
-        function renderMining() {
-            const actionArea = document.getElementById("mining-action-area");
-            const countdownOverlay = document.getElementById("countdown-overlay");
-            const container = document.getElementById("mining-container");
-
-            if (!currentUser || !currentUser.lastMiningStart) {
-                actionArea.innerHTML = `<button onclick="startMining()" class="w-full py-8 text-2xl font-bold bg-gradient-to-r from-[#00ff9d] to-cyan-400 text-black rounded-3xl">START MINING SESSION</button>`;
-                countdownOverlay.classList.add("hidden");
-            } else {
-                const elapsed = Date.now() - parseInt(currentUser.lastMiningStart);
-                if (elapsed < 86400000) {
-                    const remaining = 86400000 - elapsed;
-                    actionArea.innerHTML = `<p class="text-[#00ff9d] text-2xl">Mining in progress...</p>`;
-                    countdownOverlay.classList.remove("hidden");
-                    startCountdown(remaining);
-                    container.classList.add("mining-active");
+                if (data.success) {
+                    status.innerHTML = `<span class="text-green-400">✅ Backend Connected Successfully!</span>`;
+                    alert("Success! Backend is working.\n\nYou can now login and use the full app.");
                 } else {
-                    actionArea.innerHTML = `<button onclick="claimMining()" class="w-full py-8 text-2xl font-bold bg-gradient-to-r from-amber-400 to-orange-500 text-black rounded-3xl">CLAIM 0.20 RIDA</button>`;
-                    countdownOverlay.classList.add("hidden");
-                    container.classList.remove("mining-active");
+                    status.innerHTML = `<span class="text-red-400">❌ ${data.error || "Failed"}</span>`;
                 }
+            } catch (err) {
+                console.error(err);
+                status.innerHTML = `<span class="text-red-400">❌ Cannot reach backend.<br>Check if you created a NEW deployment.</span>`;
             }
         }
 
-        function startCountdown(ms) {
-            clearInterval(miningTimer);
-            miningTimer = setInterval(() => {
-                ms -= 1000;
-                if (ms <= 0) {
-                    clearInterval(miningTimer);
-                    renderMining();
-                    return;
-                }
-                const h = Math.floor(ms / 3600000).toString().padStart(2, '0');
-                const m = Math.floor((ms % 3600000) / 60000).toString().padStart(2, '0');
-                const s = Math.floor((ms % 60000) / 1000).toString().padStart(2, '0');
-                document.getElementById("big-timer").textContent = `\( {h}: \){m}:${s}`;
-            }, 1000);
-        }
+        function logout() { location.reload(); }
+        function navigateTo() { alert("Full UI will be enabled after successful connection test."); }
 
-        async function startMining() {
-            const result = await callAPI("startmining");
-            if (result) {
-                currentUser.lastMiningStart = Date.now().toString();
-                showToast("Mining session started!", false);
-                renderMining();
-            }
-        }
-
-        async function claimMining() {
-            const result = await callAPI("claimmining");
-            if (result) {
-                currentUser.balance = (parseFloat(currentUser.balance || 0) + 0.20).toFixed(2);
-                currentUser.lastMiningStart = "";
-                showToast("0.20 RIDA claimed successfully!", false);
-                renderMining();
-                renderHeader();
-            }
-        }
-
-        // Transfer
-        async function executeTransfer() {
-            const toUID = document.getElementById("transfer-uid").value.trim();
-            const amount = parseFloat(document.getElementById("transfer-amount").value);
-            if (!toUID || amount < 10) {
-                showToast("Invalid UID or amount (minimum 10 RIDA)", true);
-                return;
-            }
-            const result = await callAPI("transfer", { toUID, amount });
-            if (result) {
-                currentUser.balance = (parseFloat(currentUser.balance || 0) - amount).toFixed(2);
-                showToast("Transfer successful!", false);
-                document.getElementById("transfer-uid").value = "";
-                document.getElementById("transfer-amount").value = "";
-                renderHeader();
-            }
-        }
-
-        // Chat
-        async function sendChatMessage() {
-            const msg = document.getElementById("chat-input").value.trim();
-            if (!msg) return;
-            await callAPI("sendmessage", { message: msg });
-            document.getElementById("chat-input").value = "";
-            showToast("Message sent to admin", false);
-        }
-
-        function showBroadcastModal() {
-            showToast("Announcements will be shown here", false);
-        }
-
-        function copyReferral() {
-            if (!currentUser || !currentUser.referralCode) return;
-            const referralLink = `https://ridamining.github.io/ridanetwork/?ref=${currentUser.referralCode}`;
-            navigator.clipboard.writeText(referralLink);
-            showToast("Referral link copied!", false);
-        }
-
-        // Initialize
         window.onload = () => {
-            if (loadSession()) {
-                initAfterLogin();
-            } else {
-                document.getElementById("auth-modal").classList.remove("hidden");
-            }
-            console.log("%cRida Network Frontend Loaded Successfully with latest backend", "color:#00ff9d");
+            console.log("%cRida Network - Connection Test Version Loaded", "color:#00ff9d");
         };
     </script>
 </body>
