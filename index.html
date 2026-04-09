@@ -20,18 +20,24 @@
         .tab-active { color: #00ff9d; border-bottom: 3px solid #00ff9d; font-weight: 600; }
         .spinner { animation: spin 1s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
+        
+        /* Mobile Improvements */
+        @media (max-width: 640px) {
+            .tab { padding: 12px 16px; font-size: 13px; }
+            .screen { padding-top: 20px; }
+        }
     </style>
 </head>
 <body class="text-white min-h-screen pb-20">
 
     <!-- HEADER -->
     <nav class="bg-[#111113] border-b border-white/10 sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-5 py-4 flex items-center justify-between">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
             <div class="flex items-center gap-x-3">
                 <div class="w-9 h-9 bg-[#00ff9d] text-black font-bold text-3xl flex items-center justify-center rounded-2xl rotate-12">R</div>
                 <h1 class="title-font text-3xl font-semibold tracking-tighter neon-text">RIDA NETWORK</h1>
             </div>
-            <div class="flex items-center gap-x-6">
+            <div class="flex items-center gap-x-5">
                 <div onclick="navigateTo('profile')" class="flex items-center gap-x-3 cursor-pointer">
                     <div id="header-avatar" class="w-9 h-9 bg-gradient-to-br from-[#00ff9d] to-emerald-500 rounded-2xl flex items-center justify-center font-bold text-black">U</div>
                     <div>
@@ -44,24 +50,24 @@
                     <span id="header-balance-value" class="font-mono font-semibold">0.00</span>
                     <span class="text-xs text-white/60">RIDA</span>
                 </div>
-                <button onclick="logout()" class="text-red-400 hover:text-red-500">Logout</button>
+                <button onclick="logout()" class="text-red-400 hover:text-red-500 text-sm font-medium">Logout</button>
             </div>
         </div>
-        <div class="max-w-7xl mx-auto px-5 border-t border-white/10 overflow-x-auto">
-            <div id="tab-bar" class="flex gap-x-8 text-sm pb-2"></div>
+        <div class="max-w-7xl mx-auto px-4 border-t border-white/10 overflow-x-auto">
+            <div id="tab-bar" class="flex gap-x-6 text-sm whitespace-nowrap pb-2"></div>
         </div>
     </nav>
 
-    <div class="max-w-7xl mx-auto px-5 pt-8">
+    <div class="max-w-7xl mx-auto px-4 pt-8">
 
         <!-- HOME -->
         <div id="screen-home" class="screen">
             <h2 class="text-5xl font-semibold title-font neon-text mb-1">Welcome back, <span id="welcome-name"></span></h2>
             <p class="text-white/60 mb-10">1 RIDA = 1 USDT • Total Supply: 5,000,000 RIDA</p>
 
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-5 mb-10">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
                 <div class="glass rounded-3xl p-6">
-                    <p class="text-white/50 text-sm">Your Balance</p>
+                    <p class="text-white/50 text-sm">Balance</p>
                     <p id="home-balance" class="text-5xl font-mono font-bold mt-2">0.00</p>
                     <p class="text-[#00ff9d]">RIDA • <span id="home-usdt">0.00 USDT</span></p>
                 </div>
@@ -146,7 +152,6 @@
                 <button onclick="sendChatMessage()" class="w-14 h-14 bg-[#00ff9d] text-black rounded-3xl">Send</button>
             </div>
         </div>
-
     </div>
 
     <!-- AUTH MODAL -->
@@ -230,11 +235,8 @@
             document.getElementById("tab-bar").innerHTML = html;
         }
 
-        // Login
-        async function performLogin() {
+        function performLogin() {
             const email = document.getElementById("login-email").value.trim() || "user@rida.com";
-            const password = document.getElementById("login-password").value || "123";
-
             const user = {
                 name: email.split('@')[0] || "User",
                 email: email,
@@ -245,18 +247,15 @@
                 verificationStatus: "verified",
                 lastMiningStart: ""
             };
-
             saveSession(user);
             document.getElementById("auth-modal").classList.add("hidden");
             initAfterLogin();
             showToast("Login successful!", false);
         }
 
-        // Register
-        async function performRegister() {
+        function performRegister() {
             const name = document.getElementById("reg-name").value.trim() || "New User";
             const email = document.getElementById("reg-email").value.trim() || "new@rida.com";
-
             const user = {
                 name: name,
                 email: email,
@@ -267,7 +266,6 @@
                 verificationStatus: "pending",
                 lastMiningStart: ""
             };
-
             saveSession(user);
             showToast("Account created successfully!", false);
             switchToLogin();
@@ -316,7 +314,6 @@
             showToast("Referral link copied! Share with friends.", false);
         }
 
-        // Mining Logic
         function renderMining() {
             const actionArea = document.getElementById("mining-action-area");
             const countdownOverlay = document.getElementById("countdown-overlay");
@@ -360,7 +357,7 @@
         function startMining() {
             currentUser.lastMiningStart = Date.now().toString();
             saveSession(currentUser);
-            showToast("Mining session started!", false);
+            showToast("Mining session started! Come back after 24 hours to claim.", false);
             renderMining();
         }
 
@@ -374,7 +371,7 @@
         }
 
         function executeTransfer() {
-            showToast("P2P Transfer completed (Demo)", false);
+            showToast("P2P Transfer completed successfully (Demo)", false);
         }
 
         function sendChatMessage() {
@@ -392,7 +389,7 @@
             } else {
                 document.getElementById("auth-modal").classList.remove("hidden");
             }
-            console.log("%cRida Network - Fully Functional Version Loaded", "color:#00ff9d");
+            console.log("%cRida Network - Master Upgrade Complete", "color:#00ff9d");
         };
     </script>
 </body>
