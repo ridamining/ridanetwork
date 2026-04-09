@@ -9,41 +9,42 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap');
         :root { --primary: #00ff9d; }
-        body { font-family: 'Inter', system-ui, sans-serif; background: linear-gradient(180deg, #0a0a0a, #111113); }
+        body { 
+            font-family: 'Inter', system-ui, sans-serif; 
+            background: linear-gradient(180deg, #0a0a0a, #111113); 
+            color: white; 
+        }
         .title-font { font-family: 'Space Grotesk', sans-serif; }
         .neon-text { text-shadow: 0 0 15px #00ff9d, 0 0 35px #00ff9d; }
-        .glass { background: rgba(15,23,42,0.92); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.08); }
-        .mining-ring { animation: miningPulse 3s infinite ease-in-out; }
-        .mining-active .mining-ring { animation: miningActive 2.2s infinite linear; }
-        @keyframes miningPulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.1); } }
-        @keyframes miningActive { from { transform: rotate(0deg) scale(1); } to { transform: rotate(360deg) scale(1.08); } }
-        .tab-active { color: #00ff9d; border-bottom: 3px solid #00ff9d; font-weight: 600; }
+        .glass { 
+            background: rgba(15, 23, 42, 0.92); 
+            backdrop-filter: blur(20px); 
+            border: 1px solid rgba(255,255,255,0.08); 
+        }
     </style>
 </head>
-<body class="text-white min-h-screen pb-20">
+<body class="min-h-screen p-6">
 
-    <nav class="bg-[#111113] border-b border-white/10 sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-5 py-4 flex items-center justify-between">
-            <div class="flex items-center gap-x-3">
-                <div class="w-9 h-9 bg-[#00ff9d] text-black font-bold text-3xl flex items-center justify-center rounded-2xl rotate-12">R</div>
-                <h1 class="title-font text-3xl font-semibold tracking-tighter neon-text">RIDA NETWORK</h1>
-            </div>
-            <div class="flex items-center gap-x-6">
-                <div onclick="navigateTo('profile')" class="flex items-center gap-x-3 cursor-pointer">
-                    <div id="header-avatar" class="w-9 h-9 bg-gradient-to-br from-[#00ff9d] to-emerald-500 rounded-2xl flex items-center justify-center font-bold text-black">U</div>
-                    <div><p id="header-name" class="font-medium text-sm">User</p></div>
-                </div>
-                <button onclick="logout()" class="text-red-400">Logout</button>
-            </div>
+    <div class="max-w-2xl mx-auto text-center">
+        <div class="flex justify-center items-center gap-4 mb-8">
+            <div class="w-12 h-12 bg-[#00ff9d] text-black font-bold text-5xl flex items-center justify-center rounded-2xl rotate-12">R</div>
+            <h1 class="title-font text-5xl font-bold neon-text">RIDA NETWORK</h1>
         </div>
-    </nav>
 
-    <div class="max-w-7xl mx-auto px-5 pt-8 text-center">
-        <button onclick="testConnection()" 
-                class="bg-yellow-400 hover:bg-yellow-300 text-black px-10 py-5 rounded-3xl font-bold text-lg mb-8">
-            🔄 TEST BACKEND CONNECTION (Click this first)
-        </button>
-        <p id="status" class="text-lg font-medium"></p>
+        <div class="glass rounded-3xl p-10 mb-10">
+            <h2 class="text-2xl font-semibold mb-6">Backend Connection Test</h2>
+            
+            <button onclick="testConnection()" 
+                    class="w-full py-6 bg-yellow-400 hover:bg-yellow-300 text-black font-bold text-xl rounded-3xl mb-6">
+                🔄 TEST BACKEND CONNECTION
+            </button>
+
+            <div id="status" class="min-h-[100px] text-lg font-medium"></div>
+        </div>
+
+        <div class="text-xs text-white/50">
+            Backend URL: <span class="font-mono break-all">https://script.google.com/macros/s/AKfycbxbLpBFvHBlJhsko6DjDHnCs4KhMykP_f8bLeEn5TzknFxaQQhfHa-JR5EBD6ixCtVJ/exec</span>
+        </div>
     </div>
 
     <script>
@@ -51,39 +52,44 @@
 
         async function testConnection() {
             const status = document.getElementById("status");
-            status.innerHTML = "Testing connection...";
+            status.innerHTML = `<span class="text-yellow-400">Sending request to backend...</span>`;
 
             try {
                 const response = await fetch(API_URL, {
                     method: "POST",
-                    headers: { "Content-Type": "text/plain;charset=utf-8" },   // This fixes CORS
-                    body: JSON.stringify({ action: "login", email: "test@rida.com", password: "123" })
+                    headers: { 
+                        "Content-Type": "text/plain"   // This is the key fix for Google Apps Script
+                    },
+                    body: JSON.stringify({ 
+                        action: "login", 
+                        email: "test@rida.com", 
+                        password: "123" 
+                    })
                 });
 
-                const text = await response.text();
-                console.log("Backend raw response:", text);
+                const rawText = await response.text();
+                console.log("Raw response from backend:", rawText);
 
-                let data = {};
-                try { data = JSON.parse(text); } catch(e) {}
+                let data;
+                try {
+                    data = JSON.parse(rawText);
+                } catch (e) {
+                    data = { success: false, error: "Invalid JSON from backend" };
+                }
 
                 if (data.success) {
-                    status.innerHTML = `<span class="text-green-400">✅ Backend Connected Successfully!</span>`;
-                    alert("Success! Backend is working.\n\nYou can now login and use the full app.");
+                    status.innerHTML = `<span class="text-green-400 text-xl">✅ SUCCESS! Backend is connected and working.</span>`;
+                    alert("✅ Backend Connection Successful!\n\nYou can now proceed to full UI.");
                 } else {
-                    status.innerHTML = `<span class="text-red-400">❌ ${data.error || "Failed"}</span>`;
+                    status.innerHTML = `<span class="text-red-400">❌ ${data.error || "Unknown error"}</span>`;
                 }
             } catch (err) {
                 console.error(err);
-                status.innerHTML = `<span class="text-red-400">❌ Cannot reach backend.<br>Check if you created a NEW deployment.</span>`;
+                status.innerHTML = `<span class="text-red-400">❌ Connection Failed<br>${err.message}</span>`;
             }
         }
 
-        function logout() { location.reload(); }
-        function navigateTo() { alert("Full UI will be enabled after successful connection test."); }
-
-        window.onload = () => {
-            console.log("%cRida Network - Connection Test Version Loaded", "color:#00ff9d");
-        };
+        console.log("%cRida Network - Final Connection Test Loaded", "color:#00ff9d; font-size:14px");
     </script>
 </body>
 </html>
