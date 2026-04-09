@@ -61,7 +61,7 @@
                 <div class="flex items-center gap-2 text-[#00ff9d] text-xs uppercase mb-2">
                     <i class="fa-solid fa-bullhorn"></i> Announcement
                 </div>
-                <p id="latest-broadcast" class="text-sm">Welcome to Rida Network! Mine daily and refer friends to earn more.</p>
+                <p id="latest-broadcast" class="text-sm">Daily mining is now live! Refer friends and earn extra 0.01 RIDA per active referral.</p>
             </div>
 
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -157,7 +157,7 @@
             <h2 class="text-4xl font-semibold mb-8">Admin Control Panel</h2>
             <div class="glass rounded-3xl p-8">
                 <button onclick="refreshAdminData()" class="mb-6 px-6 py-3 bg-white/10 hover:bg-white/20 rounded-3xl">Refresh All Users</button>
-                <div id="admin-content" class="min-h-[400px] overflow-auto"></div>
+                <div id="admin-content" class="min-h-[400px]"></div>
             </div>
         </div>
     </div>
@@ -246,18 +246,17 @@
             document.getElementById("tab-bar").innerHTML = html;
         }
 
-        // Login & Register
         function performLogin() {
             const email = document.getElementById("login-email").value.trim().toLowerCase() || "user@rida.com";
             const user = {
                 name: email.split('@')[0] || "User",
                 email: email,
-                uid: "RIDA-" + Math.random().toString(36).substring(2, 10).toUpperCase(),
+                uid: "RIDA-USER-" + Math.random().toString(36).substring(2, 8).toUpperCase(),
                 balance: 0,
                 referralCode: "RIDA" + Math.random().toString(36).substring(2, 6).toUpperCase(),
-                walletAddress: "0x742d35Cc6634C0532925a3b8D7f8e3c8f8e3c8",
+                walletAddress: "0x742d35Cc6634C0532925a3b8D7f8e3c8f8",
                 verificationStatus: "verified",
-                lastMiningStart: ""
+                lastMiningStart: localStorage.getItem("lastMiningStart") || ""
             };
             saveSession(user);
             document.getElementById("auth-modal").classList.add("hidden");
@@ -271,10 +270,10 @@
             const user = {
                 name: name,
                 email: email,
-                uid: "RIDA-" + Math.random().toString(36).substring(2, 10).toUpperCase(),
+                uid: "RIDA-USER-" + Math.random().toString(36).substring(2, 8).toUpperCase(),
                 balance: 0,
                 referralCode: "RIDA" + Math.random().toString(36).substring(2, 6).toUpperCase(),
-                walletAddress: "0x742d35Cc6634C0532925a3b8D7f8e3c8f8e3c8",
+                walletAddress: "0x742d35Cc6634C0532925a3b8D7f8e3c8f8",
                 verificationStatus: "pending",
                 lastMiningStart: ""
             };
@@ -326,7 +325,7 @@
             showToast("Referral link copied!", false);
         }
 
-        // Mining - Fully Fixed
+        // Mining - Persistent & Fixed
         function renderMining() {
             const actionArea = document.getElementById("mining-action-area");
             const countdownOverlay = document.getElementById("countdown-overlay");
@@ -370,7 +369,7 @@
         function startMining() {
             currentUser.lastMiningStart = Date.now().toString();
             saveSession(currentUser);
-            showToast("Mining session started! Come back after 24 hours to claim.", false);
+            showToast("Mining session started! Come back after 24 hours.", false);
             renderMining();
         }
 
@@ -402,21 +401,19 @@
         // Admin Panel
         function renderAdmin() {
             const html = `
-                <h3 class="text-xl mb-4">All Users</h3>
+                <h3 class="text-xl mb-4">All Users (Demo)</h3>
                 <div class="overflow-auto max-h-[500px]">
                     <table class="w-full text-left">
                         <thead><tr class="border-b"><th class="py-3">UID</th><th>Name</th><th>Email</th><th>Balance</th><th>Status</th><th>Actions</th></tr></thead>
-                        <tbody id="admin-users-list"></tbody>
+                        <tbody>
+                            <tr class="border-b"><td class="py-4 font-mono">RIDA-USER1</td><td>Test User 1</td><td>user1@rida.com</td><td>45.50</td><td><span class="text-green-400">Verified</span></td><td><button onclick="alert('Status changed')" class="text-xs px-3 py-1 bg-white/10 rounded">Change</button></td></tr>
+                            <tr class="border-b"><td class="py-4 font-mono">RIDA-USER2</td><td>Test User 2</td><td>user2@rida.com</td><td>12.00</td><td><span class="text-yellow-400">Pending</span></td><td><button onclick="alert('Status changed')" class="text-xs px-3 py-1 bg-white/10 rounded">Change</button></td></tr>
+                        </tbody>
                     </table>
                 </div>
             `;
             const content = document.getElementById("admin-content") || document.createElement("div");
             content.innerHTML = html;
-            // Demo users
-            document.getElementById("admin-users-list").innerHTML = `
-                <tr class="border-b"><td class="py-4 font-mono">RIDA-TEST1</td><td>Test User 1</td><td>user1@rida.com</td><td>45.50</td><td><span class="text-green-400">Verified</span></td><td><button onclick="alert('Verification changed')" class="text-xs px-3 py-1 bg-white/10 rounded">Change</button></td></tr>
-                <tr class="border-b"><td class="py-4 font-mono">RIDA-TEST2</td><td>Test User 2</td><td>user2@rida.com</td><td>12.00</td><td><span class="text-yellow-400">Pending</span></td><td><button onclick="alert('Verification changed')" class="text-xs px-3 py-1 bg-white/10 rounded">Change</button></td></tr>
-            `;
             navigateTo('admin');
         }
 
@@ -427,7 +424,7 @@
             } else {
                 document.getElementById("auth-modal").classList.remove("hidden");
             }
-            console.log("%cRida Network - Final Master Version Loaded", "color:#00ff9d");
+            console.log("%cRida Network - Final Solid Version Loaded", "color:#00ff9d");
         };
     </script>
 </body>
