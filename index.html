@@ -368,4 +368,87 @@
 
         function startCountdown(ms) {
             clearInterval(miningTimer);
-            mi
+            miningTimer = setInterval(() => {
+                ms -= 1000;
+                if (ms <= 0) {
+                    clearInterval(miningTimer);
+                    renderMining();
+                    return;
+                }
+                const h = Math.floor(ms / 3600000).toString().padStart(2, '0');
+                const m = Math.floor((ms % 3600000) / 60000).toString().padStart(2, '0');
+                const s = Math.floor((ms % 60000) / 1000).toString().padStart(2, '0');
+                document.getElementById("big-timer").textContent = `\( {h}: \){m}:${s}`;
+            }, 1000);
+        }
+
+        async function startMining() {
+            const result = await callAPI("startmining");
+            if (result) {
+                currentUser.lastMiningStart = Date.now().toString();
+                showToast("Mining session started!", false);
+                renderMining();
+            }
+        }
+
+        async function claimMining() {
+            const result = await callAPI("claimmining");
+            if (result) {
+                currentUser.balance = (parseFloat(currentUser.balance || 0) + 0.20).toFixed(2);
+                currentUser.lastMiningStart = "";
+                showToast("0.20 RIDA claimed successfully!", false);
+                renderMining();
+                renderHeader();
+            }
+        }
+
+        // Transfer
+        async function executeTransfer() {
+            const toUID = document.getElementById("transfer-uid").value.trim();
+            const amount = parseFloat(document.getElementById("transfer-amount").value);
+            if (!toUID || amount < 10) {
+                showToast("Invalid UID or amount (minimum 10 RIDA)", true);
+                return;
+            }
+            const result = await callAPI("transfer", { toUID, amount });
+            if (result) {
+                currentUser.balance = (parseFloat(currentUser.balance || 0) - amount).toFixed(2);
+                showToast("Transfer successful!", false);
+                document.getElementById("transfer-uid").value = "";
+                document.getElementById("transfer-amount").value = "";
+                renderHeader();
+            }
+        }
+
+        // Chat
+        async function sendChatMessage() {
+            const msg = document.getElementById("chat-input").value.trim();
+            if (!msg) return;
+            await callAPI("sendmessage", { message: msg });
+            document.getElementById("chat-input").value = "";
+            showToast("Message sent to admin", false);
+        }
+
+        function showBroadcastModal() {
+            showToast("Announcements will be shown here", false);
+        }
+
+        function copyReferral() {
+            if (!currentUser || !currentUser.referralCode) return;
+            const referralLink = `https://ridamining.github.io/ridanetwork/?ref=${currentUser.referralCode}`;
+            navigator.clipboard.writeText(referralLink);
+            showToast("Referral link copied!", false);
+        }
+
+        // Initialize
+        window.onload = () => {
+            if (loadSession()) {
+                initAfterLogin();
+            } else {
+                document.getElementById("auth-modal").classList.remove("hidden");
+            }
+            console.log("%cRida Network Frontend Loaded Successfully with latest backend", "color:#00ff9d");
+        };
+    </script>
+</body>
+</html>
