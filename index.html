@@ -3,141 +3,213 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rida Network</title>
+    <title>Rida Network | Cloud Mining</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
-        body { background: #020617; color: white; font-family: sans-serif; }
-        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
-        .ring { transition: stroke-dashoffset 1s linear; transform: rotate(-90deg); transform-origin: 50% 50%; }
+        body { background: #010409; color: #e6edf3; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
+        .glass-card { background: rgba(13, 17, 23, 0.8); border: 1px solid #30363d; backdrop-filter: blur(8px); }
+        .mining-anim { border: 4px solid #161b22; border-top: 4px solid #2f81f7; border-radius: 50%; width: 180px; height: 180px; animation: spin 2s linear infinite; }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        .progress-ring { transition: stroke-dashoffset 0.5s; transform: rotate(-90deg); transform-origin: 50% 50%; }
     </style>
 </head>
 <body>
-    <div id="app" class="max-w-md mx-auto min-h-screen flex flex-col p-6">
+    <div id="app" class="max-w-md mx-auto min-h-screen flex flex-col p-4 relative">
         
-        <div v-if="!session.uid" class="flex-grow flex flex-col justify-center space-y-6">
-            <h1 class="text-4xl font-bold text-sky-500 text-center">RIDA NETWORK</h1>
-            <div class="glass p-6 rounded-2xl space-y-4">
-                <input v-model="auth.email" placeholder="Email" class="w-full bg-slate-900 p-4 rounded-xl outline-none border border-slate-700">
-                <input v-model="auth.password" type="password" placeholder="Password" class="w-full bg-slate-900 p-4 rounded-xl outline-none border border-slate-700">
-                <button @click="handleAuth" class="w-full bg-sky-600 py-4 rounded-xl font-bold">LOGIN / REGISTER</button>
+        <div v-if="!session.uid" class="flex-grow flex flex-col justify-center animate-fade-in">
+            <div class="text-center mb-10">
+                <div class="inline-block p-4 bg-blue-600/10 rounded-full mb-4">
+                    <i class="fas fa-microchip text-5xl text-blue-500"></i>
+                </div>
+                <h1 class="text-3xl font-bold tracking-tight">RIDA NETWORK</h1>
+                <p class="text-gray-500 text-sm">Secure Cloud Mining Infrastructure</p>
+            </div>
+
+            <div class="glass-card p-6 rounded-2xl shadow-xl space-y-4">
+                <input v-model="auth.email" type="email" placeholder="Email Address" class="w-full bg-black/40 border border-gray-800 p-4 rounded-xl outline-none focus:border-blue-500 transition">
+                <input v-model="auth.password" type="password" placeholder="Password" class="w-full bg-black/40 border border-gray-800 p-4 rounded-xl outline-none focus:border-blue-500 transition">
+                <button @click="handleAuth" :disabled="loading" class="w-full bg-blue-600 hover:bg-blue-500 py-4 rounded-xl font-bold transition disabled:opacity-50">
+                    {{ loading ? 'COMMUNICATING...' : (auth.isLogin ? 'LOG IN' : 'CREATE ACCOUNT') }}
+                </button>
+                <p @click="auth.isLogin = !auth.isLogin" class="text-center text-xs text-gray-500 cursor-pointer hover:text-blue-400">
+                    {{ auth.isLogin ? "Don't have an account? Sign Up" : "Already have an account? Log In" }}
+                </p>
             </div>
         </div>
 
         <template v-else>
-            <div class="flex justify-between items-center mb-8">
+            <header class="flex justify-between items-center py-4 mb-4">
                 <div>
-                    <p class="text-xs text-slate-400">Balance</p>
-                    <h2 class="text-2xl font-bold text-sky-400">{{ user.balance.toFixed(4) }} RIDA</h2>
+                    <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Available RIDA</p>
+                    <h2 class="text-2xl font-bold text-blue-500">{{ user.balance.toFixed(4) }}</h2>
                 </div>
-                <button @click="logout" class="text-red-400"><i class="fas fa-power-off"></i></button>
-            </div>
+                <div class="text-right">
+                    <p class="text-[10px] text-gray-500 font-bold uppercase">UID: {{ user.uid }}</p>
+                    <span class="text-[10px] bg-green-500/10 text-green-500 px-2 py-1 rounded border border-green-500/20">{{ user.status }}</span>
+                </div>
+            </header>
 
-            <div class="flex-grow">
-                <div v-if="tab === 'mine'" class="flex flex-col items-center py-10 space-y-8">
-                    <svg width="200" height="200">
-                        <circle cx="100" cy="100" r="90" fill="none" stroke="#1e293b" stroke-width="10" />
-                        <circle cx="100" cy="100" r="90" fill="none" stroke="#0ea5e9" stroke-width="10" stroke-dasharray="565" :stroke-dashoffset="offset" class="ring" />
-                        <text x="50%" y="50%" text-anchor="middle" fill="white" dy=".3em" class="text-xl font-bold">{{ timeLeft }}</text>
-                    </svg>
-                    
-                    <button v-if="!mining.isActive" @click="startMining" class="w-full bg-sky-600 py-5 rounded-2xl font-bold text-lg">START MINING</button>
-                    <button v-else-if="canClaim" @click="claimMining" class="w-full bg-green-600 py-5 rounded-2xl font-bold text-lg">CLAIM 0.20 RIDA</button>
-                    <div v-else class="text-slate-400 font-bold uppercase tracking-widest">Mining Active...</div>
+            <main class="flex-grow">
+                <div v-if="tab === 'mine'" class="flex flex-col items-center justify-center h-full py-10 space-y-12">
+                    <div class="relative flex items-center justify-center">
+                        <div :class="['mining-anim', { 'opacity-20 animate-none': !mining.isActive }]"></div>
+                        <div class="absolute text-center">
+                            <h3 class="text-2xl font-mono font-bold">{{ timerText }}</h3>
+                            <p class="text-[10px] text-gray-500 uppercase font-bold tracking-widest">Time Remaining</p>
+                        </div>
+                    </div>
+
+                    <div class="w-full space-y-4">
+                        <button v-if="!mining.isActive" @click="startMining" class="w-full bg-blue-600 py-5 rounded-2xl font-bold text-lg shadow-lg shadow-blue-900/20">
+                            START MINING
+                        </button>
+                        <button v-else-if="canClaim" @click="claimReward" class="w-full bg-green-600 py-5 rounded-2xl font-bold text-lg">
+                            CLAIM 0.20 RIDA
+                        </button>
+                        <div v-else class="glass-card p-4 rounded-2xl text-center">
+                            <p class="text-blue-400 text-sm font-bold"><i class="fas fa-bolt mr-2"></i> MINING ACTIVE</p>
+                            <p class="text-[10px] text-gray-500 mt-1">Cloud synchronization enabled.</p>
+                        </div>
+                    </div>
                 </div>
 
-                <div v-if="tab === 'transfer'" class="space-y-4">
-                    <h3 class="text-xl font-bold">Transfer RIDA</h3>
-                    <input v-model="send.target" placeholder="Recipient UID" class="w-full bg-slate-900 p-4 rounded-xl border border-slate-700 outline-none">
-                    <input v-model.number="send.amount" type="number" placeholder="Amount" class="w-full bg-slate-900 p-4 rounded-xl border border-slate-700 outline-none">
-                    <button @click="handleTransfer" class="w-full bg-white text-black py-4 rounded-xl font-bold">SEND NOW</button>
+                <div v-if="tab === 'transfer'" class="space-y-6">
+                    <h3 class="text-xl font-bold">Transfer Assets</h3>
+                    <div class="glass-card p-6 rounded-2xl space-y-4">
+                        <input v-model="transfer.target" placeholder="Recipient UID" class="w-full bg-black/40 border border-gray-800 p-4 rounded-xl outline-none focus:border-blue-500 transition">
+                        <input v-model.number="transfer.amount" type="number" placeholder="Amount (RIDA)" class="w-full bg-black/40 border border-gray-800 p-4 rounded-xl outline-none focus:border-blue-500 transition">
+                        <button @click="handleTransfer" class="w-full bg-white text-black py-4 rounded-xl font-bold hover:bg-gray-200 transition">
+                            CONFIRM SEND
+                        </button>
+                    </div>
                 </div>
-            </div>
+            </main>
 
-            <nav class="fixed bottom-6 left-6 right-6 max-w-md mx-auto glass rounded-2xl p-2 flex justify-around">
-                <button @click="tab = 'mine'" :class="tab === 'mine' ? 'text-sky-400' : 'text-slate-500'" class="p-4"><i class="fas fa-hammer text-xl"></i></button>
-                <button @click="tab = 'transfer'" :class="tab === 'transfer' ? 'text-sky-400' : 'text-slate-500'" class="p-4"><i class="fas fa-paper-plane text-xl"></i></button>
+            <nav class="glass-card fixed bottom-6 left-6 right-6 p-2 rounded-2xl flex justify-around shadow-2xl">
+                <button @click="tab = 'mine'" :class="tab === 'mine' ? 'text-blue-500 bg-blue-500/10' : 'text-gray-500'" class="p-4 rounded-xl transition">
+                    <i class="fas fa-hammer text-xl"></i>
+                </button>
+                <button @click="tab = 'transfer'" :class="tab === 'transfer' ? 'text-blue-500 bg-blue-500/10' : 'text-gray-500'" class="p-4 rounded-xl transition">
+                    <i class="fas fa-paper-plane text-xl"></i>
+                </button>
+                <button @click="logout" class="p-4 text-red-500/40">
+                    <i class="fas fa-sign-out-alt text-xl"></i>
+                </button>
             </nav>
         </template>
 
-        <div v-if="loading" class="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
-            <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-sky-500"></div>
+        <div v-if="loading" class="fixed inset-0 bg-black/90 z-50 flex flex-col items-center justify-center">
+            <div class="w-10 h-10 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+            <p class="text-blue-500 text-xs font-bold tracking-widest uppercase">Syncing with Network</p>
         </div>
     </div>
 
     <script>
-        const API = 'https://script.google.com/macros/s/AKfycbyynA7DwNZX3x8Kb5aB6HcAy3QghTO8agBmvKl8vwE5E9ta6FLzy8XB31H5N_elxYNgUw/exec';
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzqQXEHsi9sUEAYdeaxnxQCe8Ukt3Zl6-FiFrq1hRm4tadMmJHuQ-lwCcc_02utGBQ4nw/exec';
+        
         const { createApp } = Vue;
-
         createApp({
             data() {
                 return {
                     loading: false, tab: 'mine',
-                    auth: { email: '', password: '' },
+                    auth: { isLogin: true, email: '', password: '' },
                     session: { uid: localStorage.getItem('rida_uid') },
-                    user: { balance: 0, uid: '' },
+                    user: { balance: 0, uid: '', refCode: '', status: '' },
                     mining: { isActive: false, startTime: 0 },
-                    timeLeft: '24:00:00', offset: 565, canClaim: false,
-                    send: { target: '', amount: 0 }
+                    timerText: '00:00:00', canClaim: false,
+                    transfer: { target: '', amount: 0 }
                 }
             },
             async mounted() {
-                if (this.session.uid) await this.refresh();
-                setInterval(this.tick, 1000);
+                if (this.session.uid) await this.loadUserData();
+                setInterval(this.updateTimer, 1000);
             },
             methods: {
-                async call(data) {
+                async apiRequest(payload) {
                     this.loading = true;
                     try {
-                        const res = await fetch(API, {
+                        const response = await fetch(SCRIPT_URL, {
                             method: 'POST',
                             headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                            body: JSON.stringify(data)
+                            body: JSON.stringify(payload)
                         });
-                        return await res.json();
-                    } catch (e) { return { success: false }; }
-                    finally { this.loading = false; }
+                        const data = await response.json();
+                        if (!data.success && data.message) alert(data.message);
+                        return data;
+                    } catch (e) {
+                        alert("Network error. Ensure script is deployed as 'Anyone'.");
+                        return { success: false };
+                    } finally { this.loading = false; }
                 },
                 async handleAuth() {
-                    const res = await this.call({ action: 'register', ...this.auth });
-                    const final = res.success ? res : await this.call({ action: 'login', ...this.auth });
-                    if (final.uid) {
-                        this.session.uid = final.uid;
-                        localStorage.setItem('rida_uid', final.uid);
-                        await this.refresh();
+                    const res = await this.apiRequest({ 
+                        action: this.auth.isLogin ? 'login' : 'register', 
+                        email: this.auth.email, 
+                        password: this.auth.password 
+                    });
+                    if (res.success && res.uid) {
+                        this.session.uid = res.uid;
+                        localStorage.setItem('rida_uid', res.uid);
+                        await this.loadUserData();
                     }
                 },
-                async refresh() {
-                    const res = await fetch(`${API}?action=get_data&uid=${this.session.uid}`).then(r => r.json());
+                async loadUserData() {
+                    try {
+                        const res = await fetch(`${SCRIPT_URL}?action=get_data&uid=${this.session.uid}`).then(r => r.json());
+                        if (res.success) {
+                            this.user = res.user;
+                            this.mining = res.mining;
+                        } else {
+                            this.logout(); // Session invalid
+                        }
+                    } catch (e) { console.error("Sync failed"); }
+                },
+                async startMining() {
+                    const res = await this.apiRequest({ action: 'start_mining', uid: this.session.uid });
+                    if (res.success) await this.loadUserData();
+                },
+                async claimReward() {
+                    const res = await this.apiRequest({ action: 'claim_mining', uid: this.session.uid });
                     if (res.success) {
-                        this.user = res.user;
-                        this.mining = res.mining;
+                        alert("0.20 RIDA Claimed!");
+                        await this.loadUserData();
                     }
                 },
-                async startMining() { await this.call({ action: 'start_mining', uid: this.session.uid }); await this.refresh(); },
-                async claimMining() { await this.call({ action: 'claim_mining', uid: this.session.uid }); await this.refresh(); },
                 async handleTransfer() {
-                    const res = await this.call({ action: 'transfer', ...this.send, uid: this.session.uid });
-                    alert(res.success ? "Success!" : res.message);
-                    await this.refresh();
+                    if (this.transfer.amount < 1) return alert("Min transfer 1 RIDA");
+                    const res = await this.apiRequest({ action: 'transfer', ...this.transfer, uid: this.session.uid });
+                    if (res.success) {
+                        alert("Transfer successful!");
+                        this.transfer = { target: '', amount: 0 };
+                        await this.loadUserData();
+                    }
                 },
-                tick() {
-                    if (!this.mining.isActive) return;
-                    const diff = (Number(this.mining.startTime) + 86400000) - Date.now();
+                updateTimer() {
+                    if (!this.mining.isActive) {
+                        this.timerText = "00:00:00";
+                        return;
+                    }
+                    const end = Number(this.mining.startTime) + (24 * 60 * 60 * 1000);
+                    const now = Date.now();
+                    const diff = end - now;
+
                     if (diff <= 0) {
-                        this.timeLeft = "READY";
-                        this.offset = 0;
+                        this.timerText = "READY";
                         this.canClaim = true;
                     } else {
                         const h = Math.floor(diff / 3600000).toString().padStart(2, '0');
                         const m = Math.floor((diff % 3600000) / 60000).toString().padStart(2, '0');
                         const s = Math.floor((diff % 60000) / 1000).toString().padStart(2, '0');
-                        this.timeLeft = `${h}:${m}:${s}`;
-                        this.offset = (diff / 86400000) * 565;
+                        this.timerText = `${h}:${m}:${s}`;
+                        this.canClaim = false;
                     }
                 },
-                logout() { localStorage.clear(); location.reload(); }
+                logout() {
+                    localStorage.clear();
+                    location.reload();
+                }
             }
         }).mount('#app');
     </script>
