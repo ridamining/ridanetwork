@@ -3,15 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Rida Network • Advanced Miner</title>
+    <title>Rida Network • Crypto Miner</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             background: linear-gradient(145deg, #0a0f1e 0%, #07111f 100%);
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            font-family: 'Segoe UI', system-ui, sans-serif;
             padding: 20px;
             color: #eef2ff;
-            min-height: 100vh;
         }
         .container { max-width: 650px; margin: 0 auto; }
         .card {
@@ -30,7 +29,6 @@
             background-clip: text;
             color: transparent;
         }
-        .sub { text-align: center; font-size: 0.75rem; opacity: 0.7; margin-bottom: 1rem; }
         .balance-box {
             background: #0f172ad9;
             border-radius: 1.8rem;
@@ -46,7 +44,6 @@
             border-radius: 1.2rem;
             padding: 0.7rem;
             text-align: center;
-            min-width: 100px;
         }
         .stat .value { font-size: 1.3rem; font-weight: bold; color: #facc15; }
         button, .btn {
@@ -60,13 +57,11 @@
             color: white;
             cursor: pointer;
             margin-top: 0.6rem;
-            transition: 0.1s;
         }
         button:active { transform: scale(0.97); }
         .btn-danger { background: #ef4444; }
         .btn-success { background: #10b981; }
-        .btn-warning { background: #f97316; }
-        input, select, textarea {
+        input, select {
             width: 100%;
             padding: 0.75rem;
             background: #0f172a;
@@ -113,10 +108,8 @@
         .loader { display: inline-block; width: 20px; height: 20px; border: 2px solid #fff; border-radius: 50%; border-top-color: transparent; animation: spin 0.6s linear infinite; margin-right: 8px; vertical-align: middle; }
         @keyframes spin { to { transform: rotate(360deg); } }
         footer { text-align: center; font-size: 0.65rem; opacity: 0.5; margin-top: 1rem; }
-        .search-box { margin-bottom: 0.5rem; }
         .pagination { display: flex; justify-content: center; gap: 0.5rem; margin-top: 0.5rem; }
         .pagination button { width: auto; padding: 0.3rem 0.8rem; margin: 0; font-size: 0.8rem; }
-        .live-mining { background: #1e293b; border-radius: 1rem; padding: 0.5rem; text-align: center; margin-top: 0.5rem; font-size: 0.8rem; }
     </style>
 </head>
 <body>
@@ -124,12 +117,10 @@
     <h1>⛏️ RIDA NETWORK</h1>
     <div class="sub">1 Rida = $1 USD • referral bonus active</div>
 
-    <!-- Connection status -->
     <div class="card" id="statusCard">
         <div id="connStatus">🔌 Checking connection...</div>
     </div>
 
-    <!-- Auth Section -->
     <div id="authSection" class="card">
         <div id="loginBox">
             <input type="email" id="loginEmail" placeholder="Email" value="admin@rida.com">
@@ -147,7 +138,6 @@
         </div>
     </div>
 
-    <!-- Dashboard -->
     <div id="dashboardSection" class="card hidden">
         <div class="balance-box">
             <div class="balance-amount" id="userBalance">0.0000 Rida</div>
@@ -159,7 +149,7 @@
             <div class="stat"><div class="value" id="miningRate">0</div><div>Rida/sec</div></div>
         </div>
         <button id="mineActionBtn">⛏️ START MINING</button>
-        <div id="liveMiningInfo" class="live-mining hidden">⏳ Mining... earned this session: <span id="sessionEarned">0.0000</span> Rida</div>
+        <div id="liveMiningInfo" class="ref-box hidden">⏳ Mining... earned this session: <span id="sessionEarned">0.0000</span> Rida</div>
         
         <div class="ref-box">
             🔗 YOUR REFERRAL LINK<br>
@@ -167,13 +157,11 @@
             <button id="copyRefBtn" style="margin-top:8px; background:#2d3748;">📋 Copy Link</button>
         </div>
 
-        <!-- Daily Bonus -->
         <div class="ref-box" style="margin-top:0.5rem;">
             🎁 Daily Bonus: <span id="bonusStatus">Check in</span>
             <button id="claimBonusBtn" class="btn-success" style="margin-top:0;">Claim Now</button>
         </div>
 
-        <!-- Withdrawal Request -->
         <div class="ref-box" style="margin-top:0.5rem;">
             💸 Withdraw Rida<br>
             <input type="number" id="withdrawAmount" placeholder="Amount" step="0.1" min="1">
@@ -181,14 +169,12 @@
             <button id="withdrawBtn">Request Withdrawal</button>
         </div>
 
-        <!-- Leaderboard -->
         <div class="ref-box" style="margin-top:0.5rem;">
             🏆 Top Miners<br>
             <div id="leaderboardList" style="font-size:0.8rem; text-align:left; max-height:150px; overflow-y:auto;"></div>
             <button id="refreshLeaderboardBtn" style="margin-top:0.5rem; background:#2d3748;">Refresh</button>
         </div>
 
-        <!-- Admin Panel -->
         <div id="adminPanel" class="admin-section hidden">
             <div class="tabs" id="adminTabs">
                 <button class="tab-btn active" data-tab="users">👥 Users</button>
@@ -197,8 +183,8 @@
                 <button class="tab-btn" data-tab="settings">⚙️ Settings</button>
             </div>
             <div id="tab-users" class="tab-content active">
-                <div class="search-box"><input type="text" id="userSearch" placeholder="Search by email..."></div>
-                <div class="table-wrapper"><table id="usersTable"><tr><th>Email</th><th>Balance</th><th>Total</th><th>Refs</th></tr></table></div>
+                <div><input type="text" id="userSearch" placeholder="Search by email..."></div>
+                <div class="table-wrapper"><table id="usersTable"><tr><th>Email</th><th>Balance</th><th>Total</th><th>Refs</th></tr></div>
                 <div class="pagination" id="userPagination"></div>
                 <select id="userSelect"></select>
                 <select id="userField"><option value="balance">Set Balance</option><option value="totalMined">Set Total Mined</option><option value="username">Change Username</option></select>
@@ -207,7 +193,7 @@
                 <button id="refreshUsersBtn">🔄 Refresh</button>
             </div>
             <div id="tab-withdrawals" class="tab-content">
-                <div class="table-wrapper"><table id="withdrawalsTable"><tr><th>User</th><th>Amount</th><th>Address</th><th>Status</th><th>Action</th></tr></table></div>
+                <div class="table-wrapper"><table id="withdrawalsTable"><tr><th>User</th><th>Amount</th><th>Address</th><th>Status</th><th>Action</th></tr></div>
                 <button id="refreshWithdrawalsBtn">🔄 Refresh</button>
             </div>
             <div id="tab-sheets" class="tab-content">
@@ -229,21 +215,19 @@
 </div>
 
 <script>
-    // ======================= CONFIGURATION =======================
-    const DIRECT_API = 'https://script.google.com/macros/s/AKfycby9DqVWyIfc7Wwnve0ba2u_Vz5kCfcyV0cjK9XN__haCS82IY3HL7HmsZA9oNzbiENTNw/exec';
-    const PROXY_URL = 'https://corsproxy.io/?' + encodeURIComponent(DIRECT_API);
+    // ======================= YOUR APPS SCRIPT URL =======================
+    const DIRECT_API = 'https://script.google.com/macros/s/AKfycbx_pLC6Owvntl1WBZzAomMsd4AjbG3QCvGGtc_7MugU_E0ECe28QEXuEqhePp9NtBBimQ/exec';
+    // Use a reliable CORS proxy to avoid any setHeader issues
+    const API_URL = 'https://corsproxy.io/?' + encodeURIComponent(DIRECT_API);
     
-    let API_URL = DIRECT_API;
     let currentUser = null;
     let miningInterval = null;
     let sessionStartTime = null;
     let sessionRate = 0;
-    let usingProxy = false;
     let usersData = [];
     let currentPage = 1;
     const rowsPerPage = 10;
 
-    // Helper: Show message
     function showMessage(msg, type = 'error') {
         const msgDiv = document.getElementById('globalMsg');
         msgDiv.className = `message ${type}`;
@@ -252,56 +236,44 @@
         setTimeout(() => msgDiv.classList.add('hidden'), 4000);
     }
 
-    // Test connection and set API_URL
     async function testConnection() {
         const statusDiv = document.getElementById('connStatus');
         statusDiv.innerHTML = '<span class="loader"></span> Testing connection...';
         try {
-            const res = await fetch(DIRECT_API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'login', email: 'test', password: 'test' }) });
-            if (res.ok || res.status === 200) {
-                statusDiv.innerHTML = '✅ Direct connection successful.';
-                API_URL = DIRECT_API;
-                usingProxy = false;
+            const res = await fetch(API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'login', email: 'test', password: 'test' })
+            });
+            if (res.ok) {
+                statusDiv.innerHTML = '✅ Connected to backend (via CORS proxy).';
                 return true;
+            } else {
+                statusDiv.innerHTML = '❌ Backend error. Check Apps Script deployment (must be "Anyone").';
+                return false;
             }
-        } catch (e) {}
-        // Try proxy
-        try {
-            const proxyRes = await fetch(PROXY_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'login', email: 'test', password: 'test' }) });
-            if (proxyRes.ok || proxyRes.status === 200) {
-                statusDiv.innerHTML = '✅ Using CORS proxy (corsproxy.io).';
-                API_URL = PROXY_URL;
-                usingProxy = true;
-                return true;
-            }
-        } catch (e) {}
-        statusDiv.innerHTML = '❌ Cannot connect to backend. Check your Apps Script deployment (must be "Anyone").';
-        return false;
-    }
-
-    // API caller with retry
-    async function callApi(action, payload = {}, retries = 2) {
-        for (let i = 0; i <= retries; i++) {
-            try {
-                const response = await fetch(API_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action, ...payload })
-                });
-                const data = await response.json();
-                if (data.success !== undefined) return data;
-                throw new Error('Invalid response');
-            } catch (err) {
-                if (i === retries) {
-                    showMessage(`API error: ${err.message}`, 'error');
-                    return { success: false, error: err.message };
-                }
-                await new Promise(r => setTimeout(r, 500 * (i+1)));
-            }
+        } catch (e) {
+            statusDiv.innerHTML = '❌ Cannot connect. Make sure your Apps Script is deployed with "Anyone" access.';
+            return false;
         }
     }
 
-    // ---------- Dashboard & Mining ----------
+    async function callApi(action, payload = {}) {
+        try {
+            const response = await fetch(API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action, ...payload })
+            });
+            const data = await response.json();
+            return data;
+        } catch (err) {
+            showMessage(`API error: ${err.message}`, 'error');
+            return { success: false, error: err.message };
+        }
+    }
+
+    // ---------- Dashboard ----------
     async function refreshDashboard() {
         if (!currentUser) return;
         const res = await callApi('getDashboard', { email: currentUser.email });
@@ -317,15 +289,13 @@
             if (res.miningActive) {
                 mineBtn.innerText = '⏹️ STOP MINING';
                 mineBtn.classList.add('btn-danger');
-                mineBtn.classList.remove('btn-success');
                 if (!miningInterval) {
                     sessionStartTime = Date.now() / 1000;
                     startLiveCounter();
                     miningInterval = setInterval(() => {
                         if (sessionStartTime) {
                             const elapsed = (Date.now() / 1000) - sessionStartTime;
-                            const earned = elapsed * sessionRate;
-                            document.getElementById('sessionEarned').innerText = earned.toFixed(6);
+                            document.getElementById('sessionEarned').innerText = (elapsed * sessionRate).toFixed(6);
                         }
                         refreshDashboard();
                     }, 2000);
@@ -334,7 +304,6 @@
             } else {
                 mineBtn.innerText = '⛏️ START MINING';
                 mineBtn.classList.remove('btn-danger');
-                mineBtn.classList.add('btn-success');
                 if (miningInterval) { clearInterval(miningInterval); miningInterval = null; }
                 document.getElementById('liveMiningInfo').classList.add('hidden');
                 sessionStartTime = null;
@@ -343,16 +312,14 @@
     }
 
     function startLiveCounter() {
-        if (sessionStartTime) {
-            const interval = setInterval(() => {
-                if (sessionStartTime && document.getElementById('mineActionBtn').innerText.includes('STOP')) {
-                    const elapsed = (Date.now() / 1000) - sessionStartTime;
-                    document.getElementById('sessionEarned').innerText = (elapsed * sessionRate).toFixed(6);
-                } else {
-                    clearInterval(interval);
-                }
-            }, 500);
-        }
+        const interval = setInterval(() => {
+            if (sessionStartTime && document.getElementById('mineActionBtn').innerText.includes('STOP')) {
+                const elapsed = (Date.now() / 1000) - sessionStartTime;
+                document.getElementById('sessionEarned').innerText = (elapsed * sessionRate).toFixed(6);
+            } else {
+                clearInterval(interval);
+            }
+        }, 500);
     }
 
     async function startMining() {
@@ -374,7 +341,6 @@
         else document.getElementById('refLinkDisplay').innerText = 'Error';
     }
 
-    // Daily Bonus
     async function claimDailyBonus() {
         const res = await callApi('claimDailyBonus', { email: currentUser.email });
         if (res.success) showMessage(`🎉 You received ${res.bonus} Rida bonus!`, 'success');
@@ -389,7 +355,6 @@
         else document.getElementById('bonusStatus').innerHTML = 'Error';
     }
 
-    // Withdrawal
     async function requestWithdrawal() {
         const amount = parseFloat(document.getElementById('withdrawAmount').value);
         const address = document.getElementById('withdrawAddress').value;
@@ -399,7 +364,6 @@
         else showMessage(res.error);
     }
 
-    // Leaderboard
     async function loadLeaderboard() {
         const res = await callApi('getLeaderboard', { limit: 10 });
         if (res.success) {
@@ -410,7 +374,7 @@
         }
     }
 
-    // ---------- Admin Functions ----------
+    // ---------- Admin ----------
     async function adminLoadUsers(search = '') {
         const res = await callApi('adminGetUsers', { adminEmail: currentUser.email, adminPass: document.getElementById('loginPassword').value });
         if (res.success) {
