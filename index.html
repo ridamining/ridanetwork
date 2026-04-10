@@ -3,14 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Rida Network • Crypto Miner</title>
+    <title>Rida Network • Complete Mining Platform</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             background: linear-gradient(145deg, #0a0f1e 0%, #07111f 100%);
-            font-family: 'Segoe UI', system-ui, sans-serif;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
             padding: 20px;
             color: #eef2ff;
+            min-height: 100vh;
         }
         .container { max-width: 650px; margin: 0 auto; }
         .card {
@@ -21,11 +22,30 @@
             margin-bottom: 1.5rem;
             border: 1px solid rgba(255, 215, 0, 0.2);
         }
-        h1 { text-align: center; background: linear-gradient(135deg, #ffd966, #ffb347); -webkit-background-clip: text; background-clip: text; color: transparent; }
-        .balance-box { background: #0f172ad9; border-radius: 1.8rem; padding: 1.2rem; text-align: center; margin: 1rem 0; }
+        h1 {
+            text-align: center;
+            background: linear-gradient(135deg, #ffd966, #ffb347);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            font-size: 1.8rem;
+        }
+        .balance-box {
+            background: #0f172ad9;
+            border-radius: 1.8rem;
+            padding: 1.2rem;
+            text-align: center;
+            margin: 1rem 0;
+        }
         .balance-amount { font-size: 2.8rem; font-weight: 800; color: #4ade80; }
         .stats-grid { display: flex; gap: 0.8rem; margin: 1rem 0; flex-wrap: wrap; }
-        .stat { background: #1e293b; flex: 1; border-radius: 1.2rem; padding: 0.7rem; text-align: center; }
+        .stat {
+            background: #1e293b;
+            flex: 1;
+            border-radius: 1.2rem;
+            padding: 0.7rem;
+            text-align: center;
+        }
         .stat .value { font-size: 1.3rem; font-weight: bold; color: #facc15; }
         button, .btn {
             width: 100%;
@@ -52,34 +72,79 @@
             color: white;
             margin: 0.5rem 0;
         }
-        .ref-box { background: #1e293b; border-radius: 1.2rem; padding: 0.8rem; margin-top: 1rem; text-align: center; }
-        .ref-link { background: #0f172a; padding: 0.5rem; border-radius: 2rem; font-family: monospace; font-size: 0.8rem; word-break: break-all; }
-        .admin-section { background: #111827cc; border-radius: 1.5rem; padding: 1rem; margin-top: 1.2rem; border-top: 2px solid #facc15; }
+        .ref-box {
+            background: #1e293b;
+            border-radius: 1.2rem;
+            padding: 0.8rem;
+            margin-top: 1rem;
+            text-align: center;
+        }
+        .ref-link {
+            background: #0f172a;
+            padding: 0.5rem;
+            border-radius: 2rem;
+            font-family: monospace;
+            font-size: 0.8rem;
+            word-break: break-all;
+        }
+        .admin-section {
+            background: #111827cc;
+            border-radius: 1.5rem;
+            padding: 1rem;
+            margin-top: 1.2rem;
+            border-top: 2px solid #facc15;
+        }
         .tabs { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem; }
         .tab-btn { background: #334155; width: auto; padding: 0.4rem 1rem; font-size: 0.8rem; margin: 0; }
         .tab-btn.active { background: #3b82f6; }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
-        .table-wrapper { overflow-x: auto; margin: 0.5rem 0; }
+        .table-wrapper { overflow-x: auto; margin: 0.5rem 0; border-radius: 1rem; }
         table { width: 100%; font-size: 0.75rem; border-collapse: collapse; }
         th, td { border: 1px solid #334155; padding: 0.5rem; text-align: left; }
         th { background: #0f172a; }
         .hidden { display: none; }
-        .message { text-align: center; font-size: 0.8rem; margin: 0.5rem 0; padding: 0.5rem; border-radius: 2rem; }
+        .message {
+            text-align: center;
+            font-size: 0.8rem;
+            margin: 0.5rem 0;
+            padding: 0.6rem;
+            border-radius: 2rem;
+            transition: 0.2s;
+        }
         .message.success { background: #10b98133; color: #4ade80; }
         .message.error { background: #ef444433; color: #f87171; }
-        .loader { display: inline-block; width: 18px; height: 18px; border: 2px solid #fff; border-radius: 50%; border-top-color: transparent; animation: spin 0.6s linear infinite; vertical-align: middle; }
+        .loader {
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+            border: 2px solid #fff;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 0.6s linear infinite;
+            vertical-align: middle;
+        }
         @keyframes spin { to { transform: rotate(360deg); } }
         footer { text-align: center; font-size: 0.65rem; opacity: 0.5; margin-top: 1rem; }
+        .debug-panel {
+            background: #0f172a;
+            border-radius: 1rem;
+            padding: 0.5rem;
+            font-family: monospace;
+            font-size: 0.7rem;
+            margin-top: 1rem;
+            max-height: 150px;
+            overflow-y: auto;
+        }
     </style>
 </head>
 <body>
 <div class="container">
     <h1>⛏️ RIDA NETWORK</h1>
-    <div class="sub">1 Rida = $1 USD • referral bonus active</div>
+    <div class="sub" style="text-align:center; font-size:0.75rem;">1 Rida = $1 USD • referral bonus active</div>
 
     <div class="card" id="statusCard">
-        <div id="connStatus">🔌 Checking connection...</div>
+        <div id="connStatus">🔌 Initializing...</div>
     </div>
 
     <div id="authSection" class="card">
@@ -125,7 +190,8 @@
             </div>
             <div id="tab-users" class="tab-content active">
                 <div><input type="text" id="userSearch" placeholder="Search by email..."></div>
-                <div class="table-wrapper"><table id="usersTable"><tr><th>Email</th><th>Balance</th><th>Total</th><th>Refs</th></table></div>
+                <div class="table-wrapper"><table id="usersTable"><tr><th>Email</th><th>Balance</th><th>Total</th><th>Refs</th></tr></div>
+                <div class="pagination" id="userPagination"></div>
                 <select id="userSelect"></select>
                 <select id="userField"><option value="balance">Set Balance</option><option value="totalMined">Set Total Mined</option><option value="username">Change Username</option></select>
                 <input type="text" id="userFieldValue" placeholder="New value">
@@ -136,15 +202,24 @@
         </div>
         <button id="logoutBtn" style="background:#334155;">🚪 Logout</button>
     </div>
+
     <div id="globalMsg" class="message hidden"></div>
-    <footer>⚡ Mining rate: base 0.2 Rida/day + 0.01 per active referral • Refresh every 5 sec</footer>
+    <div id="debugPanel" class="debug-panel">🔍 Ready. Click buttons – errors will appear here.</div>
+    <footer>⚡ Mining refreshes every 5s • Admin: admin@rida.com / admin123</footer>
 </div>
 
 <script>
     // ======================= CONFIGURATION =======================
     const DIRECT_API = 'https://script.google.com/macros/s/AKfycbx_pLC6Owvntl1WBZzAomMsd4AjbG3QCvGGtc_7MugU_E0ECe28QEXuEqhePp9NtBBimQ/exec';
-    const PROXY = 'https://corsproxy.io/?' + encodeURIComponent(DIRECT_API);
     
+    // List of CORS proxies in order of preference
+    const PROXIES = [
+        (url) => `https://corsproxy.io/?${encodeURIComponent(url)}`,
+        (url) => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+        (url) => `https://cors-anywhere.herokuapp.com/${url}`
+    ];
+    
+    let currentProxyIndex = 0;
     let currentUser = null;
     let currentPassword = null;
     let miningInterval = null;
@@ -155,6 +230,13 @@
     let currentPage = 1;
     const rowsPerPage = 10;
 
+    function debugLog(msg) {
+        const debugDiv = document.getElementById('debugPanel');
+        const timestamp = new Date().toLocaleTimeString();
+        debugDiv.innerHTML = `[${timestamp}] ${msg}<br>` + debugDiv.innerHTML;
+        if (debugDiv.children.length > 20) debugDiv.innerHTML = debugDiv.innerHTML.split('<br>').slice(0, 20).join('<br>');
+    }
+
     function showMessage(msg, type = 'error', duration = 5000) {
         const msgDiv = document.getElementById('globalMsg');
         msgDiv.className = `message ${type}`;
@@ -162,40 +244,73 @@
         msgDiv.classList.remove('hidden');
         if (window.msgTimeout) clearTimeout(window.msgTimeout);
         window.msgTimeout = setTimeout(() => msgDiv.classList.add('hidden'), duration);
+        debugLog(`${type.toUpperCase()}: ${msg}`);
     }
 
-    async function callApi(action, payload = {}) {
-        try {
-            const res = await fetch(PROXY, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action, ...payload })
-            });
-            const text = await res.text();
+    // Get current proxy URL
+    function getProxyUrl() {
+        return PROXIES[currentProxyIndex](DIRECT_API);
+    }
+
+    // API caller with proxy fallback and retries
+    async function callApi(action, payload = {}, retries = 2) {
+        for (let attempt = 0; attempt <= retries; attempt++) {
             try {
-                return JSON.parse(text);
-            } catch(e) {
-                showMessage(`Invalid JSON from server: ${text.substring(0, 100)}`, 'error');
-                return { success: false, error: 'Invalid response' };
+                const url = getProxyUrl();
+                debugLog(`Attempt ${attempt+1}: POST ${action} to ${url.substring(0, 60)}...`);
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action, ...payload })
+                });
+                const text = await response.text();
+                debugLog(`Raw response (first 150 chars): ${text.substring(0, 150)}`);
+                let data;
+                try {
+                    data = JSON.parse(text);
+                } catch (e) {
+                    throw new Error(`Invalid JSON: ${text.substring(0, 200)}`);
+                }
+                if (data.success !== undefined) {
+                    // Successfully got a valid response
+                    return data;
+                } else {
+                    throw new Error('Response missing success field');
+                }
+            } catch (err) {
+                debugLog(`Error: ${err.message}`);
+                if (attempt === retries) {
+                    // Try next proxy if available
+                    if (currentProxyIndex + 1 < PROXIES.length) {
+                        currentProxyIndex++;
+                        debugLog(`Switching to proxy ${currentProxyIndex+1}`);
+                        return callApi(action, payload, retries);
+                    } else {
+                        showMessage(`API error (${action}): ${err.message}`, 'error');
+                        return { success: false, error: err.message };
+                    }
+                }
+                await new Promise(r => setTimeout(r, 500 * Math.pow(2, attempt)));
             }
-        } catch (err) {
-            showMessage(`Network error: ${err.message}`, 'error');
-            return { success: false, error: err.message };
         }
+        return { success: false, error: 'Max retries exceeded' };
     }
 
+    // Test connection
     async function testConnection() {
         const statusDiv = document.getElementById('connStatus');
         statusDiv.innerHTML = '<span class="loader"></span> Testing connection...';
         const res = await callApi('login', { email: 'test', password: 'test' });
         if (res.success !== undefined) {
             statusDiv.innerHTML = '✅ Connected to backend.';
+            debugLog('Connection test passed.');
         } else {
-            statusDiv.innerHTML = '❌ Backend error. Check deployment (must be "Anyone").';
+            statusDiv.innerHTML = '❌ Backend error. Check Apps Script deployment (must be "Anyone").';
+            debugLog('Connection test failed.');
         }
     }
 
-    // Dashboard & Mining
+    // ---------- Dashboard & Mining ----------
     async function refreshDashboard() {
         if (!currentUser) return;
         const res = await callApi('getDashboard', { email: currentUser.email });
@@ -229,31 +344,31 @@
                 sessionStartTime = null;
             }
         } else {
-            showMessage(res.error);
+            showMessage(`Dashboard error: ${res.error || 'Unknown'}`, 'error');
         }
     }
 
     async function startMining() {
         const res = await callApi('startMining', { email: currentUser.email });
         if (res.success) showMessage('✅ Mining started!', 'success');
-        else showMessage(res.error);
+        else showMessage(`Start failed: ${res.error}`);
         refreshDashboard();
     }
 
     async function stopMining() {
         const res = await callApi('stopMining', { email: currentUser.email });
         if (res.success) showMessage(`⛏️ Mined +${res.earned?.toFixed(6)} Rida`, 'success');
-        else showMessage(res.error);
+        else showMessage(`Stop failed: ${res.error}`);
         refreshDashboard();
     }
 
     async function loadReferralLink() {
         const res = await callApi('getReferralLink', { email: currentUser.email });
         if (res.success) document.getElementById('refLinkDisplay').innerText = `${window.location.origin}?ref=${res.code}`;
-        else document.getElementById('refLinkDisplay').innerText = 'Error';
+        else document.getElementById('refLinkDisplay').innerText = 'Error loading link';
     }
 
-    // Admin Functions
+    // ---------- Admin Functions ----------
     async function adminLoadUsers(search = '') {
         const res = await callApi('adminGetUsers', { adminEmail: currentUser.email, adminPass: currentPassword });
         if (res.success) {
@@ -262,7 +377,7 @@
             const select = document.getElementById('userSelect');
             select.innerHTML = '';
             usersData.forEach(u => select.appendChild(new Option(`${u.email} (${u.balance} Rida)`, u.email)));
-        } else showMessage(res.error);
+        } else showMessage(`Load users failed: ${res.error}`);
     }
 
     function renderUserTable() {
@@ -292,7 +407,7 @@
         if (field === 'balance' || field === 'totalMined') val = parseFloat(val);
         const res = await callApi('adminUpdateUser', { adminEmail: currentUser.email, adminPass: currentPassword, targetEmail: target, field, value: val });
         if (res.success) { showMessage('User updated', 'success'); adminLoadUsers(); refreshDashboard(); }
-        else showMessage(res.error);
+        else showMessage(`Update failed: ${res.error}`);
     }
 
     async function adminLoadSettings() {
@@ -301,7 +416,7 @@
             let html = '';
             for (let [k,v] of Object.entries(res.settings)) html += `<label>${k}</label><input type="text" id="set_${k}" value="${v}"><br>`;
             document.getElementById('settingsEditor').innerHTML = html;
-        }
+        } else showMessage(`Load settings failed: ${res.error}`);
     }
 
     async function adminSaveSettings() {
@@ -313,7 +428,7 @@
         showMessage('Settings saved', 'success');
     }
 
-    // Auth
+    // ---------- Auth ----------
     async function login(email, password) {
         const res = await callApi('login', { email, password });
         if (res.success) {
@@ -329,21 +444,21 @@
                 document.getElementById('adminPanel').classList.remove('hidden');
                 adminLoadUsers(); adminLoadSettings();
             } else document.getElementById('adminPanel').classList.add('hidden');
-        } else showMessage(res.error);
+            showMessage(`Welcome ${currentUser.username}!`, 'success');
+        } else showMessage(`Login failed: ${res.error}`);
     }
 
     async function register() {
-        const res = await callApi('register', {
-            email: document.getElementById('regEmail').value,
-            username: document.getElementById('regUsername').value,
-            password: document.getElementById('regPassword').value,
-            referralCode: document.getElementById('regReferralCode').value
-        });
+        const email = document.getElementById('regEmail').value;
+        const username = document.getElementById('regUsername').value;
+        const password = document.getElementById('regPassword').value;
+        const referralCode = document.getElementById('regReferralCode').value;
+        const res = await callApi('register', { email, username, password, referralCode });
         if (res.success) {
             showMessage('Registration successful! Please login.', 'success');
             document.getElementById('registerBox').classList.add('hidden');
             document.getElementById('loginBox').classList.remove('hidden');
-        } else showMessage(res.error);
+        } else showMessage(`Registration failed: ${res.error}`);
     }
 
     function logout() {
@@ -355,9 +470,10 @@
         document.getElementById('dashboardSection').classList.add('hidden');
         document.getElementById('authSection').classList.remove('hidden');
         document.getElementById('adminPanel').classList.add('hidden');
+        showMessage('Logged out', 'success');
     }
 
-    // Event Listeners
+    // ---------- Event Listeners ----------
     window.onload = async () => {
         await testConnection();
         document.getElementById('loginBtn').onclick = () => login(document.getElementById('loginEmail').value, document.getElementById('loginPassword').value);
@@ -377,7 +493,7 @@
             document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
             document.getElementById(`tab-${btn.dataset.tab}`).classList.add('active');
         }));
-    const savedEmail = sessionStorage.getItem('ridaEmail');
+        const savedEmail = sessionStorage.getItem('ridaEmail');
         if (savedEmail && savedEmail !== 'undefined') document.getElementById('loginEmail').value = savedEmail;
     };
 </script>
