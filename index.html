@@ -3,14 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Rida Network • Crypto Miner</title>
+    <title>Rida Network • Advanced Miner</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             background: linear-gradient(145deg, #0a0f1e 0%, #07111f 100%);
-            font-family: 'Segoe UI', system-ui, sans-serif;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
             padding: 20px;
             color: #eef2ff;
+            min-height: 100vh;
         }
         .container { max-width: 650px; margin: 0 auto; }
         .card {
@@ -20,6 +21,7 @@
             padding: 1.5rem;
             margin-bottom: 1.5rem;
             border: 1px solid rgba(255, 215, 0, 0.2);
+            transition: all 0.2s;
         }
         h1 {
             font-size: 1.8rem;
@@ -29,6 +31,7 @@
             background-clip: text;
             color: transparent;
         }
+        .sub { text-align: center; font-size: 0.75rem; opacity: 0.7; margin-bottom: 1rem; }
         .balance-box {
             background: #0f172ad9;
             border-radius: 1.8rem;
@@ -36,7 +39,7 @@
             text-align: center;
             margin: 1rem 0;
         }
-        .balance-amount { font-size: 2.8rem; font-weight: 800; color: #4ade80; }
+        .balance-amount { font-size: 2.8rem; font-weight: 800; color: #4ade80; text-shadow: 0 0 5px #22c55e80; }
         .stats-grid { display: flex; gap: 0.8rem; margin: 1rem 0; flex-wrap: wrap; }
         .stat {
             background: #1e293b;
@@ -44,6 +47,7 @@
             border-radius: 1.2rem;
             padding: 0.7rem;
             text-align: center;
+            min-width: 100px;
         }
         .stat .value { font-size: 1.3rem; font-weight: bold; color: #facc15; }
         button, .btn {
@@ -57,8 +61,14 @@
             color: white;
             cursor: pointer;
             margin-top: 0.6rem;
+            transition: 0.1s linear;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
         button:active { transform: scale(0.97); }
+        button:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
         .btn-danger { background: #ef4444; }
         .btn-success { background: #10b981; }
         input, select {
@@ -69,6 +79,7 @@
             border-radius: 2rem;
             color: white;
             margin: 0.5rem 0;
+            font-size: 0.9rem;
         }
         .ref-box {
             background: #1e293b;
@@ -97,19 +108,36 @@
         .tab-btn.active { background: #3b82f6; }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
-        .table-wrapper { overflow-x: auto; margin: 0.5rem 0; }
+        .table-wrapper { overflow-x: auto; margin: 0.5rem 0; border-radius: 1rem; }
         table { width: 100%; font-size: 0.75rem; border-collapse: collapse; }
         th, td { border: 1px solid #334155; padding: 0.5rem; text-align: left; }
         th { background: #0f172a; }
         .hidden { display: none; }
-        .message { text-align: center; font-size: 0.8rem; margin: 0.5rem 0; padding: 0.5rem; border-radius: 2rem; }
+        .message {
+            text-align: center;
+            font-size: 0.8rem;
+            margin: 0.5rem 0;
+            padding: 0.6rem;
+            border-radius: 2rem;
+            transition: 0.2s;
+        }
         .message.success { background: #10b98133; color: #4ade80; }
         .message.error { background: #ef444433; color: #f87171; }
-        .loader { display: inline-block; width: 20px; height: 20px; border: 2px solid #fff; border-radius: 50%; border-top-color: transparent; animation: spin 0.6s linear infinite; margin-right: 8px; vertical-align: middle; }
+        .loader {
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+            border: 2px solid #fff;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 0.6s linear infinite;
+            vertical-align: middle;
+        }
         @keyframes spin { to { transform: rotate(360deg); } }
         footer { text-align: center; font-size: 0.65rem; opacity: 0.5; margin-top: 1rem; }
         .pagination { display: flex; justify-content: center; gap: 0.5rem; margin-top: 0.5rem; }
         .pagination button { width: auto; padding: 0.3rem 0.8rem; margin: 0; font-size: 0.8rem; }
+        .status-badge { background: #1e293b; border-radius: 2rem; padding: 0.2rem 0.6rem; font-size: 0.7rem; display: inline-block; }
     </style>
 </head>
 <body>
@@ -211,69 +239,98 @@
         <button id="logoutBtn" style="background:#334155;">🚪 Logout</button>
     </div>
     <div id="globalMsg" class="message hidden"></div>
-    <footer>⚡ Mining rate updates every second when active • Daily bonus resets at midnight UTC</footer>
+    <footer>⚡ Mining refreshes every 5s • Daily bonus resets at midnight UTC</footer>
 </div>
 
 <script>
-    // ======================= YOUR APPS SCRIPT URL =======================
+    // ======================= CONFIGURATION =======================
     const DIRECT_API = 'https://script.google.com/macros/s/AKfycbx_pLC6Owvntl1WBZzAomMsd4AjbG3QCvGGtc_7MugU_E0ECe28QEXuEqhePp9NtBBimQ/exec';
-    // Use a reliable CORS proxy to avoid any setHeader issues
-    const API_URL = 'https://corsproxy.io/?' + encodeURIComponent(DIRECT_API);
+    const PROXIES = [
+        url => `https://corsproxy.io/?${encodeURIComponent(url)}`,
+        url => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+        url => `https://cors-anywhere.herokuapp.com/${url}`
+    ];
     
+    let currentProxyIndex = 0;
     let currentUser = null;
+    let currentPassword = null; // kept in memory only, not stored
     let miningInterval = null;
+    let dashboardInterval = null;
     let sessionStartTime = null;
     let sessionRate = 0;
     let usersData = [];
     let currentPage = 1;
     const rowsPerPage = 10;
+    let isApiCallInProgress = false;
 
-    function showMessage(msg, type = 'error') {
+    // Helper: Show message
+    function showMessage(msg, type = 'error', duration = 6000) {
         const msgDiv = document.getElementById('globalMsg');
         msgDiv.className = `message ${type}`;
         msgDiv.innerText = msg;
         msgDiv.classList.remove('hidden');
-        setTimeout(() => msgDiv.classList.add('hidden'), 4000);
+        if (window.messageTimeout) clearTimeout(window.messageTimeout);
+        window.messageTimeout = setTimeout(() => msgDiv.classList.add('hidden'), duration);
     }
 
-    async function testConnection() {
-        const statusDiv = document.getElementById('connStatus');
-        statusDiv.innerHTML = '<span class="loader"></span> Testing connection...';
-        try {
-            const res = await fetch(API_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: 'login', email: 'test', password: 'test' })
-            });
-            if (res.ok) {
-                statusDiv.innerHTML = '✅ Connected to backend (via CORS proxy).';
-                return true;
-            } else {
-                statusDiv.innerHTML = '❌ Backend error. Check Apps Script deployment (must be "Anyone").';
-                return false;
+    // Get current API URL (with active proxy)
+    function getApiUrl() {
+        return PROXIES[currentProxyIndex](DIRECT_API);
+    }
+
+    // API caller with retries and proxy fallback
+    async function callApi(action, payload = {}, retries = 2) {
+        if (isApiCallInProgress && action === 'getDashboard') {
+            // skip if already fetching to avoid spam
+            return { success: false, error: 'Already fetching' };
+        }
+        isApiCallInProgress = true;
+        for (let attempt = 0; attempt <= retries; attempt++) {
+            try {
+                const url = getApiUrl();
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action, ...payload })
+                });
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                const data = await response.json();
+                isApiCallInProgress = false;
+                return data;
+            } catch (err) {
+                if (attempt === retries) {
+                    // try next proxy
+                    if (currentProxyIndex + 1 < PROXIES.length) {
+                        currentProxyIndex++;
+                        showMessage(`Switching to proxy ${currentProxyIndex+1}...`, 'error', 3000);
+                        return callApi(action, payload, retries);
+                    } else {
+                        isApiCallInProgress = false;
+                        showMessage(`API error (${action}): ${err.message}`, 'error');
+                        return { success: false, error: err.message };
+                    }
+                }
+                await new Promise(r => setTimeout(r, 500 * Math.pow(2, attempt))); // exponential backoff
             }
-        } catch (e) {
-            statusDiv.innerHTML = '❌ Cannot connect. Make sure your Apps Script is deployed with "Anyone" access.';
-            return false;
+        }
+        isApiCallInProgress = false;
+        return { success: false, error: 'Max retries exceeded' };
+    }
+
+    // Loading spinner for buttons
+    function setButtonLoading(btn, isLoading, originalText) {
+        if (!btn) return;
+        if (isLoading) {
+            btn.disabled = true;
+            btn.dataset.originalText = btn.innerText;
+            btn.innerHTML = '<span class="loader"></span> Loading...';
+        } else {
+            btn.disabled = false;
+            btn.innerHTML = btn.dataset.originalText || originalText;
         }
     }
 
-    async function callApi(action, payload = {}) {
-        try {
-            const response = await fetch(API_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action, ...payload })
-            });
-            const data = await response.json();
-            return data;
-        } catch (err) {
-            showMessage(`API error: ${err.message}`, 'error');
-            return { success: false, error: err.message };
-        }
-    }
-
-    // ---------- Dashboard ----------
+    // ---------- Dashboard & Mining ----------
     async function refreshDashboard() {
         if (!currentUser) return;
         const res = await callApi('getDashboard', { email: currentUser.email });
@@ -292,44 +349,50 @@
                 if (!miningInterval) {
                     sessionStartTime = Date.now() / 1000;
                     startLiveCounter();
-                    miningInterval = setInterval(() => {
-                        if (sessionStartTime) {
-                            const elapsed = (Date.now() / 1000) - sessionStartTime;
-                            document.getElementById('sessionEarned').innerText = (elapsed * sessionRate).toFixed(6);
-                        }
-                        refreshDashboard();
-                    }, 2000);
                 }
                 document.getElementById('liveMiningInfo').classList.remove('hidden');
+                // set faster refresh while mining
+                if (dashboardInterval) clearInterval(dashboardInterval);
+                dashboardInterval = setInterval(() => refreshDashboard(), 5000);
             } else {
                 mineBtn.innerText = '⛏️ START MINING';
                 mineBtn.classList.remove('btn-danger');
                 if (miningInterval) { clearInterval(miningInterval); miningInterval = null; }
                 document.getElementById('liveMiningInfo').classList.add('hidden');
                 sessionStartTime = null;
+                // slower refresh when idle
+                if (dashboardInterval) clearInterval(dashboardInterval);
+                dashboardInterval = setInterval(() => refreshDashboard(), 10000);
             }
-        } else showMessage(res.error);
+        } else {
+            showMessage(res.error);
+        }
     }
 
     function startLiveCounter() {
-        const interval = setInterval(() => {
+        if (miningInterval) clearInterval(miningInterval);
+        miningInterval = setInterval(() => {
             if (sessionStartTime && document.getElementById('mineActionBtn').innerText.includes('STOP')) {
                 const elapsed = (Date.now() / 1000) - sessionStartTime;
                 document.getElementById('sessionEarned').innerText = (elapsed * sessionRate).toFixed(6);
-            } else {
-                clearInterval(interval);
             }
-        }, 500);
+        }, 1000);
     }
 
     async function startMining() {
+        const btn = document.getElementById('mineActionBtn');
+        setButtonLoading(btn, true, 'START MINING');
         const res = await callApi('startMining', { email: currentUser.email });
+        setButtonLoading(btn, false);
         if (res.success) { showMessage('✅ Mining started!', 'success'); refreshDashboard(); }
         else showMessage(res.error);
     }
 
     async function stopMining() {
+        const btn = document.getElementById('mineActionBtn');
+        setButtonLoading(btn, true, 'STOP MINING');
         const res = await callApi('stopMining', { email: currentUser.email });
+        setButtonLoading(btn, false);
         if (res.success) showMessage(`⛏️ Mined +${res.earned?.toFixed(6)} Rida`, 'success');
         else showMessage(res.error);
         refreshDashboard();
@@ -342,7 +405,10 @@
     }
 
     async function claimDailyBonus() {
+        const btn = document.getElementById('claimBonusBtn');
+        setButtonLoading(btn, true, 'Claim Now');
         const res = await callApi('claimDailyBonus', { email: currentUser.email });
+        setButtonLoading(btn, false);
         if (res.success) showMessage(`🎉 You received ${res.bonus} Rida bonus!`, 'success');
         else showMessage(res.error);
         refreshDashboard();
@@ -359,7 +425,10 @@
         const amount = parseFloat(document.getElementById('withdrawAmount').value);
         const address = document.getElementById('withdrawAddress').value;
         if (isNaN(amount) || amount < 1) return showMessage('Minimum withdrawal 1 Rida');
+        const btn = document.getElementById('withdrawBtn');
+        setButtonLoading(btn, true, 'Request Withdrawal');
         const res = await callApi('requestWithdrawal', { email: currentUser.email, amount, address });
+        setButtonLoading(btn, false);
         if (res.success) { showMessage('Withdrawal request sent', 'success'); document.getElementById('withdrawAmount').value = ''; document.getElementById('withdrawAddress').value = ''; }
         else showMessage(res.error);
     }
@@ -367,7 +436,7 @@
     async function loadLeaderboard() {
         const res = await callApi('getLeaderboard', { limit: 10 });
         if (res.success) {
-            let html = '<ol>';
+            let html = '<ol style="margin-left:1rem;">';
             res.leaderboard.forEach(u => html += `<li>${u.username || u.email}: ${u.totalMined} Rida</li>`);
             html += '</ol>';
             document.getElementById('leaderboardList').innerHTML = html;
@@ -376,9 +445,9 @@
 
     // ---------- Admin ----------
     async function adminLoadUsers(search = '') {
-        const res = await callApi('adminGetUsers', { adminEmail: currentUser.email, adminPass: document.getElementById('loginPassword').value });
+        const res = await callApi('adminGetUsers', { adminEmail: currentUser.email, adminPass: currentPassword });
         if (res.success) {
-            usersData = res.users.filter(u => u.email.includes(search) || u.username.includes(search));
+            usersData = res.users.filter(u => u.email.toLowerCase().includes(search.toLowerCase()) || u.username.toLowerCase().includes(search.toLowerCase()));
             renderUserTable();
             const select = document.getElementById('userSelect');
             select.innerHTML = '';
@@ -392,7 +461,7 @@
         const table = document.getElementById('usersTable');
         table.innerHTML = `<tr><th>Email</th><th>Balance</th><th>Total</th><th>Refs</th></tr>`;
         pageUsers.forEach(u => {
-            table.innerHTML += `<tr><td>${u.email}</td><td>${u.balance}</td><td>${u.totalMined}</td><td>${u.activeReferrals}</td></tr>`;
+            table.innerHTML += `<tr><td style="max-width:150px; overflow-x:auto;">${u.email}</td><td>${u.balance}</td><td>${u.totalMined}</td><td>${u.activeReferrals}</td></tr>`;
         });
         const totalPages = Math.ceil(usersData.length/rowsPerPage);
         const pagination = document.getElementById('userPagination');
@@ -411,13 +480,16 @@
         const field = document.getElementById('userField').value;
         let val = document.getElementById('userFieldValue').value;
         if (field === 'balance' || field === 'totalMined') val = parseFloat(val);
-        const res = await callApi('adminUpdateUser', { adminEmail: currentUser.email, adminPass: document.getElementById('loginPassword').value, targetEmail: target, field, value: val });
+        const btn = document.getElementById('updateUserBtn');
+        setButtonLoading(btn, true, 'Update User');
+        const res = await callApi('adminUpdateUser', { adminEmail: currentUser.email, adminPass: currentPassword, targetEmail: target, field, value: val });
+        setButtonLoading(btn, false);
         if (res.success) { showMessage('User updated', 'success'); adminLoadUsers(); refreshDashboard(); }
         else showMessage(res.error);
     }
 
     async function adminLoadWithdrawals() {
-        const res = await callApi('adminGetWithdrawals', { adminEmail: currentUser.email, adminPass: document.getElementById('loginPassword').value });
+        const res = await callApi('adminGetWithdrawals', { adminEmail: currentUser.email, adminPass: currentPassword });
         if (res.success) {
             const table = document.getElementById('withdrawalsTable');
             table.innerHTML = `<tr><th>User</th><th>Amount</th><th>Address</th><th>Status</th><th>Action</th></tr>`;
@@ -429,13 +501,13 @@
     }
 
     window.approveWithdrawal = async (id) => {
-        const res = await callApi('adminApproveWithdrawal', { adminEmail: currentUser.email, adminPass: document.getElementById('loginPassword').value, withdrawalId: id });
+        const res = await callApi('adminApproveWithdrawal', { adminEmail: currentUser.email, adminPass: currentPassword, withdrawalId: id });
         if (res.success) { showMessage('Withdrawal approved', 'success'); adminLoadWithdrawals(); }
         else showMessage(res.error);
     };
 
     async function adminLoadSettings() {
-        const res = await callApi('adminGetSettings', { adminEmail: currentUser.email, adminPass: document.getElementById('loginPassword').value });
+        const res = await callApi('adminGetSettings', { adminEmail: currentUser.email, adminPass: currentPassword });
         if (res.success) {
             let html = '';
             for (let [k,v] of Object.entries(res.settings)) html += `<label>${k}</label><input type="text" id="set_${k}" value="${v}"><br>`;
@@ -444,16 +516,19 @@
     }
 
     async function adminSaveSettings() {
+        const btn = document.getElementById('saveSettingsBtn');
+        setButtonLoading(btn, true, 'Save Settings');
         const inputs = document.querySelectorAll('#settingsEditor input');
         for (let inp of inputs) {
             const key = inp.id.replace('set_', '');
-            await callApi('adminUpdateSetting', { adminEmail: currentUser.email, adminPass: document.getElementById('loginPassword').value, settingKey: key, settingValue: inp.value });
+            await callApi('adminUpdateSetting', { adminEmail: currentUser.email, adminPass: currentPassword, settingKey: key, settingValue: inp.value });
         }
+        setButtonLoading(btn, false);
         showMessage('Settings saved', 'success');
     }
 
     async function adminListSheets() {
-        const res = await callApi('adminGetAllSheets', { adminEmail: currentUser.email, adminPass: document.getElementById('loginPassword').value });
+        const res = await callApi('adminGetAllSheets', { adminEmail: currentUser.email, adminPass: currentPassword });
         if (res.success) {
             const sel = document.getElementById('sheetSelect');
             sel.innerHTML = '';
@@ -464,7 +539,10 @@
     async function adminCreateSheet() {
         const name = document.getElementById('newSheetName').value;
         const cols = document.getElementById('newSheetColumns').value.split(',').map(c=>c.trim());
-        const res = await callApi('adminAddSheet', { adminEmail: currentUser.email, adminPass: document.getElementById('loginPassword').value, sheetName: name, columns: cols });
+        const btn = document.getElementById('createSheetBtn');
+        setButtonLoading(btn, true, 'Create Sheet');
+        const res = await callApi('adminAddSheet', { adminEmail: currentUser.email, adminPass: currentPassword, sheetName: name, columns: cols });
+        setButtonLoading(btn, false);
         if (res.success) { showMessage('Sheet created', 'success'); adminListSheets(); }
         else showMessage(res.error);
     }
@@ -472,7 +550,10 @@
     async function adminDeleteSheet() {
         const name = document.getElementById('sheetSelect').value;
         if (!confirm(`Delete sheet "${name}"?`)) return;
-        const res = await callApi('adminDeleteSheet', { adminEmail: currentUser.email, adminPass: document.getElementById('loginPassword').value, sheetName: name });
+        const btn = document.getElementById('deleteSheetBtn');
+        setButtonLoading(btn, true, 'Delete Sheet');
+        const res = await callApi('adminDeleteSheet', { adminEmail: currentUser.email, adminPass: currentPassword, sheetName: name });
+        setButtonLoading(btn, false);
         if (res.success) { showMessage('Sheet deleted', 'success'); adminListSheets(); }
         else showMessage(res.error);
     }
@@ -480,19 +561,28 @@
     async function adminAddColumn() {
         const sheet = document.getElementById('sheetSelect').value;
         const colName = document.getElementById('newColumnName').value;
-        const res = await callApi('adminAddColumn', { adminEmail: currentUser.email, adminPass: document.getElementById('loginPassword').value, sheetName: sheet, columnName: colName, columnType: 'String' });
+        const btn = document.getElementById('addColumnBtn');
+        setButtonLoading(btn, true, 'Add Column');
+        const res = await callApi('adminAddColumn', { adminEmail: currentUser.email, adminPass: currentPassword, sheetName: sheet, columnName: colName, columnType: 'String' });
+        setButtonLoading(btn, false);
         if (res.success) showMessage(`Column added at index ${res.newColumnIndex}`, 'success');
         else showMessage(res.error);
     }
 
     // ---------- Auth ----------
     async function login(email, password) {
+        const btn = document.getElementById('loginBtn');
+        setButtonLoading(btn, true, 'Login');
         const res = await callApi('login', { email, password });
+        setButtonLoading(btn, false);
         if (res.success) {
             currentUser = res.user;
-            sessionStorage.setItem('ridaUser', JSON.stringify({ email, password }));
+            currentPassword = password;
+            sessionStorage.setItem('ridaEmail', email);
             document.getElementById('authSection').classList.add('hidden');
             document.getElementById('dashboardSection').classList.remove('hidden');
+            // start dashboard polling
+            dashboardInterval = setInterval(() => refreshDashboard(), 10000);
             refreshDashboard();
             loadReferralLink();
             checkBonusStatus();
@@ -505,12 +595,57 @@
     }
 
     async function register() {
-        const res = await callApi('register', { email: document.getElementById('regEmail').value, username: document.getElementById('regUsername').value, password: document.getElementById('regPassword').value, referralCode: document.getElementById('regReferralCode').value });
-        if (res.success) { showMessage('Registration successful! Please login.', 'success'); document.getElementById('registerBox').classList.add('hidden'); document.getElementById('loginBox').classList.remove('hidden'); }
-        else showMessage(res.error);
+        const btn = document.getElementById('registerBtn');
+        setButtonLoading(btn, true, 'Register');
+        const res = await callApi('register', { 
+            email: document.getElementById('regEmail').value, 
+            username: document.getElementById('regUsername').value, 
+            password: document.getElementById('regPassword').value, 
+            referralCode: document.getElementById('regReferralCode').value 
+        });
+        setButtonLoading(btn, false);
+        if (res.success) { 
+            showMessage('Registration successful! Please login.', 'success'); 
+            document.getElementById('registerBox').classList.add('hidden'); 
+            document.getElementById('loginBox').classList.remove('hidden'); 
+        } else showMessage(res.error);
     }
 
-    function logout() { if (miningInterval) clearInterval(miningInterval); currentUser = null; sessionStorage.removeItem('ridaUser'); document.getElementById('dashboardSection').classList.add('hidden'); document.getElementById('authSection').classList.remove('hidden'); document.getElementById('adminPanel').classList.add('hidden'); }
+    function logout() {
+        if (miningInterval) clearInterval(miningInterval);
+        if (dashboardInterval) clearInterval(dashboardInterval);
+        currentUser = null;
+        currentPassword = null;
+        sessionStorage.removeItem('ridaEmail');
+        document.getElementById('dashboardSection').classList.add('hidden');
+        document.getElementById('authSection').classList.remove('hidden');
+        document.getElementById('adminPanel').classList.add('hidden');
+        document.getElementById('loginEmail').value = 'admin@rida.com';
+        document.getElementById('loginPassword').value = 'admin123';
+    }
+
+    // ---------- Connection Test ----------
+    async function testConnection() {
+        const statusDiv = document.getElementById('connStatus');
+        statusDiv.innerHTML = '<span class="loader"></span> Testing connection...';
+        for (let i = 0; i < PROXIES.length; i++) {
+            currentProxyIndex = i;
+            try {
+                const url = getApiUrl();
+                const res = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'login', email: 'test', password: 'test' })
+                });
+                if (res.ok) {
+                    statusDiv.innerHTML = `✅ Connected (proxy ${i+1})`;
+                    return true;
+                }
+            } catch (e) { /* try next */ }
+        }
+        statusDiv.innerHTML = '❌ No proxy works. Check Apps Script deployment (must be "Anyone").';
+        return false;
+    }
 
     // ---------- Event Listeners ----------
     window.onload = async () => {
@@ -541,8 +676,11 @@
             if (btn.dataset.tab === 'sheets') adminListSheets();
             if (btn.dataset.tab === 'withdrawals') adminLoadWithdrawals();
         }));
-        const saved = sessionStorage.getItem('ridaUser');
-        if (saved) { const u = JSON.parse(saved); login(u.email, u.password); }
+        const savedEmail = sessionStorage.getItem('ridaEmail');
+        if (savedEmail && savedEmail !== 'undefined') {
+            // don't auto-login without password; just show login screen
+            document.getElementById('loginEmail').value = savedEmail;
+        }
     };
 </script>
 </body>
