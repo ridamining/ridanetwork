@@ -2,238 +2,52 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Rida Network • Basic Miner</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rida Network – Final Test</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            background: linear-gradient(145deg, #0a0f1e 0%, #07111f 100%);
-            font-family: 'Segoe UI', system-ui, sans-serif;
-            padding: 20px;
-            color: #eef2ff;
-        }
-        .container { max-width: 550px; margin: 0 auto; }
-        .card {
-            background: rgba(18, 25, 45, 0.85);
-            backdrop-filter: blur(14px);
-            border-radius: 2rem;
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
-            border: 1px solid rgba(255, 215, 0, 0.2);
-        }
-        h1 { text-align: center; color: #ffd966; margin-bottom: 1rem; }
-        .balance-box {
-            background: #0f172ad9;
-            border-radius: 1.8rem;
-            padding: 1.2rem;
-            text-align: center;
-            margin: 1rem 0;
-        }
-        .balance-amount { font-size: 2.8rem; font-weight: 800; color: #4ade80; }
-        .stats-grid { display: flex; gap: 0.8rem; margin: 1rem 0; }
-        .stat {
-            background: #1e293b;
-            flex: 1;
-            border-radius: 1.2rem;
-            padding: 0.7rem;
-            text-align: center;
-        }
-        .stat .value { font-size: 1.3rem; font-weight: bold; color: #facc15; }
-        button {
-            width: 100%;
-            padding: 0.9rem;
-            font-size: 1rem;
-            font-weight: bold;
-            border: none;
-            border-radius: 3rem;
-            background: #3b82f6;
-            color: white;
-            cursor: pointer;
-            margin-top: 0.6rem;
-        }
-        button:active { transform: scale(0.97); }
-        .btn-danger { background: #ef4444; }
-        input {
-            width: 100%;
-            padding: 0.75rem;
-            background: #0f172a;
-            border: 1px solid #334155;
-            border-radius: 2rem;
-            color: white;
-            margin: 0.5rem 0;
-        }
-        .ref-box {
-            background: #1e293b;
-            border-radius: 1.2rem;
-            padding: 0.8rem;
-            margin-top: 1rem;
-            text-align: center;
-        }
-        .hidden { display: none; }
-        .message { text-align: center; font-size: 0.8rem; margin: 0.5rem 0; padding: 0.5rem; border-radius: 2rem; }
-        .message.success { background: #10b98133; color: #4ade80; }
-        .message.error { background: #ef444433; color: #f87171; }
-        footer { text-align: center; font-size: 0.65rem; opacity: 0.5; margin-top: 1rem; }
+        body { background: #0a0f1e; color: white; font-family: monospace; padding: 20px; }
+        button { background: #3b82f6; border: none; padding: 10px 20px; border-radius: 2rem; color: white; margin: 5px; }
+        pre { background: #1e293b; padding: 1rem; border-radius: 1rem; overflow-x: auto; }
     </style>
 </head>
 <body>
-<div class="container">
-    <h1>⛏️ RIDA NETWORK (Basic)</h1>
-
-    <div id="authSection" class="card">
-        <div id="loginBox">
-            <input type="email" id="loginEmail" placeholder="Email" value="admin@rida.com">
-            <input type="password" id="loginPassword" placeholder="Password" value="admin123">
-            <button id="loginBtn">🔓 Login</button>
-            <p style="text-align:center; margin-top:12px;"><a href="#" id="showRegLink" style="color:#facc15;">Create account</a></p>
-        </div>
-        <div id="registerBox" class="hidden">
-            <input type="text" id="regUsername" placeholder="Username">
-            <input type="email" id="regEmail" placeholder="Email">
-            <input type="password" id="regPassword" placeholder="Password">
-            <input type="text" id="regReferralCode" placeholder="Referral code (optional)">
-            <button id="registerBtn">📝 Register</button>
-            <p style="text-align:center; margin-top:12px;"><a href="#" id="showLoginLink" style="color:#facc15;">← Back to login</a></p>
-        </div>
-    </div>
-
-    <div id="dashboardSection" class="card hidden">
-        <div class="balance-box">
-            <div class="balance-amount" id="userBalance">0.0000 Rida</div>
-        </div>
-        <div class="stats-grid">
-            <div class="stat"><div class="value" id="totalMined">0</div><div>Total Mined</div></div>
-            <div class="stat"><div class="value" id="activeRefs">0</div><div>Active Refs</div></div>
-            <div class="stat"><div class="value" id="miningRate">0</div><div>Rida/sec</div></div>
-        </div>
-        <button id="mineActionBtn">⛏️ START MINING</button>
-        <div class="ref-box">
-            🔗 YOUR REFERRAL LINK<br>
-            <div class="ref-link" id="refLinkDisplay" style="background:#0f172a; padding:0.5rem; border-radius:2rem; margin-top:0.5rem;">loading...</div>
-            <button id="copyRefBtn" style="margin-top:8px; background:#2d3748;">📋 Copy Link</button>
-        </div>
-        <button id="logoutBtn" style="background:#334155;">🚪 Logout</button>
-    </div>
-    <div id="globalMsg" class="message hidden"></div>
-    <footer>⚡ Mining rate: base daily 0.2 Rida + 0.01 per active referral</footer>
-</div>
+<h1>🔧 Rida Network – Backend Test</h1>
+<button id="testLogin">Test Login (admin@rida.com / admin123)</button>
+<button id="testDashboard">Test Dashboard</button>
+<pre id="output">Click a button...</pre>
 
 <script>
-    const DIRECT_API = 'https://script.google.com/macros/s/AKfycbx_pLC6Owvntl1WBZzAomMsd4AjbG3QCvGGtc_7MugU_E0ECe28QEXuEqhePp9NtBBimQ/exec';
-    const PROXY = 'https://corsproxy.io/?' + encodeURIComponent(DIRECT_API);
-    
-    let currentUser = null;
-    let miningInterval = null;
+    // Replace this with your actual Apps Script URL
+    const API_URL = 'https://script.google.com/macros/s/AKfycbwz3_kw0XIVFEU4X6qNUgm2cuvpZeDIQXnJO56Pw4J9GpNWgfcaz6lBgmBdrFC78FsedA/exec';
+    const PROXY = 'https://corsproxy.io/?' + encodeURIComponent(API_URL);
 
-    function showMessage(msg, type = 'error') {
-        const msgDiv = document.getElementById('globalMsg');
-        msgDiv.className = `message ${type}`;
-        msgDiv.innerText = msg;
-        msgDiv.classList.remove('hidden');
-        setTimeout(() => msgDiv.classList.add('hidden'), 5000);
-    }
-
-    async function callApi(action, payload = {}) {
+    async function callApi(action, payload) {
         try {
             const res = await fetch(PROXY, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ action, ...payload })
             });
-            return await res.json();
-        } catch (err) {
-            showMessage(`Network error: ${err.message}`);
-            return { success: false, error: err.message };
-        }
-    }
-
-    async function refreshDashboard() {
-        if (!currentUser) return;
-        const res = await callApi('getDashboard', { email: currentUser.email });
-        if (res.success) {
-            document.getElementById('userBalance').innerText = res.balance.toFixed(4) + ' Rida';
-            document.getElementById('totalMined').innerText = res.totalMined.toFixed(4);
-            document.getElementById('activeRefs').innerText = res.activeReferrals;
-            document.getElementById('miningRate').innerText = res.currentRatePerSec.toFixed(6);
-            const mineBtn = document.getElementById('mineActionBtn');
-            if (res.miningActive) {
-                mineBtn.innerText = '⏹️ STOP MINING';
-                mineBtn.classList.add('btn-danger');
-                if (!miningInterval) miningInterval = setInterval(refreshDashboard, 2000);
-            } else {
-                mineBtn.innerText = '⛏️ START MINING';
-                mineBtn.classList.remove('btn-danger');
-                if (miningInterval) { clearInterval(miningInterval); miningInterval = null; }
+            const text = await res.text();
+            document.getElementById('output').innerText = 'Raw response:\n' + text;
+            try {
+                return JSON.parse(text);
+            } catch(e) {
+                return { error: 'Invalid JSON', raw: text };
             }
-        } else {
-            showMessage(res.error);
+        } catch(err) {
+            document.getElementById('output').innerText = 'Fetch error: ' + err.message;
         }
     }
 
-    async function startMining() {
-        const res = await callApi('startMining', { email: currentUser.email });
-        if (res.success) showMessage('✅ Mining started!', 'success');
-        else showMessage(res.error);
-        refreshDashboard();
-    }
-
-    async function stopMining() {
-        const res = await callApi('stopMining', { email: currentUser.email });
-        if (res.success) showMessage(`⛏️ Mined +${res.earned?.toFixed(6)} Rida`, 'success');
-        else showMessage(res.error);
-        refreshDashboard();
-    }
-
-    async function loadReferralLink() {
-        const res = await callApi('getReferralLink', { email: currentUser.email });
-        if (res.success) document.getElementById('refLinkDisplay').innerText = `${window.location.origin}?ref=${res.code}`;
-        else document.getElementById('refLinkDisplay').innerText = 'Error';
-    }
-
-    async function login(email, password) {
-        const res = await callApi('login', { email, password });
-        if (res.success) {
-            currentUser = res.user;
-            sessionStorage.setItem('ridaUser', JSON.stringify({ email }));
-            document.getElementById('authSection').classList.add('hidden');
-            document.getElementById('dashboardSection').classList.remove('hidden');
-            refreshDashboard();
-            loadReferralLink();
-        } else showMessage(res.error);
-    }
-
-    async function register() {
-        const res = await callApi('register', {
-            email: document.getElementById('regEmail').value,
-            username: document.getElementById('regUsername').value,
-            password: document.getElementById('regPassword').value,
-            referralCode: document.getElementById('regReferralCode').value
-        });
-        if (res.success) {
-            showMessage('Registration successful! Please login.', 'success');
-            document.getElementById('registerBox').classList.add('hidden');
-            document.getElementById('loginBox').classList.remove('hidden');
-        } else showMessage(res.error);
-    }
-
-    function logout() {
-        if (miningInterval) clearInterval(miningInterval);
-        currentUser = null;
-        sessionStorage.removeItem('ridaUser');
-        document.getElementById('dashboardSection').classList.add('hidden');
-        document.getElementById('authSection').classList.remove('hidden');
-    }
-
-    document.getElementById('loginBtn').onclick = () => login(document.getElementById('loginEmail').value, document.getElementById('loginPassword').value);
-    document.getElementById('showRegLink').onclick = (e) => { e.preventDefault(); document.getElementById('loginBox').classList.add('hidden'); document.getElementById('registerBox').classList.remove('hidden'); };
-    document.getElementById('showLoginLink').onclick = (e) => { e.preventDefault(); document.getElementById('registerBox').classList.add('hidden'); document.getElementById('loginBox').classList.remove('hidden'); };
-    document.getElementById('registerBtn').onclick = register;
-    document.getElementById('logoutBtn').onclick = logout;
-    document.getElementById('mineActionBtn').onclick = () => { if (document.getElementById('mineActionBtn').innerText.includes('START')) startMining(); else stopMining(); };
-    document.getElementById('copyRefBtn').onclick = () => { navigator.clipboard.writeText(document.getElementById('refLinkDisplay').innerText); showMessage('Copied!', 'success'); };
-
-    const saved = sessionStorage.getItem('ridaUser');
-    if (saved) { const u = JSON.parse(saved); if (u.email) document.getElementById('loginEmail').value = u.email; }
+    document.getElementById('testLogin').onclick = async () => {
+        const result = await callApi('login', { email: 'admin@rida.com', password: 'admin123' });
+        console.log(result);
+    };
+    document.getElementById('testDashboard').onclick = async () => {
+        const result = await callApi('getDashboard', { email: 'admin@rida.com' });
+        console.log(result);
+    };
 </script>
 </body>
 </html>
