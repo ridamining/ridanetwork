@@ -5,12 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>Rida Network • Crypto Miner</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             background: linear-gradient(145deg, #0a0f1e 0%, #07111f 100%);
             font-family: 'Segoe UI', system-ui, -apple-system, 'Inter', sans-serif;
@@ -18,13 +13,7 @@
             color: #eef2ff;
             min-height: 100vh;
         }
-
-        .container {
-            max-width: 550px;
-            margin: 0 auto;
-        }
-
-        /* Cards */
+        .container { max-width: 550px; margin: 0 auto; }
         .card {
             background: rgba(18, 25, 45, 0.85);
             backdrop-filter: blur(14px);
@@ -33,9 +22,7 @@
             margin-bottom: 1.5rem;
             border: 1px solid rgba(255, 215, 0, 0.2);
             box-shadow: 0 20px 35px -12px rgba(0, 0, 0, 0.5);
-            transition: all 0.2s;
         }
-
         h1 {
             font-size: 1.8rem;
             text-align: center;
@@ -43,17 +30,8 @@
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
-            margin-bottom: 0.25rem;
         }
-
-        .sub {
-            text-align: center;
-            font-size: 0.75rem;
-            opacity: 0.7;
-            margin-bottom: 1.5rem;
-        }
-
-        /* Balance display */
+        .sub { text-align: center; font-size: 0.75rem; opacity: 0.7; margin-bottom: 1.5rem; }
         .balance-box {
             background: #0f172ad9;
             border-radius: 1.8rem;
@@ -61,29 +39,9 @@
             text-align: center;
             margin: 1rem 0;
         }
-
-        .balance-label {
-            font-size: 0.8rem;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            opacity: 0.7;
-        }
-
-        .balance-amount {
-            font-size: 2.8rem;
-            font-weight: 800;
-            color: #4ade80;
-            text-shadow: 0 0 8px #22c55e80;
-            line-height: 1.2;
-        }
-
-        /* Stats grid */
-        .stats-grid {
-            display: flex;
-            gap: 0.8rem;
-            margin: 1rem 0;
-        }
-
+        .balance-label { font-size: 0.8rem; letter-spacing: 1px; text-transform: uppercase; opacity: 0.7; }
+        .balance-amount { font-size: 2.8rem; font-weight: 800; color: #4ade80; text-shadow: 0 0 8px #22c55e80; }
+        .stats-grid { display: flex; gap: 0.8rem; margin: 1rem 0; }
         .stat {
             background: #1e293b;
             flex: 1;
@@ -91,20 +49,8 @@
             padding: 0.7rem;
             text-align: center;
         }
-
-        .stat .label {
-            font-size: 0.65rem;
-            text-transform: uppercase;
-            opacity: 0.7;
-        }
-
-        .stat .value {
-            font-size: 1.3rem;
-            font-weight: bold;
-            color: #facc15;
-        }
-
-        /* Buttons */
+        .stat .label { font-size: 0.65rem; text-transform: uppercase; opacity: 0.7; }
+        .stat .value { font-size: 1.3rem; font-weight: bold; color: #facc15; }
         button, .btn {
             width: 100%;
             padding: 0.9rem;
@@ -118,13 +64,9 @@
             transition: 0.15s linear;
             margin-top: 0.6rem;
         }
-
         button:active { transform: scale(0.97); }
         .btn-danger { background: #ef4444; }
         .btn-success { background: #10b981; }
-        .btn-warning { background: #f97316; }
-
-        /* Inputs */
         input, select, textarea {
             width: 100%;
             padding: 0.75rem;
@@ -135,8 +77,6 @@
             margin: 0.5rem 0;
             font-size: 0.9rem;
         }
-
-        /* Referral */
         .ref-box {
             background: #1e293b;
             border-radius: 1.2rem;
@@ -144,7 +84,6 @@
             margin-top: 1rem;
             text-align: center;
         }
-
         .ref-link {
             background: #0f172a;
             padding: 0.5rem;
@@ -154,8 +93,6 @@
             word-break: break-all;
             margin-top: 0.5rem;
         }
-
-        /* Admin panel */
         .admin-section {
             background: #111827cc;
             border-radius: 1.5rem;
@@ -163,69 +100,17 @@
             margin-top: 1.2rem;
             border-top: 2px solid #facc15;
         }
-
-        .tabs {
-            display: flex;
-            gap: 0.5rem;
-            flex-wrap: wrap;
-            margin-bottom: 1rem;
-        }
-
-        .tab-btn {
-            background: #334155;
-            width: auto;
-            padding: 0.4rem 1rem;
-            font-size: 0.8rem;
-            margin: 0;
-        }
-
-        .tab-btn.active {
-            background: #3b82f6;
-        }
-
-        .tab-content {
-            display: none;
-        }
-
-        .tab-content.active {
-            display: block;
-        }
-
-        table {
-            width: 100%;
-            font-size: 0.7rem;
-            border-collapse: collapse;
-            overflow-x: auto;
-            display: block;
-        }
-
-        th, td {
-            border: 1px solid #334155;
-            padding: 0.4rem;
-            text-align: left;
-        }
-
-        th {
-            background: #0f172a;
-        }
-
-        .hidden {
-            display: none;
-        }
-
-        .message {
-            text-align: center;
-            font-size: 0.8rem;
-            margin: 0.5rem 0;
-            padding: 0.3rem;
-        }
-
-        footer {
-            text-align: center;
-            font-size: 0.65rem;
-            opacity: 0.5;
-            margin-top: 1rem;
-        }
+        .tabs { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem; }
+        .tab-btn { background: #334155; width: auto; padding: 0.4rem 1rem; font-size: 0.8rem; margin: 0; }
+        .tab-btn.active { background: #3b82f6; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        table { width: 100%; font-size: 0.7rem; border-collapse: collapse; overflow-x: auto; display: block; }
+        th, td { border: 1px solid #334155; padding: 0.4rem; text-align: left; }
+        th { background: #0f172a; }
+        .hidden { display: none; }
+        .message { text-align: center; font-size: 0.8rem; margin: 0.5rem 0; padding: 0.3rem; }
+        footer { text-align: center; font-size: 0.65rem; opacity: 0.5; margin-top: 1rem; }
     </style>
 </head>
 <body>
@@ -286,7 +171,7 @@
             <!-- Tab: Users -->
             <div id="tab-users" class="tab-content active">
                 <h4>All Miners</h4>
-                <div style="overflow-x:auto"><table id="usersTable"><tr><th>Email</th><th>Balance</th><th>Total</th><th>Refs</th></table></div>
+                <div style="overflow-x:auto"><table id="usersTable"><tr><th>Email</th><th>Balance</th><th>Total</th><th>Refs</th></tr></div>
                 <select id="userSelect"></select>
                 <select id="userField">
                     <option value="balance">Set Balance</option>
@@ -346,7 +231,8 @@
 
 <script>
     // ======================= CONFIGURATION =======================
-    const API_URL = 'https://script.google.com/macros/s/AKfycby9DqVWyIfc7Wwnve0ba2u_Vz5kCfcyV0cjK9XN__haCS82IY3HL7HmsZA9oNzbiENTNw/exec';
+    // IMPORTANT: Replace this with YOUR Apps Script URL after redeploying
+    const API_URL = 'https://script.google.com/macros/s/AKfycbzbqB3LYfABRgtvEpcctso63OB7c_dCLKJQ22PAqLo8zJkfBwQwvja6be7l9jHiIrmdHQ/exec';
     
     let currentUser = null;
     let miningInterval = null;
@@ -360,10 +246,11 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ action, ...payload })
             });
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
             const data = await response.json();
             return data;
         } catch (err) {
-            showMessage(err.message, true);
+            showMessage(`Network error: ${err.message}`, true);
             return { success: false, error: err.message };
         }
     }
@@ -422,7 +309,6 @@
         if (res.success) {
             const link = `${window.location.origin}?ref=${res.code}`;
             document.getElementById('refLinkDisplay').innerText = link;
-            window.refCode = res.code;
         } else {
             document.getElementById('refLinkDisplay').innerText = 'Error loading link';
         }
@@ -533,6 +419,8 @@
                 html += '<tr>';
                 row.forEach(cell => html += `<td>${cell}</td>`);
                 html += '</tr>';
+        row.forEach(cell => html += `<td>${cell}</td>`);
+                html += '</tr>';
             });
             html += '</table>';
             document.getElementById('rawTable').innerHTML = html;
@@ -642,20 +530,6 @@
             if (btn.dataset.tab === 'sheets') adminListSheets();
             if (btn.dataset.tab === 'rawdata') adminListSheets();
         });
-    });
-    
-    // If already logged in from session? (optional localStorage)
-    const saved = localStorage.getItem('ridaUser');
-    if (saved) {
-        try {
-            const u = JSON.parse(saved);
-            if (u.email) login(u.email, u.password || '');
-        } catch(e) {}
-    }
-    // store after login (optional)
-    window.addEventListener('beforeunload', () => {
-        if (currentUser) localStorage.setItem('ridaUser', JSON.stringify({ email: currentUser.email, password: document.getElementById('loginPassword')?.value || '' }));
-        else localStorage.removeItem('ridaUser');
     });
 </script>
 </body>
