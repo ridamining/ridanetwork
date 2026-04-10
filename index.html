@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Rida Network • Crypto Miner</title>
+    <title>Rida Network • Crypto Miner (CORS Fixed)</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -21,7 +21,6 @@
             padding: 1.5rem;
             margin-bottom: 1.5rem;
             border: 1px solid rgba(255, 215, 0, 0.2);
-            box-shadow: 0 20px 35px -12px rgba(0, 0, 0, 0.5);
         }
         h1 {
             font-size: 1.8rem;
@@ -39,8 +38,7 @@
             text-align: center;
             margin: 1rem 0;
         }
-        .balance-label { font-size: 0.8rem; letter-spacing: 1px; text-transform: uppercase; opacity: 0.7; }
-        .balance-amount { font-size: 2.8rem; font-weight: 800; color: #4ade80; text-shadow: 0 0 8px #22c55e80; }
+        .balance-amount { font-size: 2.8rem; font-weight: 800; color: #4ade80; }
         .stats-grid { display: flex; gap: 0.8rem; margin: 1rem 0; }
         .stat {
             background: #1e293b;
@@ -49,7 +47,6 @@
             padding: 0.7rem;
             text-align: center;
         }
-        .stat .label { font-size: 0.65rem; text-transform: uppercase; opacity: 0.7; }
         .stat .value { font-size: 1.3rem; font-weight: bold; color: #facc15; }
         button, .btn {
             width: 100%;
@@ -61,13 +58,11 @@
             background: #3b82f6;
             color: white;
             cursor: pointer;
-            transition: 0.15s linear;
             margin-top: 0.6rem;
         }
         button:active { transform: scale(0.97); }
         .btn-danger { background: #ef4444; }
-        .btn-success { background: #10b981; }
-        input, select, textarea {
+        input, select {
             width: 100%;
             padding: 0.75rem;
             background: #0f172a;
@@ -75,7 +70,6 @@
             border-radius: 2rem;
             color: white;
             margin: 0.5rem 0;
-            font-size: 0.9rem;
         }
         .ref-box {
             background: #1e293b;
@@ -91,7 +85,6 @@
             font-family: monospace;
             font-size: 0.8rem;
             word-break: break-all;
-            margin-top: 0.5rem;
         }
         .admin-section {
             background: #111827cc;
@@ -107,16 +100,22 @@
         .tab-content.active { display: block; }
         table { width: 100%; font-size: 0.7rem; border-collapse: collapse; overflow-x: auto; display: block; }
         th, td { border: 1px solid #334155; padding: 0.4rem; text-align: left; }
-        th { background: #0f172a; }
         .hidden { display: none; }
-        .message { text-align: center; font-size: 0.8rem; margin: 0.5rem 0; padding: 0.3rem; }
+        .message { text-align: center; font-size: 0.8rem; margin: 0.5rem 0; }
         footer { text-align: center; font-size: 0.65rem; opacity: 0.5; margin-top: 1rem; }
+        .test-result { font-size: 0.75rem; padding: 0.5rem; background: #0f172a; border-radius: 1rem; margin-top: 0.5rem; }
     </style>
 </head>
 <body>
 <div class="container">
     <h1>⛏️ RIDA NETWORK</h1>
     <div class="sub">1 Rida = $1 USD • referral bonus active</div>
+
+    <!-- Connection Test Panel -->
+    <div class="card" id="testPanel">
+        <button id="testConnBtn" style="background:#f97316;">🔌 Test API Connection</button>
+        <div id="testResult" class="test-result"></div>
+    </div>
 
     <!-- LOGIN / REGISTER SECTION -->
     <div id="authSection" class="card">
@@ -140,17 +139,16 @@
         </div>
     </div>
 
-    <!-- DASHBOARD (MINING) SECTION -->
+    <!-- DASHBOARD SECTION -->
     <div id="dashboardSection" class="card hidden">
         <div class="balance-box">
-            <div class="balance-label">💰 YOUR RIDA BALANCE</div>
-            <div class="balance-amount" id="userBalance">0.0000</div>
+            <div class="balance-amount" id="userBalance">0.0000 Rida</div>
             <div>≈ $<span id="userUsd">0.00</span> USD</div>
         </div>
         <div class="stats-grid">
-            <div class="stat"><div class="label">Total Mined</div><div class="value" id="totalMined">0</div></div>
-            <div class="stat"><div class="label">Active Refs</div><div class="value" id="activeRefs">0</div></div>
-            <div class="stat"><div class="label">Rate (R/s)</div><div class="value" id="miningRate">0</div></div>
+            <div class="stat"><div class="value" id="totalMined">0</div><div>Total Mined</div></div>
+            <div class="stat"><div class="value" id="activeRefs">0</div><div>Active Refs</div></div>
+            <div class="stat"><div class="value" id="miningRate">0</div><div>Rida/sec</div></div>
         </div>
         <button id="mineActionBtn">⛏️ START MINING</button>
         <div class="ref-box">
@@ -159,7 +157,7 @@
             <button id="copyRefBtn" style="margin-top:8px; background:#2d3748;">📋 Copy Link</button>
         </div>
 
-        <!-- ADMIN PANEL (visible only for admin@rida.com) -->
+        <!-- ADMIN PANEL -->
         <div id="adminPanel" class="admin-section hidden">
             <div class="tabs" id="adminTabs">
                 <button class="tab-btn active" data-tab="users">👥 Users</button>
@@ -167,23 +165,14 @@
                 <button class="tab-btn" data-tab="settings">⚙️ Settings</button>
                 <button class="tab-btn" data-tab="rawdata">📊 Raw Editor</button>
             </div>
-
-            <!-- Tab: Users -->
             <div id="tab-users" class="tab-content active">
-                <h4>All Miners</h4>
                 <div style="overflow-x:auto"><table id="usersTable"><tr><th>Email</th><th>Balance</th><th>Total</th><th>Refs</th></tr></div>
                 <select id="userSelect"></select>
-                <select id="userField">
-                    <option value="balance">Set Balance</option>
-                    <option value="totalMined">Set Total Mined</option>
-                    <option value="username">Change Username</option>
-                </select>
+                <select id="userField"><option value="balance">Set Balance</option><option value="totalMined">Set Total Mined</option><option value="username">Change Username</option></select>
                 <input type="text" id="userFieldValue" placeholder="New value">
                 <button id="updateUserBtn">✏️ Update User</button>
                 <button id="refreshUsersBtn">🔄 Refresh</button>
             </div>
-
-            <!-- Tab: Sheets Management -->
             <div id="tab-sheets" class="tab-content">
                 <input type="text" id="newSheetName" placeholder="New sheet name">
                 <input type="text" id="newSheetColumns" placeholder="Columns: name1,name2">
@@ -191,54 +180,85 @@
                 <hr>
                 <select id="sheetSelect"></select>
                 <button id="deleteSheetBtn" class="btn-danger">🗑️ Delete Sheet</button>
-                <h4>Add Column</h4>
                 <input type="text" id="newColumnName" placeholder="Column name">
                 <button id="addColumnBtn">➕ Add Column</button>
-                <h4>Delete Column (index 1-based)</h4>
-                <input type="number" id="deleteColIdx" placeholder="Column number">
+                <input type="number" id="deleteColIdx" placeholder="Column number to delete">
                 <button id="deleteColumnBtn" class="btn-danger">❌ Delete Column</button>
             </div>
-
-            <!-- Tab: Settings -->
-            <div id="tab-settings" class="tab-content">
-                <div id="settingsEditor"></div>
-                <button id="saveSettingsBtn">💾 Save Settings</button>
-            </div>
-
-            <!-- Tab: Raw Data Editor -->
+            <div id="tab-settings" class="tab-content"><div id="settingsEditor"></div><button id="saveSettingsBtn">💾 Save Settings</button></div>
             <div id="tab-rawdata" class="tab-content">
                 <select id="rawSheetSelect"></select>
                 <button id="loadRawBtn">📂 Load Data</button>
                 <div style="overflow-x:auto"><table id="rawTable"></table></div>
-                <h4>Add Row (comma separated)</h4>
                 <input type="text" id="newRowValues" placeholder="value1,value2,value3">
                 <button id="addRowBtn">➕ Add Row</button>
-                <h4>Delete Row (1 = header)</h4>
-                <input type="number" id="delRowIdx" placeholder="Row number">
+                <input type="number" id="delRowIdx" placeholder="Row number to delete">
                 <button id="deleteRowBtn" class="btn-danger">🗑️ Delete Row</button>
-                <h4>Update Cell</h4>
-                <input type="number" id="updRow" placeholder="Row">
-                <input type="number" id="updCol" placeholder="Col">
-                <input type="text" id="updValue" placeholder="New value">
+                <input type="number" id="updRow" placeholder="Row"><input type="number" id="updCol" placeholder="Col"><input type="text" id="updValue" placeholder="New value">
                 <button id="updateCellBtn">✏️ Update Cell</button>
             </div>
         </div>
         <button id="logoutBtn" style="background:#334155;">🚪 Logout</button>
     </div>
     <div id="globalMsg" class="message"></div>
-    <footer>⚡ Auto mining • Daily base rate +0.01 per active referral • Admin full control</footer>
+    <footer>⚡ Auto mining • Daily base rate +0.01 per active referral</footer>
 </div>
 
 <script>
-    // ======================= CONFIGURATION =======================
-    // IMPORTANT: Replace this with YOUR Apps Script URL after redeploying
-    const API_URL = 'https://script.google.com/macros/s/AKfycbzbqB3LYfABRgtvEpcctso63OB7c_dCLKJQ22PAqLo8zJkfBwQwvja6be7l9jHiIrmdHQ/exec';
+    // ======================= YOUR APPS SCRIPT URL =======================
+    const DIRECT_API = 'https://script.google.com/macros/s/AKfycby9DqVWyIfc7Wwnve0ba2u_Vz5kCfcyV0cjK9XN__haCS82IY3HL7HmsZA9oNzbiENTNw/exec';
+    const CORS_PROXY = 'https://cors-anywhere.herokuapp.com/';
     
+    let API_URL = DIRECT_API;  // will switch to proxy if needed
     let currentUser = null;
     let miningInterval = null;
-    
-    // Helper: call API (POST JSON)
+    let usingProxy = false;
+
+    // ---------- Helper: Test connection and automatically switch to proxy if needed ----------
+    async function testConnection() {
+        const testBtn = document.getElementById('testConnBtn');
+        const resultDiv = document.getElementById('testResult');
+        resultDiv.innerHTML = '🔄 Testing direct connection...';
+        testBtn.disabled = true;
+        
+        try {
+            const res = await fetch(DIRECT_API, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'login', email: 'test@test.com', password: 'fake' })
+            });
+            // Even if login fails, we just need to see if fetch succeeds
+            resultDiv.innerHTML = '✅ Direct connection works! No proxy needed.';
+            usingProxy = false;
+            API_URL = DIRECT_API;
+            return true;
+        } catch (err) {
+            resultDiv.innerHTML = `❌ Direct failed: ${err.message}<br>🔄 Trying with CORS proxy...`;
+            try {
+                const proxyRes = await fetch(CORS_PROXY + DIRECT_API, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'login', email: 'test@test.com', password: 'fake' })
+                });
+                resultDiv.innerHTML = '✅ CORS proxy works! Will use proxy for all requests.';
+                usingProxy = true;
+                API_URL = CORS_PROXY + DIRECT_API;
+                return true;
+            } catch (proxyErr) {
+                resultDiv.innerHTML = `❌ Both direct and proxy failed. Check your Apps Script deployment (must be "Anyone" access). Error: ${proxyErr.message}`;
+                return false;
+            }
+        } finally {
+            testBtn.disabled = false;
+        }
+    }
+
+    // Call API using the best available URL
     async function callApi(action, payload = {}) {
+        if (!API_URL) {
+            // fallback: try test again
+            await testConnection();
+        }
         try {
             const response = await fetch(API_URL, {
                 method: 'POST',
@@ -246,92 +266,86 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ action, ...payload })
             });
-            if (!response.ok) throw new Error(`HTTP ${response.status}`);
             const data = await response.json();
             return data;
         } catch (err) {
+            // If using direct and failed, try proxy once
+            if (!usingProxy && API_URL === DIRECT_API) {
+                console.log('Direct failed, switching to proxy...');
+                API_URL = CORS_PROXY + DIRECT_API;
+                usingProxy = true;
+                return callApi(action, payload);
+            }
             showMessage(`Network error: ${err.message}`, true);
             return { success: false, error: err.message };
         }
     }
-    
+
     function showMessage(msg, isError = true) {
         const msgDiv = document.getElementById('globalMsg');
         msgDiv.innerText = msg;
         msgDiv.style.color = isError ? '#f87171' : '#4ade80';
-        setTimeout(() => { msgDiv.innerText = ''; }, 3500);
+        setTimeout(() => msgDiv.innerText = '', 3500);
     }
-    
-    // ======================= USER DASHBOARD & MINING =======================
+
+    // ---------- Dashboard & Mining ----------
     async function refreshDashboard() {
         if (!currentUser) return;
         const res = await callApi('getDashboard', { email: currentUser.email });
         if (res.success) {
-            document.getElementById('userBalance').innerText = res.balance.toFixed(4);
+            document.getElementById('userBalance').innerText = res.balance.toFixed(4) + ' Rida';
             document.getElementById('userUsd').innerText = res.balance.toFixed(2);
             document.getElementById('totalMined').innerText = res.totalMined.toFixed(4);
             document.getElementById('activeRefs').innerText = res.activeReferrals;
             document.getElementById('miningRate').innerText = res.currentRatePerSec.toFixed(6);
-            
             const mineBtn = document.getElementById('mineActionBtn');
             if (res.miningActive) {
                 mineBtn.innerText = '⏹️ STOP MINING';
                 mineBtn.classList.add('btn-danger');
-                mineBtn.classList.remove('btn-success');
                 if (!miningInterval) miningInterval = setInterval(refreshDashboard, 2000);
             } else {
                 mineBtn.innerText = '⛏️ START MINING';
                 mineBtn.classList.remove('btn-danger');
-                mineBtn.classList.add('btn-success');
                 if (miningInterval) { clearInterval(miningInterval); miningInterval = null; }
             }
-        } else {
-            showMessage(res.error || 'Dashboard error');
-        }
+        } else showMessage(res.error);
     }
-    
+
     async function startMining() {
         const res = await callApi('startMining', { email: currentUser.email });
         if (res.success) showMessage('✅ Mining started!', false);
         else showMessage(res.error);
         refreshDashboard();
     }
-    
+
     async function stopMining() {
         const res = await callApi('stopMining', { email: currentUser.email });
         if (res.success) showMessage(`⛏️ Mined +${res.earned?.toFixed(6)} Rida`, false);
         else showMessage(res.error);
         refreshDashboard();
     }
-    
+
     async function loadReferralLink() {
         const res = await callApi('getReferralLink', { email: currentUser.email });
-        if (res.success) {
-            const link = `${window.location.origin}?ref=${res.code}`;
-            document.getElementById('refLinkDisplay').innerText = link;
-        } else {
-            document.getElementById('refLinkDisplay').innerText = 'Error loading link';
-        }
+        if (res.success) document.getElementById('refLinkDisplay').innerText = `${window.location.origin}?ref=${res.code}`;
+        else document.getElementById('refLinkDisplay').innerText = 'Error loading link';
     }
-    
-    // ======================= ADMIN FUNCTIONS =======================
+
+    // ---------- Admin functions (same as before) ----------
     async function adminLoadUsers() {
         const res = await callApi('adminGetUsers', { adminEmail: currentUser.email, adminPass: document.getElementById('loginPassword').value });
         if (res.success) {
             const table = document.getElementById('usersTable');
-            table.innerHTML = `<tr><th>Email</th><th>Balance</th><th>Total Mined</th><th>Refs</th></tr>`;
+            table.innerHTML = `<table><th>Email</th><th>Balance</th><th>Total Mined</th><th>Refs</th></tr>`;
             const select = document.getElementById('userSelect');
             select.innerHTML = '';
             res.users.forEach(u => {
                 table.innerHTML += `<tr><td>${u.email}</td><td>${u.balance}</td><td>${u.totalMined}</td><td>${u.activeReferrals}</td></tr>`;
-                const opt = document.createElement('option');
-                opt.value = u.email;
-                opt.innerText = `${u.email} (${u.balance} Rida)`;
-                select.appendChild(opt);
+                select.appendChild(new Option(`${u.email} (${u.balance} Rida)`, u.email));
             });
         } else showMessage(res.error);
     }
-    
+
     async function adminUpdateUser() {
         const target = document.getElementById('userSelect').value;
         const field = document.getElementById('userField').value;
@@ -341,51 +355,43 @@
         if (res.success) { showMessage('User updated', false); adminLoadUsers(); refreshDashboard(); }
         else showMessage(res.error);
     }
-    
+
     async function adminLoadSettings() {
         const res = await callApi('adminGetSettings', { adminEmail: currentUser.email, adminPass: document.getElementById('loginPassword').value });
         if (res.success) {
             let html = '';
-            for (let [k, v] of Object.entries(res.settings)) {
-                html += `<label>${k}</label><input type="text" id="set_${k}" value="${v}"><br>`;
-            }
+            for (let [k, v] of Object.entries(res.settings)) html += `<label>${k}</label><input type="text" id="set_${k}" value="${v}"><br>`;
             document.getElementById('settingsEditor').innerHTML = html;
         }
     }
-    
+
     async function adminSaveSettings() {
         const inputs = document.querySelectorAll('#settingsEditor input');
         for (let inp of inputs) {
             const key = inp.id.replace('set_', '');
-            const value = inp.value;
-            await callApi('adminUpdateSetting', { adminEmail: currentUser.email, adminPass: document.getElementById('loginPassword').value, settingKey: key, settingValue: value });
+            await callApi('adminUpdateSetting', { adminEmail: currentUser.email, adminPass: document.getElementById('loginPassword').value, settingKey: key, settingValue: inp.value });
         }
         showMessage('Settings saved', false);
     }
-    
+
     async function adminListSheets() {
         const res = await callApi('adminGetAllSheets', { adminEmail: currentUser.email, adminPass: document.getElementById('loginPassword').value });
         if (res.success) {
             const sel = document.getElementById('sheetSelect');
             const rawSel = document.getElementById('rawSheetSelect');
-            sel.innerHTML = '';
-            rawSel.innerHTML = '';
-            res.sheets.forEach(s => {
-                sel.appendChild(new Option(s, s));
-                rawSel.appendChild(new Option(s, s));
-            });
+            sel.innerHTML = ''; rawSel.innerHTML = '';
+            res.sheets.forEach(s => { sel.appendChild(new Option(s, s)); rawSel.appendChild(new Option(s, s)); });
         }
     }
-    
+
     async function adminCreateSheet() {
         const name = document.getElementById('newSheetName').value;
-        const colsRaw = document.getElementById('newSheetColumns').value;
-        const cols = colsRaw.split(',').map(c => c.trim());
+        const cols = document.getElementById('newSheetColumns').value.split(',').map(c=>c.trim());
         const res = await callApi('adminAddSheet', { adminEmail: currentUser.email, adminPass: document.getElementById('loginPassword').value, sheetName: name, columns: cols });
         if (res.success) { showMessage('Sheet created', false); adminListSheets(); }
         else showMessage(res.error);
     }
-    
+
     async function adminDeleteSheet() {
         const name = document.getElementById('sheetSelect').value;
         if (!confirm(`Delete sheet "${name}"?`)) return;
@@ -393,7 +399,7 @@
         if (res.success) { showMessage('Sheet deleted', false); adminListSheets(); }
         else showMessage(res.error);
     }
-    
+
     async function adminAddColumn() {
         const sheet = document.getElementById('sheetSelect').value;
         const colName = document.getElementById('newColumnName').value;
@@ -401,7 +407,7 @@
         if (res.success) showMessage(`Column added at index ${res.newColumnIndex}`, false);
         else showMessage(res.error);
     }
-    
+
     async function adminDeleteColumn() {
         const sheet = document.getElementById('sheetSelect').value;
         const idx = parseInt(document.getElementById('deleteColIdx').value);
@@ -409,32 +415,26 @@
         if (res.success) showMessage('Column deleted', false);
         else showMessage(res.error);
     }
-    
+
     async function adminLoadRawData() {
         const sheet = document.getElementById('rawSheetSelect').value;
         const res = await callApi('adminGetSheetData', { adminEmail: currentUser.email, adminPass: document.getElementById('loginPassword').value, sheetName: sheet });
         if (res.success) {
             let html = '<table border="1">';
-            res.data.forEach(row => {
-                html += '<tr>';
-                row.forEach(cell => html += `<td>${cell}</td>`);
-                html += '</tr>';
-        row.forEach(cell => html += `<td>${cell}</td>`);
-                html += '</tr>';
-            });
+            res.data.forEach(row => { html += '<tr>'; row.forEach(cell => html += `<td>${cell}</td>`); html += '</tr>'; });
             html += '</table>';
             document.getElementById('rawTable').innerHTML = html;
         } else showMessage(res.error);
     }
-    
+
     async function adminAddRow() {
         const sheet = document.getElementById('rawSheetSelect').value;
-        const rowVals = document.getElementById('newRowValues').value.split(',').map(v => v.trim());
+        const rowVals = document.getElementById('newRowValues').value.split(',').map(v=>v.trim());
         const res = await callApi('adminAddRow', { adminEmail: currentUser.email, adminPass: document.getElementById('loginPassword').value, sheetName: sheet, rowData: rowVals });
         if (res.success) { showMessage('Row added', false); adminLoadRawData(); }
         else showMessage(res.error);
     }
-    
+
     async function adminDeleteRow() {
         const sheet = document.getElementById('rawSheetSelect').value;
         const rowIdx = parseInt(document.getElementById('delRowIdx').value);
@@ -442,7 +442,7 @@
         if (res.success) { showMessage('Row deleted', false); adminLoadRawData(); }
         else showMessage(res.error);
     }
-    
+
     async function adminUpdateCell() {
         const sheet = document.getElementById('rawSheetSelect').value;
         const row = parseInt(document.getElementById('updRow').value);
@@ -452,8 +452,8 @@
         if (res.success) { showMessage('Cell updated', false); adminLoadRawData(); }
         else showMessage(res.error);
     }
-    
-    // ======================= AUTH & SWITCH =======================
+
+    // ---------- Auth ----------
     async function login(email, password) {
         const res = await callApi('login', { email, password });
         if (res.success) {
@@ -464,50 +464,28 @@
             loadReferralLink();
             if (currentUser.email === 'admin@rida.com') {
                 document.getElementById('adminPanel').classList.remove('hidden');
-                adminLoadUsers();
-                adminLoadSettings();
-                adminListSheets();
-            } else {
-                document.getElementById('adminPanel').classList.add('hidden');
-            }
-        } else {
-            showMessage(res.error);
-        }
+                adminLoadUsers(); adminLoadSettings(); adminListSheets();
+            } else document.getElementById('adminPanel').classList.add('hidden');
+        } else showMessage(res.error);
     }
-    
+
     async function register() {
-        const username = document.getElementById('regUsername').value;
-        const email = document.getElementById('regEmail').value;
-        const password = document.getElementById('regPassword').value;
-        const ref = document.getElementById('regReferralCode').value;
-        const res = await callApi('register', { email, username, password, referralCode: ref });
-        if (res.success) {
-            showMessage('Registration successful! Please login.', false);
-            document.getElementById('registerBox').classList.add('hidden');
-            document.getElementById('loginBox').classList.remove('hidden');
-        } else {
-            showMessage(res.error);
-        }
+        const res = await callApi('register', { email: document.getElementById('regEmail').value, username: document.getElementById('regUsername').value, password: document.getElementById('regPassword').value, referralCode: document.getElementById('regReferralCode').value });
+        if (res.success) { showMessage('Registration successful! Please login.', false); document.getElementById('registerBox').classList.add('hidden'); document.getElementById('loginBox').classList.remove('hidden'); }
+        else showMessage(res.error);
     }
-    
-    function logout() {
-        if (miningInterval) clearInterval(miningInterval);
-        currentUser = null;
-        document.getElementById('dashboardSection').classList.add('hidden');
-        document.getElementById('authSection').classList.remove('hidden');
-        document.getElementById('adminPanel').classList.add('hidden');
-    }
-    
-    // ======================= EVENT LISTENERS =======================
+
+    function logout() { if (miningInterval) clearInterval(miningInterval); currentUser = null; document.getElementById('dashboardSection').classList.add('hidden'); document.getElementById('authSection').classList.remove('hidden'); document.getElementById('adminPanel').classList.add('hidden'); }
+
+    // ---------- Event listeners ----------
+    document.getElementById('testConnBtn').onclick = testConnection;
     document.getElementById('loginBtn').onclick = () => login(document.getElementById('loginEmail').value, document.getElementById('loginPassword').value);
     document.getElementById('showRegLink').onclick = (e) => { e.preventDefault(); document.getElementById('loginBox').classList.add('hidden'); document.getElementById('registerBox').classList.remove('hidden'); };
     document.getElementById('showLoginLink').onclick = (e) => { e.preventDefault(); document.getElementById('registerBox').classList.add('hidden'); document.getElementById('loginBox').classList.remove('hidden'); };
     document.getElementById('registerBtn').onclick = register;
     document.getElementById('logoutBtn').onclick = logout;
     document.getElementById('mineActionBtn').onclick = () => { if (document.getElementById('mineActionBtn').innerText.includes('START')) startMining(); else stopMining(); };
-    document.getElementById('copyRefBtn').onclick = () => { navigator.clipboard.writeText(document.getElementById('refLinkDisplay').innerText); showMessage('Referral link copied!', false); };
-    
-    // Admin buttons
+    document.getElementById('copyRefBtn').onclick = () => { navigator.clipboard.writeText(document.getElementById('refLinkDisplay').innerText); showMessage('Copied!', false); };
     document.getElementById('refreshUsersBtn').onclick = adminLoadUsers;
     document.getElementById('updateUserBtn').onclick = adminUpdateUser;
     document.getElementById('saveSettingsBtn').onclick = adminSaveSettings;
@@ -519,18 +497,17 @@
     document.getElementById('addRowBtn').onclick = adminAddRow;
     document.getElementById('deleteRowBtn').onclick = adminDeleteRow;
     document.getElementById('updateCellBtn').onclick = adminUpdateCell;
-    
-    // Tab switching
-    document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-            document.getElementById(`tab-${btn.dataset.tab}`).classList.add('active');
-            if (btn.dataset.tab === 'sheets') adminListSheets();
-            if (btn.dataset.tab === 'rawdata') adminListSheets();
-        });
-    });
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+        btn.classList.add('active');
+        document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+        document.getElementById(`tab-${btn.dataset.tab}`).classList.add('active');
+        if (btn.dataset.tab === 'sheets') adminListSheets();
+        if (btn.dataset.tab === 'rawdata') adminListSheets();
+    }));
+
+    // Auto-test connection on page load
+    window.addEventListener('load', () => { testConnection(); });
 </script>
 </body>
 </html>
