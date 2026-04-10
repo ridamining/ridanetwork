@@ -3,17 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Rida Network • Crypto Miner (CORS Fixed)</title>
+    <title>Rida Network • Advanced Miner</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             background: linear-gradient(145deg, #0a0f1e 0%, #07111f 100%);
-            font-family: 'Segoe UI', system-ui, -apple-system, 'Inter', sans-serif;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
             padding: 20px;
             color: #eef2ff;
             min-height: 100vh;
         }
-        .container { max-width: 550px; margin: 0 auto; }
+        .container { max-width: 650px; margin: 0 auto; }
         .card {
             background: rgba(18, 25, 45, 0.85);
             backdrop-filter: blur(14px);
@@ -30,7 +30,7 @@
             background-clip: text;
             color: transparent;
         }
-        .sub { text-align: center; font-size: 0.75rem; opacity: 0.7; margin-bottom: 1.5rem; }
+        .sub { text-align: center; font-size: 0.75rem; opacity: 0.7; margin-bottom: 1rem; }
         .balance-box {
             background: #0f172ad9;
             border-radius: 1.8rem;
@@ -39,19 +39,20 @@
             margin: 1rem 0;
         }
         .balance-amount { font-size: 2.8rem; font-weight: 800; color: #4ade80; }
-        .stats-grid { display: flex; gap: 0.8rem; margin: 1rem 0; }
+        .stats-grid { display: flex; gap: 0.8rem; margin: 1rem 0; flex-wrap: wrap; }
         .stat {
             background: #1e293b;
             flex: 1;
             border-radius: 1.2rem;
             padding: 0.7rem;
             text-align: center;
+            min-width: 100px;
         }
         .stat .value { font-size: 1.3rem; font-weight: bold; color: #facc15; }
         button, .btn {
             width: 100%;
             padding: 0.9rem;
-            font-size: 1.1rem;
+            font-size: 1rem;
             font-weight: bold;
             border: none;
             border-radius: 3rem;
@@ -59,10 +60,13 @@
             color: white;
             cursor: pointer;
             margin-top: 0.6rem;
+            transition: 0.1s;
         }
         button:active { transform: scale(0.97); }
         .btn-danger { background: #ef4444; }
-        input, select {
+        .btn-success { background: #10b981; }
+        .btn-warning { background: #f97316; }
+        input, select, textarea {
             width: 100%;
             padding: 0.75rem;
             background: #0f172a;
@@ -98,12 +102,21 @@
         .tab-btn.active { background: #3b82f6; }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
-        table { width: 100%; font-size: 0.7rem; border-collapse: collapse; overflow-x: auto; display: block; }
-        th, td { border: 1px solid #334155; padding: 0.4rem; text-align: left; }
+        .table-wrapper { overflow-x: auto; margin: 0.5rem 0; }
+        table { width: 100%; font-size: 0.75rem; border-collapse: collapse; }
+        th, td { border: 1px solid #334155; padding: 0.5rem; text-align: left; }
+        th { background: #0f172a; }
         .hidden { display: none; }
-        .message { text-align: center; font-size: 0.8rem; margin: 0.5rem 0; }
+        .message { text-align: center; font-size: 0.8rem; margin: 0.5rem 0; padding: 0.5rem; border-radius: 2rem; }
+        .message.success { background: #10b98133; color: #4ade80; }
+        .message.error { background: #ef444433; color: #f87171; }
+        .loader { display: inline-block; width: 20px; height: 20px; border: 2px solid #fff; border-radius: 50%; border-top-color: transparent; animation: spin 0.6s linear infinite; margin-right: 8px; vertical-align: middle; }
+        @keyframes spin { to { transform: rotate(360deg); } }
         footer { text-align: center; font-size: 0.65rem; opacity: 0.5; margin-top: 1rem; }
-        .test-result { font-size: 0.75rem; padding: 0.5rem; background: #0f172a; border-radius: 1rem; margin-top: 0.5rem; }
+        .search-box { margin-bottom: 0.5rem; }
+        .pagination { display: flex; justify-content: center; gap: 0.5rem; margin-top: 0.5rem; }
+        .pagination button { width: auto; padding: 0.3rem 0.8rem; margin: 0; font-size: 0.8rem; }
+        .live-mining { background: #1e293b; border-radius: 1rem; padding: 0.5rem; text-align: center; margin-top: 0.5rem; font-size: 0.8rem; }
     </style>
 </head>
 <body>
@@ -111,21 +124,18 @@
     <h1>⛏️ RIDA NETWORK</h1>
     <div class="sub">1 Rida = $1 USD • referral bonus active</div>
 
-    <!-- Connection Test Panel -->
-    <div class="card" id="testPanel">
-        <button id="testConnBtn" style="background:#f97316;">🔌 Test API Connection</button>
-        <div id="testResult" class="test-result"></div>
+    <!-- Connection status -->
+    <div class="card" id="statusCard">
+        <div id="connStatus">🔌 Checking connection...</div>
     </div>
 
-    <!-- LOGIN / REGISTER SECTION -->
+    <!-- Auth Section -->
     <div id="authSection" class="card">
         <div id="loginBox">
             <input type="email" id="loginEmail" placeholder="Email" value="admin@rida.com">
             <input type="password" id="loginPassword" placeholder="Password" value="admin123">
             <button id="loginBtn">🔓 Login</button>
-            <p style="text-align:center; margin-top:12px;">
-                <a href="#" id="showRegLink" style="color:#facc15;">✨ Create new account</a>
-            </p>
+            <p style="text-align:center; margin-top:12px;"><a href="#" id="showRegLink" style="color:#facc15;">✨ Create new account</a></p>
         </div>
         <div id="registerBox" class="hidden">
             <input type="text" id="regUsername" placeholder="Username">
@@ -133,13 +143,11 @@
             <input type="password" id="regPassword" placeholder="Password">
             <input type="text" id="regReferralCode" placeholder="Referral code (optional)">
             <button id="registerBtn">📝 Register</button>
-            <p style="text-align:center; margin-top:12px;">
-                <a href="#" id="showLoginLink" style="color:#facc15;">← Back to login</a>
-            </p>
+            <p style="text-align:center; margin-top:12px;"><a href="#" id="showLoginLink" style="color:#facc15;">← Back to login</a></p>
         </div>
     </div>
 
-    <!-- DASHBOARD SECTION -->
+    <!-- Dashboard -->
     <div id="dashboardSection" class="card hidden">
         <div class="balance-box">
             <div class="balance-amount" id="userBalance">0.0000 Rida</div>
@@ -151,27 +159,56 @@
             <div class="stat"><div class="value" id="miningRate">0</div><div>Rida/sec</div></div>
         </div>
         <button id="mineActionBtn">⛏️ START MINING</button>
+        <div id="liveMiningInfo" class="live-mining hidden">⏳ Mining... earned this session: <span id="sessionEarned">0.0000</span> Rida</div>
+        
         <div class="ref-box">
             🔗 YOUR REFERRAL LINK<br>
             <div class="ref-link" id="refLinkDisplay">loading...</div>
             <button id="copyRefBtn" style="margin-top:8px; background:#2d3748;">📋 Copy Link</button>
         </div>
 
-        <!-- ADMIN PANEL -->
+        <!-- Daily Bonus -->
+        <div class="ref-box" style="margin-top:0.5rem;">
+            🎁 Daily Bonus: <span id="bonusStatus">Check in</span>
+            <button id="claimBonusBtn" class="btn-success" style="margin-top:0;">Claim Now</button>
+        </div>
+
+        <!-- Withdrawal Request -->
+        <div class="ref-box" style="margin-top:0.5rem;">
+            💸 Withdraw Rida<br>
+            <input type="number" id="withdrawAmount" placeholder="Amount" step="0.1" min="1">
+            <input type="text" id="withdrawAddress" placeholder="Wallet address (optional)">
+            <button id="withdrawBtn">Request Withdrawal</button>
+        </div>
+
+        <!-- Leaderboard -->
+        <div class="ref-box" style="margin-top:0.5rem;">
+            🏆 Top Miners<br>
+            <div id="leaderboardList" style="font-size:0.8rem; text-align:left; max-height:150px; overflow-y:auto;"></div>
+            <button id="refreshLeaderboardBtn" style="margin-top:0.5rem; background:#2d3748;">Refresh</button>
+        </div>
+
+        <!-- Admin Panel -->
         <div id="adminPanel" class="admin-section hidden">
             <div class="tabs" id="adminTabs">
                 <button class="tab-btn active" data-tab="users">👥 Users</button>
+                <button class="tab-btn" data-tab="withdrawals">💸 Withdrawals</button>
                 <button class="tab-btn" data-tab="sheets">📑 Sheets</button>
                 <button class="tab-btn" data-tab="settings">⚙️ Settings</button>
-                <button class="tab-btn" data-tab="rawdata">📊 Raw Editor</button>
             </div>
             <div id="tab-users" class="tab-content active">
-                <div style="overflow-x:auto"><table id="usersTable"><tr><th>Email</th><th>Balance</th><th>Total</th><th>Refs</th></tr></div>
+                <div class="search-box"><input type="text" id="userSearch" placeholder="Search by email..."></div>
+                <div class="table-wrapper"><table id="usersTable"><tr><th>Email</th><th>Balance</th><th>Total</th><th>Refs</th></tr></table></div>
+                <div class="pagination" id="userPagination"></div>
                 <select id="userSelect"></select>
                 <select id="userField"><option value="balance">Set Balance</option><option value="totalMined">Set Total Mined</option><option value="username">Change Username</option></select>
                 <input type="text" id="userFieldValue" placeholder="New value">
                 <button id="updateUserBtn">✏️ Update User</button>
                 <button id="refreshUsersBtn">🔄 Refresh</button>
+            </div>
+            <div id="tab-withdrawals" class="tab-content">
+                <div class="table-wrapper"><table id="withdrawalsTable"><tr><th>User</th><th>Amount</th><th>Address</th><th>Status</th><th>Action</th></tr></table></div>
+                <button id="refreshWithdrawalsBtn">🔄 Refresh</button>
             </div>
             <div id="tab-sheets" class="tab-content">
                 <input type="text" id="newSheetName" placeholder="New sheet name">
@@ -182,110 +219,86 @@
                 <button id="deleteSheetBtn" class="btn-danger">🗑️ Delete Sheet</button>
                 <input type="text" id="newColumnName" placeholder="Column name">
                 <button id="addColumnBtn">➕ Add Column</button>
-                <input type="number" id="deleteColIdx" placeholder="Column number to delete">
-                <button id="deleteColumnBtn" class="btn-danger">❌ Delete Column</button>
             </div>
             <div id="tab-settings" class="tab-content"><div id="settingsEditor"></div><button id="saveSettingsBtn">💾 Save Settings</button></div>
-            <div id="tab-rawdata" class="tab-content">
-                <select id="rawSheetSelect"></select>
-                <button id="loadRawBtn">📂 Load Data</button>
-                <div style="overflow-x:auto"><table id="rawTable"></table></div>
-                <input type="text" id="newRowValues" placeholder="value1,value2,value3">
-                <button id="addRowBtn">➕ Add Row</button>
-                <input type="number" id="delRowIdx" placeholder="Row number to delete">
-                <button id="deleteRowBtn" class="btn-danger">🗑️ Delete Row</button>
-                <input type="number" id="updRow" placeholder="Row"><input type="number" id="updCol" placeholder="Col"><input type="text" id="updValue" placeholder="New value">
-                <button id="updateCellBtn">✏️ Update Cell</button>
-            </div>
         </div>
         <button id="logoutBtn" style="background:#334155;">🚪 Logout</button>
     </div>
-    <div id="globalMsg" class="message"></div>
-    <footer>⚡ Auto mining • Daily base rate +0.01 per active referral</footer>
+    <div id="globalMsg" class="message hidden"></div>
+    <footer>⚡ Mining rate updates every second when active • Daily bonus resets at midnight UTC</footer>
 </div>
 
 <script>
-    // ======================= YOUR APPS SCRIPT URL =======================
+    // ======================= CONFIGURATION =======================
     const DIRECT_API = 'https://script.google.com/macros/s/AKfycby9DqVWyIfc7Wwnve0ba2u_Vz5kCfcyV0cjK9XN__haCS82IY3HL7HmsZA9oNzbiENTNw/exec';
-    const CORS_PROXY = 'https://cors-anywhere.herokuapp.com/';
+    const PROXY_URL = 'https://corsproxy.io/?' + encodeURIComponent(DIRECT_API);
     
-    let API_URL = DIRECT_API;  // will switch to proxy if needed
+    let API_URL = DIRECT_API;
     let currentUser = null;
     let miningInterval = null;
+    let sessionStartTime = null;
+    let sessionRate = 0;
     let usingProxy = false;
+    let usersData = [];
+    let currentPage = 1;
+    const rowsPerPage = 10;
 
-    // ---------- Helper: Test connection and automatically switch to proxy if needed ----------
+    // Helper: Show message
+    function showMessage(msg, type = 'error') {
+        const msgDiv = document.getElementById('globalMsg');
+        msgDiv.className = `message ${type}`;
+        msgDiv.innerText = msg;
+        msgDiv.classList.remove('hidden');
+        setTimeout(() => msgDiv.classList.add('hidden'), 4000);
+    }
+
+    // Test connection and set API_URL
     async function testConnection() {
-        const testBtn = document.getElementById('testConnBtn');
-        const resultDiv = document.getElementById('testResult');
-        resultDiv.innerHTML = '🔄 Testing direct connection...';
-        testBtn.disabled = true;
-        
+        const statusDiv = document.getElementById('connStatus');
+        statusDiv.innerHTML = '<span class="loader"></span> Testing connection...';
         try {
-            const res = await fetch(DIRECT_API, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: 'login', email: 'test@test.com', password: 'fake' })
-            });
-            // Even if login fails, we just need to see if fetch succeeds
-            resultDiv.innerHTML = '✅ Direct connection works! No proxy needed.';
-            usingProxy = false;
-            API_URL = DIRECT_API;
-            return true;
-        } catch (err) {
-            resultDiv.innerHTML = `❌ Direct failed: ${err.message}<br>🔄 Trying with CORS proxy...`;
+            const res = await fetch(DIRECT_API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'login', email: 'test', password: 'test' }) });
+            if (res.ok || res.status === 200) {
+                statusDiv.innerHTML = '✅ Direct connection successful.';
+                API_URL = DIRECT_API;
+                usingProxy = false;
+                return true;
+            }
+        } catch (e) {}
+        // Try proxy
+        try {
+            const proxyRes = await fetch(PROXY_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'login', email: 'test', password: 'test' }) });
+            if (proxyRes.ok || proxyRes.status === 200) {
+                statusDiv.innerHTML = '✅ Using CORS proxy (corsproxy.io).';
+                API_URL = PROXY_URL;
+                usingProxy = true;
+                return true;
+            }
+        } catch (e) {}
+        statusDiv.innerHTML = '❌ Cannot connect to backend. Check your Apps Script deployment (must be "Anyone").';
+        return false;
+    }
+
+    // API caller with retry
+    async function callApi(action, payload = {}, retries = 2) {
+        for (let i = 0; i <= retries; i++) {
             try {
-                const proxyRes = await fetch(CORS_PROXY + DIRECT_API, {
+                const response = await fetch(API_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: 'login', email: 'test@test.com', password: 'fake' })
+                    body: JSON.stringify({ action, ...payload })
                 });
-                resultDiv.innerHTML = '✅ CORS proxy works! Will use proxy for all requests.';
-                usingProxy = true;
-                API_URL = CORS_PROXY + DIRECT_API;
-                return true;
-            } catch (proxyErr) {
-                resultDiv.innerHTML = `❌ Both direct and proxy failed. Check your Apps Script deployment (must be "Anyone" access). Error: ${proxyErr.message}`;
-                return false;
+                const data = await response.json();
+                if (data.success !== undefined) return data;
+                throw new Error('Invalid response');
+            } catch (err) {
+                if (i === retries) {
+                    showMessage(`API error: ${err.message}`, 'error');
+                    return { success: false, error: err.message };
+                }
+                await new Promise(r => setTimeout(r, 500 * (i+1)));
             }
-        } finally {
-            testBtn.disabled = false;
         }
-    }
-
-    // Call API using the best available URL
-    async function callApi(action, payload = {}) {
-        if (!API_URL) {
-            // fallback: try test again
-            await testConnection();
-        }
-        try {
-            const response = await fetch(API_URL, {
-                method: 'POST',
-                mode: 'cors',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action, ...payload })
-            });
-            const data = await response.json();
-            return data;
-        } catch (err) {
-            // If using direct and failed, try proxy once
-            if (!usingProxy && API_URL === DIRECT_API) {
-                console.log('Direct failed, switching to proxy...');
-                API_URL = CORS_PROXY + DIRECT_API;
-                usingProxy = true;
-                return callApi(action, payload);
-            }
-            showMessage(`Network error: ${err.message}`, true);
-            return { success: false, error: err.message };
-        }
-    }
-
-    function showMessage(msg, isError = true) {
-        const msgDiv = document.getElementById('globalMsg');
-        msgDiv.innerText = msg;
-        msgDiv.style.color = isError ? '#f87171' : '#4ade80';
-        setTimeout(() => msgDiv.innerText = '', 3500);
     }
 
     // ---------- Dashboard & Mining ----------
@@ -298,29 +311,59 @@
             document.getElementById('totalMined').innerText = res.totalMined.toFixed(4);
             document.getElementById('activeRefs').innerText = res.activeReferrals;
             document.getElementById('miningRate').innerText = res.currentRatePerSec.toFixed(6);
+            sessionRate = res.currentRatePerSec;
+            
             const mineBtn = document.getElementById('mineActionBtn');
             if (res.miningActive) {
                 mineBtn.innerText = '⏹️ STOP MINING';
                 mineBtn.classList.add('btn-danger');
-                if (!miningInterval) miningInterval = setInterval(refreshDashboard, 2000);
+                mineBtn.classList.remove('btn-success');
+                if (!miningInterval) {
+                    sessionStartTime = Date.now() / 1000;
+                    startLiveCounter();
+                    miningInterval = setInterval(() => {
+                        if (sessionStartTime) {
+                            const elapsed = (Date.now() / 1000) - sessionStartTime;
+                            const earned = elapsed * sessionRate;
+                            document.getElementById('sessionEarned').innerText = earned.toFixed(6);
+                        }
+                        refreshDashboard();
+                    }, 2000);
+                }
+                document.getElementById('liveMiningInfo').classList.remove('hidden');
             } else {
                 mineBtn.innerText = '⛏️ START MINING';
                 mineBtn.classList.remove('btn-danger');
+                mineBtn.classList.add('btn-success');
                 if (miningInterval) { clearInterval(miningInterval); miningInterval = null; }
+                document.getElementById('liveMiningInfo').classList.add('hidden');
+                sessionStartTime = null;
             }
         } else showMessage(res.error);
     }
 
+    function startLiveCounter() {
+        if (sessionStartTime) {
+            const interval = setInterval(() => {
+                if (sessionStartTime && document.getElementById('mineActionBtn').innerText.includes('STOP')) {
+                    const elapsed = (Date.now() / 1000) - sessionStartTime;
+                    document.getElementById('sessionEarned').innerText = (elapsed * sessionRate).toFixed(6);
+                } else {
+                    clearInterval(interval);
+                }
+            }, 500);
+        }
+    }
+
     async function startMining() {
         const res = await callApi('startMining', { email: currentUser.email });
-        if (res.success) showMessage('✅ Mining started!', false);
+        if (res.success) { showMessage('✅ Mining started!', 'success'); refreshDashboard(); }
         else showMessage(res.error);
-        refreshDashboard();
     }
 
     async function stopMining() {
         const res = await callApi('stopMining', { email: currentUser.email });
-        if (res.success) showMessage(`⛏️ Mined +${res.earned?.toFixed(6)} Rida`, false);
+        if (res.success) showMessage(`⛏️ Mined +${res.earned?.toFixed(6)} Rida`, 'success');
         else showMessage(res.error);
         refreshDashboard();
     }
@@ -328,22 +371,75 @@
     async function loadReferralLink() {
         const res = await callApi('getReferralLink', { email: currentUser.email });
         if (res.success) document.getElementById('refLinkDisplay').innerText = `${window.location.origin}?ref=${res.code}`;
-        else document.getElementById('refLinkDisplay').innerText = 'Error loading link';
+        else document.getElementById('refLinkDisplay').innerText = 'Error';
     }
 
-    // ---------- Admin functions (same as before) ----------
-    async function adminLoadUsers() {
+    // Daily Bonus
+    async function claimDailyBonus() {
+        const res = await callApi('claimDailyBonus', { email: currentUser.email });
+        if (res.success) showMessage(`🎉 You received ${res.bonus} Rida bonus!`, 'success');
+        else showMessage(res.error);
+        refreshDashboard();
+        checkBonusStatus();
+    }
+
+    async function checkBonusStatus() {
+        const res = await callApi('canClaimBonus', { email: currentUser.email });
+        if (res.success) document.getElementById('bonusStatus').innerHTML = res.canClaim ? '✅ Available!' : `Claimed. Next: ${res.nextInHours}h`;
+        else document.getElementById('bonusStatus').innerHTML = 'Error';
+    }
+
+    // Withdrawal
+    async function requestWithdrawal() {
+        const amount = parseFloat(document.getElementById('withdrawAmount').value);
+        const address = document.getElementById('withdrawAddress').value;
+        if (isNaN(amount) || amount < 1) return showMessage('Minimum withdrawal 1 Rida');
+        const res = await callApi('requestWithdrawal', { email: currentUser.email, amount, address });
+        if (res.success) { showMessage('Withdrawal request sent', 'success'); document.getElementById('withdrawAmount').value = ''; document.getElementById('withdrawAddress').value = ''; }
+        else showMessage(res.error);
+    }
+
+    // Leaderboard
+    async function loadLeaderboard() {
+        const res = await callApi('getLeaderboard', { limit: 10 });
+        if (res.success) {
+            let html = '<ol>';
+            res.leaderboard.forEach(u => html += `<li>${u.username || u.email}: ${u.totalMined} Rida</li>`);
+            html += '</ol>';
+            document.getElementById('leaderboardList').innerHTML = html;
+        }
+    }
+
+    // ---------- Admin Functions ----------
+    async function adminLoadUsers(search = '') {
         const res = await callApi('adminGetUsers', { adminEmail: currentUser.email, adminPass: document.getElementById('loginPassword').value });
         if (res.success) {
-            const table = document.getElementById('usersTable');
-            table.innerHTML = `<table><th>Email</th><th>Balance</th><th>Total Mined</th><th>Refs</th></tr>`;
+            usersData = res.users.filter(u => u.email.includes(search) || u.username.includes(search));
+            renderUserTable();
             const select = document.getElementById('userSelect');
             select.innerHTML = '';
-            res.users.forEach(u => {
-                table.innerHTML += `<tr><td>${u.email}</td><td>${u.balance}</td><td>${u.totalMined}</td><td>${u.activeReferrals}</td></tr>`;
-                select.appendChild(new Option(`${u.email} (${u.balance} Rida)`, u.email));
-            });
+            usersData.forEach(u => select.appendChild(new Option(`${u.email} (${u.balance} Rida)`, u.email)));
         } else showMessage(res.error);
+    }
+
+    function renderUserTable() {
+        const start = (currentPage-1)*rowsPerPage;
+        const pageUsers = usersData.slice(start, start+rowsPerPage);
+        const table = document.getElementById('usersTable');
+        table.innerHTML = `<tr><th>Email</th><th>Balance</th><th>Total</th><th>Refs</th></tr>`;
+        pageUsers.forEach(u => {
+            table.innerHTML += `<tr><td>${u.email}</td><td>${u.balance}</td><td>${u.totalMined}</td><td>${u.activeReferrals}</td></tr>`;
+        });
+        const totalPages = Math.ceil(usersData.length/rowsPerPage);
+        const pagination = document.getElementById('userPagination');
+        pagination.innerHTML = '';
+        for (let i=1; i<=totalPages; i++) {
+            const btn = document.createElement('button');
+            btn.innerText = i;
+            btn.onclick = () => { currentPage = i; renderUserTable(); };
+            if (i===currentPage) btn.style.background = '#3b82f6';
+            pagination.appendChild(btn);
+        }
     }
 
     async function adminUpdateUser() {
@@ -352,15 +448,33 @@
         let val = document.getElementById('userFieldValue').value;
         if (field === 'balance' || field === 'totalMined') val = parseFloat(val);
         const res = await callApi('adminUpdateUser', { adminEmail: currentUser.email, adminPass: document.getElementById('loginPassword').value, targetEmail: target, field, value: val });
-        if (res.success) { showMessage('User updated', false); adminLoadUsers(); refreshDashboard(); }
+        if (res.success) { showMessage('User updated', 'success'); adminLoadUsers(); refreshDashboard(); }
         else showMessage(res.error);
     }
+
+    async function adminLoadWithdrawals() {
+        const res = await callApi('adminGetWithdrawals', { adminEmail: currentUser.email, adminPass: document.getElementById('loginPassword').value });
+        if (res.success) {
+            const table = document.getElementById('withdrawalsTable');
+            table.innerHTML = `<tr><th>User</th><th>Amount</th><th>Address</th><th>Status</th><th>Action</th></tr>`;
+            res.withdrawals.forEach(w => {
+                table.innerHTML += `<tr><td>${w.email}</td><td>${w.amount}</td><td>${w.address}</td><td>${w.status}</td>
+                <td>${w.status === 'pending' ? `<button onclick="approveWithdrawal('${w.id}')">Approve</button>` : 'Done'}</td></tr>`;
+            });
+        }
+    }
+
+    window.approveWithdrawal = async (id) => {
+        const res = await callApi('adminApproveWithdrawal', { adminEmail: currentUser.email, adminPass: document.getElementById('loginPassword').value, withdrawalId: id });
+        if (res.success) { showMessage('Withdrawal approved', 'success'); adminLoadWithdrawals(); }
+        else showMessage(res.error);
+    };
 
     async function adminLoadSettings() {
         const res = await callApi('adminGetSettings', { adminEmail: currentUser.email, adminPass: document.getElementById('loginPassword').value });
         if (res.success) {
             let html = '';
-            for (let [k, v] of Object.entries(res.settings)) html += `<label>${k}</label><input type="text" id="set_${k}" value="${v}"><br>`;
+            for (let [k,v] of Object.entries(res.settings)) html += `<label>${k}</label><input type="text" id="set_${k}" value="${v}"><br>`;
             document.getElementById('settingsEditor').innerHTML = html;
         }
     }
@@ -371,16 +485,15 @@
             const key = inp.id.replace('set_', '');
             await callApi('adminUpdateSetting', { adminEmail: currentUser.email, adminPass: document.getElementById('loginPassword').value, settingKey: key, settingValue: inp.value });
         }
-        showMessage('Settings saved', false);
+        showMessage('Settings saved', 'success');
     }
 
     async function adminListSheets() {
         const res = await callApi('adminGetAllSheets', { adminEmail: currentUser.email, adminPass: document.getElementById('loginPassword').value });
         if (res.success) {
             const sel = document.getElementById('sheetSelect');
-            const rawSel = document.getElementById('rawSheetSelect');
-            sel.innerHTML = ''; rawSel.innerHTML = '';
-            res.sheets.forEach(s => { sel.appendChild(new Option(s, s)); rawSel.appendChild(new Option(s, s)); });
+            sel.innerHTML = '';
+            res.sheets.forEach(s => sel.appendChild(new Option(s, s)));
         }
     }
 
@@ -388,7 +501,7 @@
         const name = document.getElementById('newSheetName').value;
         const cols = document.getElementById('newSheetColumns').value.split(',').map(c=>c.trim());
         const res = await callApi('adminAddSheet', { adminEmail: currentUser.email, adminPass: document.getElementById('loginPassword').value, sheetName: name, columns: cols });
-        if (res.success) { showMessage('Sheet created', false); adminListSheets(); }
+        if (res.success) { showMessage('Sheet created', 'success'); adminListSheets(); }
         else showMessage(res.error);
     }
 
@@ -396,7 +509,7 @@
         const name = document.getElementById('sheetSelect').value;
         if (!confirm(`Delete sheet "${name}"?`)) return;
         const res = await callApi('adminDeleteSheet', { adminEmail: currentUser.email, adminPass: document.getElementById('loginPassword').value, sheetName: name });
-        if (res.success) { showMessage('Sheet deleted', false); adminListSheets(); }
+        if (res.success) { showMessage('Sheet deleted', 'success'); adminListSheets(); }
         else showMessage(res.error);
     }
 
@@ -404,52 +517,7 @@
         const sheet = document.getElementById('sheetSelect').value;
         const colName = document.getElementById('newColumnName').value;
         const res = await callApi('adminAddColumn', { adminEmail: currentUser.email, adminPass: document.getElementById('loginPassword').value, sheetName: sheet, columnName: colName, columnType: 'String' });
-        if (res.success) showMessage(`Column added at index ${res.newColumnIndex}`, false);
-        else showMessage(res.error);
-    }
-
-    async function adminDeleteColumn() {
-        const sheet = document.getElementById('sheetSelect').value;
-        const idx = parseInt(document.getElementById('deleteColIdx').value);
-        const res = await callApi('adminDeleteColumn', { adminEmail: currentUser.email, adminPass: document.getElementById('loginPassword').value, sheetName: sheet, columnIndex: idx });
-        if (res.success) showMessage('Column deleted', false);
-        else showMessage(res.error);
-    }
-
-    async function adminLoadRawData() {
-        const sheet = document.getElementById('rawSheetSelect').value;
-        const res = await callApi('adminGetSheetData', { adminEmail: currentUser.email, adminPass: document.getElementById('loginPassword').value, sheetName: sheet });
-        if (res.success) {
-            let html = '<table border="1">';
-            res.data.forEach(row => { html += '<tr>'; row.forEach(cell => html += `<td>${cell}</td>`); html += '</tr>'; });
-            html += '</table>';
-            document.getElementById('rawTable').innerHTML = html;
-        } else showMessage(res.error);
-    }
-
-    async function adminAddRow() {
-        const sheet = document.getElementById('rawSheetSelect').value;
-        const rowVals = document.getElementById('newRowValues').value.split(',').map(v=>v.trim());
-        const res = await callApi('adminAddRow', { adminEmail: currentUser.email, adminPass: document.getElementById('loginPassword').value, sheetName: sheet, rowData: rowVals });
-        if (res.success) { showMessage('Row added', false); adminLoadRawData(); }
-        else showMessage(res.error);
-    }
-
-    async function adminDeleteRow() {
-        const sheet = document.getElementById('rawSheetSelect').value;
-        const rowIdx = parseInt(document.getElementById('delRowIdx').value);
-        const res = await callApi('adminDeleteRow', { adminEmail: currentUser.email, adminPass: document.getElementById('loginPassword').value, sheetName: sheet, rowIndex: rowIdx });
-        if (res.success) { showMessage('Row deleted', false); adminLoadRawData(); }
-        else showMessage(res.error);
-    }
-
-    async function adminUpdateCell() {
-        const sheet = document.getElementById('rawSheetSelect').value;
-        const row = parseInt(document.getElementById('updRow').value);
-        const col = parseInt(document.getElementById('updCol').value);
-        const val = document.getElementById('updValue').value;
-        const res = await callApi('adminUpdateCell', { adminEmail: currentUser.email, adminPass: document.getElementById('loginPassword').value, sheetName: sheet, row, col, value: val });
-        if (res.success) { showMessage('Cell updated', false); adminLoadRawData(); }
+        if (res.success) showMessage(`Column added at index ${res.newColumnIndex}`, 'success');
         else showMessage(res.error);
     }
 
@@ -458,56 +526,60 @@
         const res = await callApi('login', { email, password });
         if (res.success) {
             currentUser = res.user;
+            sessionStorage.setItem('ridaUser', JSON.stringify({ email, password }));
             document.getElementById('authSection').classList.add('hidden');
             document.getElementById('dashboardSection').classList.remove('hidden');
             refreshDashboard();
             loadReferralLink();
+            checkBonusStatus();
+            loadLeaderboard();
             if (currentUser.email === 'admin@rida.com') {
                 document.getElementById('adminPanel').classList.remove('hidden');
-                adminLoadUsers(); adminLoadSettings(); adminListSheets();
+                adminLoadUsers(); adminLoadSettings(); adminListSheets(); adminLoadWithdrawals();
             } else document.getElementById('adminPanel').classList.add('hidden');
         } else showMessage(res.error);
     }
 
     async function register() {
         const res = await callApi('register', { email: document.getElementById('regEmail').value, username: document.getElementById('regUsername').value, password: document.getElementById('regPassword').value, referralCode: document.getElementById('regReferralCode').value });
-        if (res.success) { showMessage('Registration successful! Please login.', false); document.getElementById('registerBox').classList.add('hidden'); document.getElementById('loginBox').classList.remove('hidden'); }
+        if (res.success) { showMessage('Registration successful! Please login.', 'success'); document.getElementById('registerBox').classList.add('hidden'); document.getElementById('loginBox').classList.remove('hidden'); }
         else showMessage(res.error);
     }
 
-    function logout() { if (miningInterval) clearInterval(miningInterval); currentUser = null; document.getElementById('dashboardSection').classList.add('hidden'); document.getElementById('authSection').classList.remove('hidden'); document.getElementById('adminPanel').classList.add('hidden'); }
+    function logout() { if (miningInterval) clearInterval(miningInterval); currentUser = null; sessionStorage.removeItem('ridaUser'); document.getElementById('dashboardSection').classList.add('hidden'); document.getElementById('authSection').classList.remove('hidden'); document.getElementById('adminPanel').classList.add('hidden'); }
 
-    // ---------- Event listeners ----------
-    document.getElementById('testConnBtn').onclick = testConnection;
-    document.getElementById('loginBtn').onclick = () => login(document.getElementById('loginEmail').value, document.getElementById('loginPassword').value);
-    document.getElementById('showRegLink').onclick = (e) => { e.preventDefault(); document.getElementById('loginBox').classList.add('hidden'); document.getElementById('registerBox').classList.remove('hidden'); };
-    document.getElementById('showLoginLink').onclick = (e) => { e.preventDefault(); document.getElementById('registerBox').classList.add('hidden'); document.getElementById('loginBox').classList.remove('hidden'); };
-    document.getElementById('registerBtn').onclick = register;
-    document.getElementById('logoutBtn').onclick = logout;
-    document.getElementById('mineActionBtn').onclick = () => { if (document.getElementById('mineActionBtn').innerText.includes('START')) startMining(); else stopMining(); };
-    document.getElementById('copyRefBtn').onclick = () => { navigator.clipboard.writeText(document.getElementById('refLinkDisplay').innerText); showMessage('Copied!', false); };
-    document.getElementById('refreshUsersBtn').onclick = adminLoadUsers;
-    document.getElementById('updateUserBtn').onclick = adminUpdateUser;
-    document.getElementById('saveSettingsBtn').onclick = adminSaveSettings;
-    document.getElementById('createSheetBtn').onclick = adminCreateSheet;
-    document.getElementById('deleteSheetBtn').onclick = adminDeleteSheet;
-    document.getElementById('addColumnBtn').onclick = adminAddColumn;
-    document.getElementById('deleteColumnBtn').onclick = adminDeleteColumn;
-    document.getElementById('loadRawBtn').onclick = adminLoadRawData;
-    document.getElementById('addRowBtn').onclick = adminAddRow;
-    document.getElementById('deleteRowBtn').onclick = adminDeleteRow;
-    document.getElementById('updateCellBtn').onclick = adminUpdateCell;
-    document.querySelectorAll('.tab-btn').forEach(btn => btn.addEventListener('click', () => {
-        document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
-        btn.classList.add('active');
-        document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
-        document.getElementById(`tab-${btn.dataset.tab}`).classList.add('active');
-        if (btn.dataset.tab === 'sheets') adminListSheets();
-        if (btn.dataset.tab === 'rawdata') adminListSheets();
-    }));
-
-    // Auto-test connection on page load
-    window.addEventListener('load', () => { testConnection(); });
+    // ---------- Event Listeners ----------
+    window.onload = async () => {
+        await testConnection();
+        document.getElementById('loginBtn').onclick = () => login(document.getElementById('loginEmail').value, document.getElementById('loginPassword').value);
+        document.getElementById('showRegLink').onclick = (e) => { e.preventDefault(); document.getElementById('loginBox').classList.add('hidden'); document.getElementById('registerBox').classList.remove('hidden'); };
+        document.getElementById('showLoginLink').onclick = (e) => { e.preventDefault(); document.getElementById('registerBox').classList.add('hidden'); document.getElementById('loginBox').classList.remove('hidden'); };
+        document.getElementById('registerBtn').onclick = register;
+        document.getElementById('logoutBtn').onclick = logout;
+        document.getElementById('mineActionBtn').onclick = () => { if (document.getElementById('mineActionBtn').innerText.includes('START')) startMining(); else stopMining(); };
+        document.getElementById('copyRefBtn').onclick = () => { navigator.clipboard.writeText(document.getElementById('refLinkDisplay').innerText); showMessage('Copied!', 'success'); };
+        document.getElementById('claimBonusBtn').onclick = claimDailyBonus;
+        document.getElementById('withdrawBtn').onclick = requestWithdrawal;
+        document.getElementById('refreshLeaderboardBtn').onclick = loadLeaderboard;
+        document.getElementById('refreshUsersBtn').onclick = () => adminLoadUsers(document.getElementById('userSearch').value);
+        document.getElementById('userSearch').oninput = (e) => { adminLoadUsers(e.target.value); };
+        document.getElementById('updateUserBtn').onclick = adminUpdateUser;
+        document.getElementById('saveSettingsBtn').onclick = adminSaveSettings;
+        document.getElementById('createSheetBtn').onclick = adminCreateSheet;
+        document.getElementById('deleteSheetBtn').onclick = adminDeleteSheet;
+        document.getElementById('addColumnBtn').onclick = adminAddColumn;
+        document.getElementById('refreshWithdrawalsBtn').onclick = adminLoadWithdrawals;
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.addEventListener('click', () => {
+            document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+            btn.classList.add('active');
+            document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+            document.getElementById(`tab-${btn.dataset.tab}`).classList.add('active');
+            if (btn.dataset.tab === 'sheets') adminListSheets();
+            if (btn.dataset.tab === 'withdrawals') adminLoadWithdrawals();
+        }));
+        const saved = sessionStorage.getItem('ridaUser');
+        if (saved) { const u = JSON.parse(saved); login(u.email, u.password); }
+    };
 </script>
 </body>
 </html>
