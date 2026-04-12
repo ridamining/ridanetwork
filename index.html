@@ -2,260 +2,236 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rida Network | Mobile Miner</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Rida Network | Cloud Miner</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         :root {
             --primary: #38bdf8;
             --secondary: #818cf8;
-            --dark: #070b14;
+            --bg: #070b14;
         }
         body { 
-            background: var(--dark); 
-            color: white; 
-            font-family: 'Inter', sans-serif; 
-            user-select: none;
+            background: var(--bg); 
+            color: #fff; 
+            font-family: 'Outfit', sans-serif; 
+            overflow-x: hidden;
             -webkit-tap-highlight-color: transparent;
         }
-        .glass { background: rgba(255,255,255,0.03); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
-        .rida-btn { background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%); transition: all 0.2s; }
-        .rida-btn:active { transform: scale(0.96); opacity: 0.9; }
-        .hidden { display: none; }
-        .mining-pulse { animation: pulse 2s infinite; }
-        @keyframes pulse {
-            0% { box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.5); transform: scale(1); }
-            70% { box-shadow: 0 0 0 20px rgba(56, 189, 248, 0); transform: scale(1.02); }
-            100% { box-shadow: 0 0 0 0 rgba(56, 189, 248, 0); transform: scale(1); }
+        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.08); }
+        .rida-gradient { background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%); }
+        .neon-text { text-shadow: 0 0 10px rgba(56, 189, 248, 0.5); }
+        
+        /* Animations */
+        .mining-pulse {
+            animation: pulse 2s infinite cubic-bezier(0.4, 0, 0.6, 1);
         }
-        input::placeholder { color: rgba(255,255,255,0.3); }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); filter: drop-shadow(0 0 5px var(--primary)); }
+            50% { transform: scale(1.05); filter: drop-shadow(0 0 20px var(--primary)); }
+        }
+        .hidden { display: none; }
+        input:focus { border-color: var(--primary); outline: none; }
     </style>
 </head>
-<body class="max-w-md mx-auto min-h-screen relative border-x border-white/5">
+<body class="max-w-md mx-auto min-h-screen border-x border-white/5">
 
-    <div id="loader" class="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center hidden">
-        <div class="flex flex-col items-center">
-            <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-sky-500 mb-4"></div>
-            <p class="text-sky-400 font-bold text-xs tracking-widest">CONNECTING TO RIDA...</p>
-        </div>
+    <div id="loader" class="fixed inset-0 z-[100] bg-black/90 flex flex-col items-center justify-center hidden">
+        <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-sky-400 mb-4"></div>
+        <p class="text-sky-400 text-xs font-bold tracking-[0.3em] uppercase">Connecting to Rida...</p>
     </div>
 
-    <div id="screen-auth" class="p-8 pt-20 animate-in fade-in duration-700">
+    <div id="screen-auth" class="p-8 pt-20">
         <div class="text-center mb-12">
-            <h1 class="text-5xl font-black tracking-tighter italic">RIDA<span class="text-sky-400">.</span></h1>
-            <p class="text-slate-500 text-sm mt-2 font-medium tracking-widest uppercase">Decentralized Mining</p>
+            <h1 class="text-5xl font-black italic tracking-tighter">RIDA<span class="text-sky-400">.</span></h1>
+            <p class="text-slate-500 text-xs font-bold tracking-[0.2em] mt-2 uppercase">Mining Ecosystem</p>
         </div>
 
-        <div id="box-login" class="glass p-8 rounded-[2.5rem]">
+        <div id="box-login" class="glass p-8 rounded-[2.5rem] shadow-2xl">
             <h2 class="text-2xl font-bold mb-6">Welcome Back</h2>
             <div class="space-y-4">
-                <input type="email" id="l-email" placeholder="Email Address" class="w-full bg-white/5 p-4 rounded-2xl border border-white/10 outline-none focus:border-sky-500/50">
-                <input type="password" id="l-pass" placeholder="Password" class="w-full bg-white/5 p-4 rounded-2xl border border-white/10 outline-none focus:border-sky-500/50">
-                <button onclick="handleAction('login')" class="w-full rida-btn p-4 rounded-2xl font-bold text-lg mt-2 shadow-lg shadow-sky-500/20">Sign In</button>
+                <div class="relative">
+                    <i class="fas fa-envelope absolute left-4 top-4 text-slate-500"></i>
+                    <input type="email" id="l-email" placeholder="Email Address" class="w-full bg-white/5 p-4 pl-12 rounded-2xl border border-white/10">
+                </div>
+                <div class="relative">
+                    <i class="fas fa-lock absolute left-4 top-4 text-slate-500"></i>
+                    <input type="password" id="l-pass" placeholder="Password" class="w-full bg-white/5 p-4 pl-12 rounded-2xl border border-white/10">
+                </div>
+                <button onclick="handleAuth('login')" class="w-full rida-gradient p-4 rounded-2xl font-bold text-lg shadow-lg shadow-sky-500/20">Sign In</button>
             </div>
-            <p class="text-center mt-8 text-slate-400 text-sm">Don't have an account? <span class="text-sky-400 font-bold cursor-pointer" onclick="toggleAuth(true)">Register</span></p>
+            <p class="text-center mt-8 text-slate-400 text-sm">New miner? <span class="text-sky-400 font-bold cursor-pointer" onclick="toggleAuth(true)">Register</span></p>
         </div>
 
         <div id="box-register" class="glass p-8 rounded-[2.5rem] hidden">
-            <h2 class="text-2xl font-bold mb-6">Join Network</h2>
+            <h2 class="text-2xl font-bold mb-6">Create Account</h2>
             <div class="space-y-4">
-                <input type="text" id="r-user" placeholder="Username" class="w-full bg-white/5 p-4 rounded-2xl border border-white/10 outline-none">
-                <input type="email" id="r-email" placeholder="Email" class="w-full bg-white/5 p-4 rounded-2xl border border-white/10 outline-none">
-                <input type="password" id="r-pass" placeholder="Password" class="w-full bg-white/5 p-4 rounded-2xl border border-white/10 outline-none">
-                <input type="text" id="r-ref" placeholder="Referral Code (Optional)" class="w-full bg-white/5 p-4 rounded-2xl border border-white/10 outline-none">
-                <button onclick="handleAction('register')" class="w-full rida-btn p-4 rounded-2xl font-bold text-lg mt-2">Create Account</button>
+                <input type="text" id="r-user" placeholder="Username" class="w-full bg-white/5 p-4 rounded-2xl border border-white/10">
+                <input type="email" id="r-email" placeholder="Email" class="w-full bg-white/5 p-4 rounded-2xl border border-white/10">
+                <input type="password" id="r-pass" placeholder="Password" class="w-full bg-white/5 p-4 rounded-2xl border border-white/10">
+                <input type="text" id="r-ref" placeholder="Referral Code (Optional)" class="w-full bg-white/5 p-4 rounded-2xl border border-white/10">
+                <button onclick="handleAuth('register')" class="w-full rida-gradient p-4 rounded-2xl font-bold text-lg">Join Network</button>
             </div>
-            <p class="text-center mt-8 text-slate-400 text-sm">Already a miner? <span class="text-sky-400 font-bold cursor-pointer" onclick="toggleAuth(false)">Login</span></p>
+            <p class="text-center mt-8 text-slate-400 text-sm">Already a member? <span class="text-sky-400 font-bold cursor-pointer" onclick="toggleAuth(false)">Login</span></p>
         </div>
     </div>
 
     <div id="screen-app" class="hidden pb-32">
         <header class="p-8 flex justify-between items-center">
             <div>
-                <p class="text-slate-500 text-[10px] font-bold tracking-widest mb-1">MINER PROFILE</p>
+                <p class="text-slate-500 text-[10px] font-bold tracking-widest mb-1">CURRENT MINER</p>
                 <h3 id="u-display" class="text-xl font-bold">---</h3>
             </div>
-            <div id="v-badge" class="px-4 py-2 rounded-full glass border-sky-500/30 text-[10px] font-black text-sky-400 tracking-tighter uppercase">
-                Checking...
+            <div id="v-status" class="px-4 py-2 rounded-full glass border-sky-500/30 text-[10px] font-black text-sky-400 uppercase tracking-tighter">
+                UNVERIFIED
             </div>
         </header>
 
-        <div class="px-8">
-            <div class="rida-btn p-10 rounded-[3rem] shadow-2xl shadow-sky-500/30 relative overflow-hidden">
-                <i class="fas fa-cube absolute -right-4 -bottom-4 text-8xl opacity-10"></i>
-                <p class="text-white/60 text-xs font-bold mb-1">ESTIMATED BALANCE</p>
+        <div class="px-8 space-y-8">
+            <div class="rida-gradient p-10 rounded-[3rem] shadow-2xl relative overflow-hidden">
+                <div class="absolute -right-4 -bottom-4 opacity-10">
+                    <i class="fas fa-microchip text-9xl"></i>
+                </div>
+                <p class="text-white/60 text-xs font-bold tracking-widest mb-1 uppercase">Total Rida</p>
                 <div class="flex items-baseline gap-2">
                     <h1 id="u-bal" class="text-5xl font-black tabular-nums">0.0000</h1>
-                    <span class="text-lg font-bold opacity-80">RDA</span>
+                    <span class="text-xl font-bold opacity-80 uppercase">RDA</span>
                 </div>
             </div>
 
-            <div class="mt-10 glass p-10 rounded-[3rem] text-center border-white/5">
+            <div class="glass p-10 rounded-[3.5rem] text-center">
                 <div id="m-idle">
-                    <button onclick="startMining()" class="w-36 h-36 rounded-full rida-btn mx-auto flex items-center justify-center shadow-2xl relative z-10">
-                        <i class="fas fa-hammer text-4xl text-white"></i>
+                    <button onclick="startMining()" class="w-40 h-40 rounded-full rida-gradient mx-auto flex items-center justify-center shadow-2xl active:scale-90 transition-all">
+                        <i class="fas fa-hammer text-4xl"></i>
                     </button>
-                    <h3 class="mt-6 text-xl font-bold">Start Mining</h3>
-                    <p class="text-slate-500 text-sm mt-1 font-medium">Earn +0.20 RDA / 24h</p>
+                    <h3 class="mt-8 text-xl font-bold">Start Session</h3>
+                    <p class="text-slate-500 text-sm mt-1">Base Rate: 0.20 RDA / 24h</p>
                 </div>
 
                 <div id="m-active" class="hidden">
-                    <div class="w-36 h-36 rounded-full border-4 border-sky-500 mx-auto flex items-center justify-center mining-pulse bg-sky-500/5">
-                        <i class="fas fa-microchip text-4xl text-sky-400"></i>
+                    <div class="w-40 h-40 rounded-full border-4 border-sky-400 mx-auto flex items-center justify-center mining-pulse">
+                        <div class="w-32 h-32 rounded-full bg-slate-900/50 flex items-center justify-center">
+                            <i class="fas fa-pickaxe text-4xl text-sky-400"></i>
+                        </div>
                     </div>
-                    <h3 class="mt-6 text-xl font-bold text-sky-400">Mining Active</h3>
-                    <p id="timer" class="mt-2 font-mono text-2xl tracking-[0.2em] font-bold">24:00:00</p>
+                    <h3 class="mt-8 text-xl font-bold text-sky-400">Mining Active</h3>
+                    <p id="timer" class="mt-2 font-mono text-3xl font-black tracking-widest">24:00:00</p>
                 </div>
             </div>
 
-            <div class="mt-6 grid grid-cols-2 gap-4">
+            <div class="grid grid-cols-2 gap-4">
                 <div class="glass p-6 rounded-[2rem]">
-                    <p class="text-slate-500 text-[10px] font-bold mb-2 uppercase">Your Code</p>
-                    <p id="u-ref" class="font-bold text-sky-400 tracking-wider">---</p>
+                    <p class="text-slate-500 text-[10px] font-bold mb-1 uppercase">Ref Code</p>
+                    <p id="u-ref" class="font-bold text-sky-400 text-sm">---</p>
                 </div>
                 <div class="glass p-6 rounded-[2rem] flex items-center justify-center" onclick="logout()">
-                    <i class="fas fa-power-off text-red-500/70 text-xl"></i>
+                    <i class="fas fa-sign-out-alt text-slate-500 text-xl"></i>
                 </div>
             </div>
         </div>
 
-        <nav class="fixed bottom-8 left-8 right-8 h-20 glass rounded-[2.5rem] flex items-center justify-around px-4 border-white/10">
+        <nav class="fixed bottom-8 left-8 right-8 h-20 glass rounded-[2.5rem] flex items-center justify-around px-4 border-t border-white/10 z-50">
             <i class="fas fa-home text-sky-400 text-xl"></i>
             <i class="fas fa-wallet text-slate-600 text-xl"></i>
             <i class="fas fa-users text-slate-600 text-xl"></i>
-            <i class="fas fa-gear text-slate-600 text-xl"></i>
+            <i class="fas fa-comment-dots text-slate-600 text-xl"></i>
         </nav>
     </div>
 
     <script>
-        const API = 'https://script.google.com/macros/s/AKfycbydwJRt6RqsTwbStRGuK5x-2llP2M7nNKkSAkxecqOwoRyBrJID7tj6bLdXbb-K4V3u/exec';
-        let session = JSON.parse(localStorage.getItem('rida_session')) || null;
-        let timerRef;
+        const API = 'https://script.google.com/macros/s/AKfycbxFL7MjbEN20PohBW7OMH5xzAPI84b6sjnm58FEm5GMudQm6HcsO0rZswE9SI09JZg/exec';
+        let user = JSON.parse(localStorage.getItem('rida_v1_session')) || null;
+        let timerTick;
 
-        window.onload = () => { if(session) openDashboard(); };
+        window.onload = () => { if(user) openApp(); };
 
-        function toggleAuth(showReg) {
-            document.getElementById('box-login').classList.toggle('hidden', showReg);
-            document.getElementById('box-register').classList.toggle('hidden', !showReg);
+        function toggleAuth(isReg) {
+            document.getElementById('box-login').classList.toggle('hidden', isReg);
+            document.getElementById('box-register').classList.toggle('hidden', !isReg);
         }
 
-        async function handleAction(type) {
-            const loader = document.getElementById('loader');
-            loader.classList.remove('hidden');
-
-            const payload = type === 'login' ? {
-                action: 'login',
-                email: document.getElementById('l-email').value,
-                password: document.getElementById('l-pass').value
-            } : {
-                action: 'register',
-                username: document.getElementById('r-user').value,
-                email: document.getElementById('r-email').value,
-                password: document.getElementById('r-pass').value,
-                referredBy: document.getElementById('r-ref').value
-            };
+        async function handleAuth(type) {
+            showLoader(true);
+            const payload = type === 'login' ? 
+                { action: 'login', email: document.getElementById('l-email').value, password: document.getElementById('l-pass').value } :
+                { action: 'register', username: document.getElementById('r-user').value, email: document.getElementById('r-email').value, password: document.getElementById('r-pass').value, referredBy: document.getElementById('r-ref').value };
 
             try {
-                const response = await fetch(API, { 
-                    method: 'POST', 
-                    mode: 'cors',
-                    body: JSON.stringify(payload) 
-                });
-                const res = await response.json();
-
+                const req = await fetch(API, { method: 'POST', body: JSON.stringify(payload) });
+                const res = await req.json();
                 if(res.success) {
                     if(type === 'login') {
-                        session = res.data;
-                        localStorage.setItem('rida_session', JSON.stringify(session));
-                        openDashboard();
+                        user = res.data;
+                        localStorage.setItem('rida_v1_session', JSON.stringify(user));
+                        openApp();
                     } else {
-                        alert("Registration Successful! Please login.");
+                        alert("Account Ready! Login now.");
                         toggleAuth(false);
                     }
-                } else {
-                    alert(res.msg);
-                }
-            } catch (e) {
-                alert("Network Error: Check your internet or API deployment.");
-            } finally {
-                loader.classList.add('hidden');
-            }
+                } else { alert(res.msg); }
+            } catch(e) { alert("API Connection Failed"); }
+            showLoader(false);
         }
 
-        function openDashboard() {
+        function openApp() {
             document.getElementById('screen-auth').classList.add('hidden');
             document.getElementById('screen-app').classList.remove('hidden');
-            document.getElementById('u-display').innerText = session.username;
-            syncData();
+            document.getElementById('u-display').innerText = user.username;
+            fetchStats();
         }
 
-        async function syncData() {
+        async function fetchStats() {
             try {
-                const r = await fetch(API, { 
-                    method: 'POST', 
-                    body: JSON.stringify({ action: 'getDashboard', uid: session.uid }) 
-                });
-                const res = await r.json();
+                const req = await fetch(API, { method: 'POST', body: JSON.stringify({ action: 'getDashboard', uid: user.uid }) });
+                const res = await req.json();
                 if(res.success) {
                     const d = res.data;
                     document.getElementById('u-bal').innerText = parseFloat(d.balance).toFixed(4);
                     document.getElementById('u-ref').innerText = d.refCode;
-                    document.getElementById('v-badge').innerText = d.verified === "Yes" ? "Verified" : "Unverified";
-                    
-                    if(d.miningStatus === "Active") {
-                        runTimer(d.lastMiningTime);
-                    } else {
-                        document.getElementById('m-idle').classList.remove('hidden');
-                        document.getElementById('m-active').classList.add('hidden');
-                    }
+                    document.getElementById('v-status').innerText = d.verified === "Yes" ? "Verified" : "Unverified";
+                    if(d.miningStatus === "Active") startTimer(d.lastMiningTime);
                 }
-            } catch(e) { console.error("Sync Failed"); }
+            } catch(e) { console.error("Sync Error"); }
         }
 
         async function startMining() {
-            document.getElementById('loader').classList.remove('hidden');
-            const r = await fetch(API, { 
-                method: 'POST', 
-                body: JSON.stringify({ action: 'startMining', uid: session.uid }) 
-            });
-            const res = await r.json();
-            document.getElementById('loader').classList.add('hidden');
-            if(res.success) syncData();
+            showLoader(true);
+            const req = await fetch(API, { method: 'POST', body: JSON.stringify({ action: 'startMining', uid: user.uid }) });
+            const res = await req.json();
+            showLoader(false);
+            if(res.success) fetchStats();
         }
 
-        function runTimer(startTime) {
+        function startTimer(startTime) {
             document.getElementById('m-idle').classList.add('hidden');
             document.getElementById('m-active').classList.remove('hidden');
+            if(timerTick) clearInterval(timerTick);
             
-            if(timerRef) clearInterval(timerRef);
-            
-            timerRef = setInterval(() => {
+            timerTick = setInterval(() => {
                 const now = Date.now();
-                const diff = (24 * 60 * 60 * 1000) - (now - parseInt(startTime));
+                const rem = (24 * 60 * 60 * 1000) - (now - parseInt(startTime));
                 
-                if(diff <= 0) {
-                    clearInterval(timerRef);
-                    syncData();
+                if(rem <= 0) {
+                    clearInterval(timerTick);
+                    location.reload();
                     return;
                 }
 
-                const h = Math.floor(diff / 3600000).toString().padStart(2, '0');
-                const m = Math.floor((diff % 3600000) / 60000).toString().padStart(2, '0');
-                const s = Math.floor((diff % 60000) / 1000).toString().padStart(2, '0');
+                const h = Math.floor(rem / 3600000).toString().padStart(2, '0');
+                const m = Math.floor((rem % 3600000) / 60000).toString().padStart(2, '0');
+                const s = Math.floor((rem % 60000) / 1000).toString().padStart(2, '0');
                 document.getElementById('timer').innerText = `${h}:${m}:${s}`;
                 
-                // Visual counter animation
+                // Live Counter: Smooth increment simulation
                 const balEl = document.getElementById('u-bal');
-                const newVal = parseFloat(balEl.innerText) + 0.0000023; // Visual only until refresh
-                balEl.innerText = newVal.toFixed(6);
+                const current = parseFloat(balEl.innerText);
+                balEl.innerText = (current + 0.0000023).toFixed(6);
             }, 1000);
         }
 
-        function logout() {
-            localStorage.clear();
-            location.reload();
-        }
+        function showLoader(show) { document.getElementById('loader').classList.toggle('hidden', !show); }
+        function logout() { localStorage.clear(); location.reload(); }
     </script>
 </body>
 </html>
