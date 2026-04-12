@@ -3,144 +3,158 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Rida Network | Pro Miner</title>
+    <title>Rida Network | Cloud Mining</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
-        :root { --primary: #38bdf8; --bg: #070b14; }
-        body { background: var(--bg); color: white; font-family: 'Inter', sans-serif; overflow: hidden; height: 100vh; }
-        .glass { background: rgba(255,255,255,0.03); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.08); }
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;900&display=swap');
+        :root { --primary: #38bdf8; --secondary: #818cf8; --bg: #070b14; }
+        body { background: var(--bg); color: white; font-family: 'Outfit', sans-serif; overflow: hidden; height: 100vh; }
+        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.08); }
+        .rida-gradient { background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%); }
         .hidden { display: none; }
         .active-nav { color: var(--primary) !important; filter: drop-shadow(0 0 8px var(--primary)); }
-        .section { height: calc(100vh - 160px); overflow-y: auto; padding-bottom: 40px; }
+        .section { height: calc(100vh - 180px); overflow-y: auto; padding-bottom: 50px; scrollbar-width: none; }
+        .section::-webkit-scrollbar { display: none; }
         input:focus { border-color: var(--primary); outline: none; }
+        .mining-glow { animation: pulse-glow 2s infinite ease-in-out; }
+        @keyframes pulse-glow { 0%, 100% { box-shadow: 0 0 15px rgba(56, 189, 248, 0.2); } 50% { box-shadow: 0 0 35px rgba(56, 189, 248, 0.6); } }
     </style>
 </head>
 <body class="max-w-md mx-auto relative border-x border-white/5">
 
-    <div id="loader" class="fixed inset-0 z-[100] bg-black/90 flex flex-col items-center justify-center hidden">
-        <div class="w-12 h-12 border-4 border-sky-500 border-t-transparent rounded-full animate-spin mb-4"></div>
-        <p class="text-[10px] font-bold tracking-[0.3em] text-sky-400">CONNECTING TO NODE</p>
+    <div id="loader" class="fixed inset-0 z-[100] bg-black/95 flex flex-col items-center justify-center hidden">
+        <div class="w-14 h-14 border-4 border-sky-500/20 border-t-sky-500 rounded-full animate-spin mb-4"></div>
+        <p class="text-[10px] font-black tracking-[0.4em] text-sky-400 uppercase">Synchronizing Node</p>
     </div>
 
     <div id="screen-auth" class="h-full p-8 flex flex-col justify-center">
-        <div class="text-center mb-10">
-            <h1 class="text-5xl font-black italic tracking-tighter">RIDA<span class="text-sky-400">.</span></h1>
-            <p class="text-slate-500 text-[10px] font-bold tracking-widest mt-2 uppercase">Mining Ecosystem</p>
-        </div>
-        
-        <div id="box-login" class="glass p-8 rounded-[2.5rem] space-y-4 shadow-2xl">
-            <input type="email" id="l-email" placeholder="Email" class="w-full bg-white/5 p-4 rounded-2xl border border-white/10">
-            <input type="password" id="l-pass" placeholder="Password" class="w-full bg-white/5 p-4 rounded-2xl border border-white/10">
-            <button onclick="handleAuth('login')" class="w-full bg-sky-500 p-4 rounded-2xl font-bold shadow-lg shadow-sky-500/20 active:scale-95 transition-transform">Sign In</button>
-            <p class="text-center text-sm text-slate-400">No account? <span class="text-sky-400 font-bold cursor-pointer" onclick="toggleAuth(true)">Register</span></p>
+        <div class="text-center mb-12">
+            <h1 class="text-6xl font-black italic tracking-tighter">RIDA<span class="text-sky-400">.</span></h1>
+            <p class="text-slate-500 text-xs font-bold tracking-[0.3em] mt-2 uppercase">Decentralized Asset</p>
         </div>
 
-        <div id="box-register" class="glass p-8 rounded-[2.5rem] space-y-4 hidden shadow-2xl">
+        <div id="login-box" class="glass p-8 rounded-[2.5rem] space-y-4 shadow-2xl">
+            <h2 class="text-xl font-bold">Sign In</h2>
+            <input type="email" id="l-email" placeholder="Email Address" class="w-full bg-white/5 p-4 rounded-2xl border border-white/10">
+            <input type="password" id="l-pass" placeholder="Password" class="w-full bg-white/5 p-4 rounded-2xl border border-white/10">
+            <button onclick="handleAuth('login')" class="w-full rida-gradient p-4 rounded-2xl font-bold shadow-lg shadow-sky-500/20 active:scale-95 transition-all">Start Mining</button>
+            <p class="text-center text-sm text-slate-500 pt-2">No account? <span class="text-sky-400 font-bold cursor-pointer" onclick="toggleAuth(true)">Register</span></p>
+        </div>
+
+        <div id="reg-box" class="glass p-8 rounded-[2.5rem] space-y-4 hidden shadow-2xl">
+            <h2 class="text-xl font-bold">New Miner</h2>
             <input type="text" id="r-user" placeholder="Username" class="w-full bg-white/5 p-4 rounded-2xl border border-white/10">
             <input type="email" id="r-email" placeholder="Email" class="w-full bg-white/5 p-4 rounded-2xl border border-white/10">
             <input type="password" id="r-pass" placeholder="Password" class="w-full bg-white/5 p-4 rounded-2xl border border-white/10">
             <input type="text" id="r-ref" placeholder="Referral Code (Optional)" class="w-full bg-white/5 p-4 rounded-2xl border border-white/10">
-            <button onclick="handleAuth('register')" class="w-full bg-sky-500 p-4 rounded-2xl font-bold shadow-lg shadow-sky-500/20 active:scale-95 transition-transform">Create Miner</button>
-            <p class="text-center text-sm text-slate-400"><span class="text-sky-400 font-bold cursor-pointer" onclick="toggleAuth(false)">Back to Login</span></p>
+            <button onclick="handleAuth('register')" class="w-full rida-gradient p-4 rounded-2xl font-bold shadow-lg">Create Account</button>
+            <p class="text-center text-sm text-slate-500 pt-2"><span class="text-sky-400 font-bold cursor-pointer" onclick="toggleAuth(false)">Back to Login</span></p>
         </div>
     </div>
 
     <div id="screen-app" class="h-full hidden flex flex-col">
         <header class="p-8 flex justify-between items-center">
             <div>
-                <p class="text-slate-500 text-[10px] font-black tracking-widest uppercase">Miner Identity</p>
+                <p class="text-slate-500 text-[10px] font-black tracking-widest uppercase">Identity</p>
                 <h2 id="u-display-name" class="text-xl font-bold">---</h2>
             </div>
-            <div id="badge-admin" class="hidden px-4 py-1.5 bg-red-500/20 border border-red-500/50 rounded-full text-[10px] font-black text-red-500 uppercase">Admin Access</div>
+            <div id="badge-admin" class="hidden px-4 py-1.5 bg-red-500/20 border border-red-500/40 rounded-full text-[10px] font-black text-red-500 uppercase tracking-tighter">Admin Access</div>
         </header>
 
         <main class="flex-1 px-8">
-            <div id="sec-home" class="section space-y-8">
-                <div class="bg-gradient-to-br from-sky-500 to-indigo-600 p-10 rounded-[3rem] shadow-2xl relative overflow-hidden">
-                    <i class="fas fa-microchip absolute -right-4 -bottom-4 text-9xl opacity-10"></i>
-                    <p class="text-white/60 text-xs font-bold uppercase tracking-widest">Available RDA</p>
+            <div id="sec-home" class="section space-y-6">
+                <div class="rida-gradient p-10 rounded-[3rem] shadow-2xl relative overflow-hidden">
+                    <i class="fas fa-cube absolute -right-4 -bottom-4 text-9xl opacity-10"></i>
+                    <p class="text-white/60 text-[10px] font-bold tracking-widest mb-1 uppercase">Total RDA Balance</p>
                     <div class="flex items-baseline gap-2">
-                        <h1 id="u-balance" class="text-5xl font-black tabular-nums">0.0000</h1>
+                        <h1 id="u-balance" class="text-5xl font-black tracking-tight tabular-nums">0.000000</h1>
                     </div>
                 </div>
 
                 <div class="glass p-10 rounded-[3.5rem] text-center border-white/5">
                     <div id="m-idle">
-                        <button onclick="startMiningSession()" class="w-36 h-36 rounded-full bg-sky-500 shadow-2xl flex items-center justify-center active:scale-90 transition-all">
-                            <i class="fas fa-hammer text-4xl"></i>
+                        <button onclick="startMining()" class="w-36 h-36 rounded-full rida-gradient shadow-2xl flex items-center justify-center mx-auto active:scale-90 transition-all">
+                            <i class="fas fa-power-off text-4xl"></i>
                         </button>
-                        <h3 class="mt-8 text-xl font-bold">Ready to Mine</h3>
-                        <p class="text-slate-500 text-sm mt-1">Earn 0.20 RDA Daily</p>
+                        <p class="mt-8 font-bold text-slate-300">Start 24h Session</p>
                     </div>
                     <div id="m-active" class="hidden">
-                        <div class="w-36 h-36 rounded-full border-4 border-sky-400 mx-auto flex items-center justify-center animate-pulse">
+                        <div class="w-36 h-36 rounded-full border-4 border-sky-400 mx-auto flex items-center justify-center mining-glow">
                             <i class="fas fa-bolt text-4xl text-sky-400"></i>
                         </div>
-                        <h3 class="mt-8 text-xl font-bold text-sky-400">Mining Active</h3>
-                        <p id="timer" class="mt-2 font-mono text-3xl font-black tracking-widest">24:00:00</p>
+                        <p id="timer" class="mt-8 font-mono text-3xl font-black tracking-widest text-sky-400">24:00:00</p>
                     </div>
                 </div>
             </div>
 
             <div id="sec-wallet" class="section hidden space-y-6">
-                <h3 class="text-2xl font-bold">My Wallet</h3>
-                <div class="glass p-8 rounded-[2.5rem] border-white/5">
-                    <p class="text-slate-400 leading-relaxed">Assets are currently in <span class="text-sky-400 font-bold">Testnet Mode</span>. Withdrawals will unlock after Mainnet verification phase.</p>
+                <h3 class="text-2xl font-bold">Wallet</h3>
+                <div class="glass p-8 rounded-[2.5rem]">
+                    <p class="text-slate-400 text-sm leading-relaxed">Financial operations are locked during the <span class="text-sky-400">Cloud Mining Phase</span>. Transfers will enable once KYC is completed.</p>
                 </div>
-                <div class="glass p-6 rounded-2xl flex justify-between items-center">
-                    <span>Transaction History</span>
-                    <i class="fas fa-chevron-right text-slate-500 text-xs"></i>
-                </div>
+                <button class="w-full glass p-6 rounded-2xl flex justify-between items-center opacity-50">
+                    <span class="font-bold">Withdraw RDA</span>
+                    <i class="fas fa-lock text-xs"></i>
+                </button>
             </div>
 
             <div id="sec-team" class="section hidden space-y-6">
-                <h3 class="text-2xl font-bold">Referral Program</h3>
-                <div class="glass p-8 rounded-[2.5rem] border-white/5">
-                    <p class="text-[10px] text-slate-500 font-black uppercase tracking-widest mb-2">Your Personal Code</p>
-                    <p id="u-ref-code" class="text-3xl font-black text-sky-400 tracking-widest">---</p>
+                <h3 class="text-2xl font-bold">Network Team</h3>
+                <div class="glass p-8 rounded-[2.5rem]">
+                    <p class="text-[10px] text-slate-500 font-black uppercase tracking-widest mb-2">My Referral Code</p>
+                    <p id="u-ref-code" class="text-3xl font-black text-sky-400 tracking-[0.2em]">---</p>
                 </div>
-                <div class="p-6 bg-sky-500/10 rounded-2xl border border-sky-500/20">
-                    <p class="text-sm text-sky-200">Share your code with friends to increase your network mining power.</p>
+                <div class="p-6 bg-sky-500/10 rounded-3xl border border-sky-500/20">
+                    <p class="text-sm text-sky-300">Invite users to secure your position in the upcoming Mainnet launch.</p>
                 </div>
             </div>
 
             <div id="sec-admin" class="section hidden space-y-6">
-                <h3 class="text-2xl font-bold text-red-500">Global Admin</h3>
+                <h3 class="text-2xl font-bold text-red-500 italic">Global Admin Panel</h3>
                 <div class="space-y-3">
-                    <div class="glass p-6 rounded-2xl">
-                        <p class="text-xs text-slate-500 uppercase font-bold">System Status</p>
-                        <p class="text-lg font-bold text-green-400">API Node Online</p>
+                    <div class="glass p-6 rounded-2xl border-red-500/10">
+                        <p class="text-[10px] font-bold text-slate-500 uppercase mb-1">Node Connectivity</p>
+                        <p class="text-lg font-bold text-green-400">API NODE ONLINE</p>
                     </div>
-                    <button class="w-full glass p-5 rounded-2xl text-left hover:bg-white/5">Manage User Database</button>
-                    <button class="w-full glass p-5 rounded-2xl text-left hover:bg-white/5">Approve Verification Requests</button>
-                    <button class="w-full glass p-5 rounded-2xl text-left hover:bg-white/5">Broadcast Announcement</button>
+                    <button onclick="adminManageUsers()" class="w-full glass p-5 rounded-2xl text-left flex justify-between items-center">
+                        <span>Manage User Database</span>
+                        <i class="fas fa-database text-slate-600"></i>
+                    </button>
+                    <button onclick="adminBroadcast()" class="w-full glass p-5 rounded-2xl text-left flex justify-between items-center">
+                        <span>Broadcast Announcement</span>
+                        <i class="fas fa-bullhorn text-slate-600"></i>
+                    </button>
+                    <button onclick="openChat()" class="w-full glass p-5 rounded-2xl text-left flex justify-between items-center">
+                        <span>User Chat System</span>
+                        <i class="fas fa-comments text-slate-600"></i>
+                    </button>
                 </div>
             </div>
         </main>
 
-        <nav class="fixed bottom-0 left-0 right-0 h-24 glass rounded-t-[3rem] flex items-center justify-around px-6 border-t border-white/10 z-50">
-            <i onclick="switchSection('home', this)" class="nav-btn fas fa-home text-2xl active-nav cursor-pointer"></i>
-            <i onclick="switchSection('wallet', this)" class="nav-btn fas fa-wallet text-2xl text-slate-600 cursor-pointer"></i>
-            <i onclick="switchSection('team', this)" class="nav-btn fas fa-users text-2xl text-slate-600 cursor-pointer"></i>
-            <i id="nav-admin-link" onclick="switchSection('admin', this)" class="nav-btn fas fa-shield-halved text-2xl text-slate-600 cursor-pointer hidden"></i>
-            <i onclick="handleLogout()" class="fas fa-power-off text-2xl text-red-500/50 cursor-pointer"></i>
+        <nav class="fixed bottom-0 left-0 right-0 h-24 glass rounded-t-[3rem] flex items-center justify-around px-8 border-t border-white/10 z-50">
+            <i onclick="switchTab('home', this)" class="nav-btn fas fa-home text-2xl active-nav cursor-pointer"></i>
+            <i onclick="switchTab('wallet', this)" class="nav-btn fas fa-wallet text-2xl text-slate-600 cursor-pointer"></i>
+            <i onclick="switchTab('team', this)" class="nav-btn fas fa-users text-2xl text-slate-600 cursor-pointer"></i>
+            <i id="nav-admin-link" onclick="switchTab('admin', this)" class="nav-btn fas fa-shield-halved text-2xl text-slate-600 cursor-pointer hidden"></i>
+            <i onclick="handleLogout()" class="fas fa-power-off text-2xl text-red-500/30 cursor-pointer"></i>
         </nav>
     </div>
 
     <script>
-        const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwOvwFtfZMWUF4feou_0Kyy1Ky-Du1GgLUXD4_J6tsJOzle2NEEiOcCqW6Uy5viuUQ/exec';
-        let session = JSON.parse(localStorage.getItem('rida_pro_session')) || null;
+        const API_URL = 'https://script.google.com/macros/s/AKfycbxMUfWDlX2uwNss7DpeEHY8yKr5Ee951qNvSWYMh7JddzRcnSP8-L0cszddx17tmO_x/exec';
+        let session = JSON.parse(localStorage.getItem('rida_pro_v3')) || null;
+        let counterTick;
 
-        window.onload = () => { if(session) startApp(); };
+        window.onload = () => { if(session) initApp(); };
 
-        function switchSection(id, element) {
+        function switchTab(id, el) {
             document.querySelectorAll('.section').forEach(s => s.classList.add('hidden'));
             document.getElementById('sec-' + id).classList.remove('hidden');
-            
-            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active-nav', 'text-slate-600'));
-            document.querySelectorAll('.nav-btn').forEach(btn => { if(btn !== element) btn.classList.add('text-slate-600'); });
-            element.classList.add('active-nav');
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active-nav', 'text-slate-600'));
+            document.querySelectorAll('.nav-btn').forEach(b => { if(b !== el) b.classList.add('text-slate-600'); });
+            el.classList.add('active-nav');
         }
 
         async function handleAuth(mode) {
@@ -150,58 +164,63 @@
                 { action: 'register', username: document.getElementById('r-user').value, email: document.getElementById('r-email').value, password: document.getElementById('r-pass').value, referredBy: document.getElementById('r-ref').value };
 
             try {
-                const response = await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify(data) });
-                const result = await response.json();
-                if(result.success) {
+                const req = await fetch(API_URL, { method: 'POST', body: JSON.stringify(data) });
+                const res = await req.json();
+                if(res.success) {
                     if(mode === 'login') {
-                        session = result.data;
-                        localStorage.setItem('rida_pro_session', JSON.stringify(session));
-                        startApp();
-                    } else { alert("Account Created Successfully!"); toggleAuth(false); }
-                } else { alert(result.msg); }
-            } catch(e) { alert("API Node Timeout. Please try again."); }
+                        session = res.data;
+                        localStorage.setItem('rida_pro_v3', JSON.stringify(session));
+                        initApp();
+                    } else { alert("Account Created! You can login now."); toggleAuth(false); }
+                } else { alert(res.msg); }
+            } catch(e) { alert("Node Connection Failed."); }
             setLoading(false);
         }
 
-        function startApp() {
+        function initApp() {
             document.getElementById('screen-auth').classList.add('hidden');
             document.getElementById('screen-app').classList.remove('hidden');
             document.getElementById('u-display-name').innerText = session.username;
-
             if(session.role === 'Admin') {
                 document.getElementById('badge-admin').classList.remove('hidden');
                 document.getElementById('nav-admin-link').classList.remove('hidden');
             }
-            refreshStats();
+            syncData();
         }
 
-        async function refreshStats() {
+        async function syncData() {
             try {
-                const response = await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify({ action: 'getDashboard', uid: session.uid }) });
-                const result = await response.json();
-                if(result.success) {
-                    const d = result.data;
-                    document.getElementById('u-balance').innerText = parseFloat(d.balance).toFixed(4);
+                const req = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'getDashboard', uid: session.uid }) });
+                const res = await req.json();
+                if(res.success) {
+                    const d = res.data;
                     document.getElementById('u-ref-code').innerText = d.refCode;
-                    if(d.miningStatus === "Active") initTimer(d.lastMiningTime);
+                    if(d.miningStatus === "Active") {
+                        startLiveCounter(d.balance, d.lastMiningTime);
+                        updateTimerUI(d.lastMiningTime);
+                    } else {
+                        document.getElementById('u-balance').innerText = parseFloat(d.balance).toFixed(6);
+                    }
                 }
-            } catch(e) { console.warn("Background Sync Failed"); }
+            } catch(e) {}
         }
 
-        async function startMiningSession() {
-            setLoading(true);
-            const response = await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify({ action: 'startMining', uid: session.uid }) });
-            const result = await response.json();
-            setLoading(false);
-            if(result.success) refreshStats();
+        function startLiveCounter(base, start) {
+            if(counterTick) clearInterval(counterTick);
+            const perSecond = 0.2 / 86400; 
+            counterTick = setInterval(() => {
+                const elapsed = (Date.now() - parseInt(start)) / 1000;
+                const earned = elapsed * perSecond;
+                document.getElementById('u-balance').innerText = (parseFloat(base) + earned).toFixed(6);
+            }, 1000);
         }
 
-        function initTimer(start) {
+        function updateTimerUI(start) {
             document.getElementById('m-idle').classList.add('hidden');
             document.getElementById('m-active').classList.remove('hidden');
-            const interval = setInterval(() => {
+            setInterval(() => {
                 const diff = (24 * 60 * 60 * 1000) - (Date.now() - parseInt(start));
-                if(diff <= 0) { clearInterval(interval); location.reload(); return; }
+                if(diff <= 0) location.reload();
                 const h = Math.floor(diff/3600000).toString().padStart(2,'0');
                 const m = Math.floor((diff%3600000)/60000).toString().padStart(2,'0');
                 const s = Math.floor((diff%60000)/1000).toString().padStart(2,'0');
@@ -209,9 +228,42 @@
             }, 1000);
         }
 
+        async function startMining() {
+            setLoading(true);
+            const req = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'startMining', uid: session.uid }) });
+            const res = await req.json();
+            setLoading(false);
+            if(res.success) syncData();
+        }
+
+        // --- ADMIN FUNCTIONS ---
+        async function adminBroadcast() {
+            const msg = prompt("Enter Broadcast Message:");
+            if(!msg) return;
+            setLoading(true);
+            const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'broadcast', uid: session.uid, message: msg }) });
+            const data = await res.json();
+            setLoading(false);
+            alert(data.msg);
+        }
+
+        async function adminManageUsers() {
+            setLoading(true);
+            const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'getUsersCount', uid: session.uid }) });
+            const data = await res.json();
+            setLoading(false);
+            alert("Total Registered Miners: " + data.data.total);
+        }
+
+        function openChat() {
+            alert("Opening User Chat System... (Redirecting to Secure Admin Chat)");
+            // You can replace this with a real chat URL or Telegram link
+            window.open("https://t.me/your_support_link", "_blank");
+        }
+
         function toggleAuth(reg) {
-            document.getElementById('box-login').classList.toggle('hidden', reg);
-            document.getElementById('box-register').classList.toggle('hidden', !reg);
+            document.getElementById('login-box').classList.toggle('hidden', reg);
+            document.getElementById('reg-box').classList.toggle('hidden', !reg);
         }
 
         function setLoading(s) { document.getElementById('loader').classList.toggle('hidden', !s); }
