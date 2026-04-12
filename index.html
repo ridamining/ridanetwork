@@ -3,234 +3,214 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Rida Network | Cloud Miner</title>
+    <title>Rida Network | Miner</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;700;900&display=swap');
+        
         :root {
             --primary: #38bdf8;
             --secondary: #818cf8;
             --bg: #070b14;
         }
+        
         body { 
             background: var(--bg); 
             color: #fff; 
             font-family: 'Outfit', sans-serif; 
-            overflow-x: hidden;
-            -webkit-tap-highlight-color: transparent;
+            overflow: hidden;
+            height: 100vh;
         }
+
         .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.08); }
         .rida-gradient { background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%); }
-        .neon-text { text-shadow: 0 0 10px rgba(56, 189, 248, 0.5); }
         
-        /* Animations */
         .mining-pulse {
-            animation: pulse 2s infinite cubic-bezier(0.4, 0, 0.6, 1);
+            animation: pulse-glow 2s infinite ease-in-out;
         }
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); filter: drop-shadow(0 0 5px var(--primary)); }
-            50% { transform: scale(1.05); filter: drop-shadow(0 0 20px var(--primary)); }
+
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 10px rgba(56, 189, 248, 0.2); transform: scale(1); }
+            50% { box-shadow: 0 0 30px rgba(56, 189, 248, 0.5); transform: scale(1.02); }
         }
+
         .hidden { display: none; }
-        input:focus { border-color: var(--primary); outline: none; }
+        input { transition: all 0.3s; }
+        input:focus { border-color: var(--primary) !important; background: rgba(255,255,255,0.08); }
     </style>
 </head>
-<body class="max-w-md mx-auto min-h-screen border-x border-white/5">
+<body class="max-w-md mx-auto relative border-x border-white/5">
 
-    <div id="loader" class="fixed inset-0 z-[100] bg-black/90 flex flex-col items-center justify-center hidden">
-        <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-sky-400 mb-4"></div>
-        <p class="text-sky-400 text-xs font-bold tracking-[0.3em] uppercase">Connecting to Rida...</p>
+    <div id="loader" class="fixed inset-0 z-[100] bg-black flex flex-col items-center justify-center hidden">
+        <div class="w-12 h-12 border-4 border-sky-500/20 border-t-sky-500 rounded-full animate-spin mb-4"></div>
+        <p class="text-[10px] font-bold tracking-[0.4em] text-sky-500 uppercase">Synchronizing</p>
     </div>
 
-    <div id="screen-auth" class="p-8 pt-20">
-        <div class="text-center mb-12">
+    <div id="screen-auth" class="h-full p-8 flex flex-col justify-center">
+        <div class="text-center mb-10">
             <h1 class="text-5xl font-black italic tracking-tighter">RIDA<span class="text-sky-400">.</span></h1>
-            <p class="text-slate-500 text-xs font-bold tracking-[0.2em] mt-2 uppercase">Mining Ecosystem</p>
+            <p class="text-slate-500 text-[10px] font-bold tracking-[0.3em] mt-2 uppercase">Decentralized Asset</p>
         </div>
 
-        <div id="box-login" class="glass p-8 rounded-[2.5rem] shadow-2xl">
-            <h2 class="text-2xl font-bold mb-6">Welcome Back</h2>
-            <div class="space-y-4">
-                <div class="relative">
-                    <i class="fas fa-envelope absolute left-4 top-4 text-slate-500"></i>
-                    <input type="email" id="l-email" placeholder="Email Address" class="w-full bg-white/5 p-4 pl-12 rounded-2xl border border-white/10">
-                </div>
-                <div class="relative">
-                    <i class="fas fa-lock absolute left-4 top-4 text-slate-500"></i>
-                    <input type="password" id="l-pass" placeholder="Password" class="w-full bg-white/5 p-4 pl-12 rounded-2xl border border-white/10">
-                </div>
-                <button onclick="handleAuth('login')" class="w-full rida-gradient p-4 rounded-2xl font-bold text-lg shadow-lg shadow-sky-500/20">Sign In</button>
-            </div>
-            <p class="text-center mt-8 text-slate-400 text-sm">New miner? <span class="text-sky-400 font-bold cursor-pointer" onclick="toggleAuth(true)">Register</span></p>
+        <div id="login-box" class="glass p-8 rounded-[2.5rem] space-y-4">
+            <h2 class="text-xl font-bold mb-2">Miner Login</h2>
+            <input type="email" id="l-email" placeholder="Email" class="w-full bg-white/5 p-4 rounded-2xl border border-white/10 outline-none">
+            <input type="password" id="l-pass" placeholder="Password" class="w-full bg-white/5 p-4 rounded-2xl border border-white/10 outline-none">
+            <button onclick="auth('login')" class="w-full rida-gradient p-4 rounded-2xl font-bold shadow-lg shadow-sky-500/20">Access Dashboard</button>
+            <p class="text-center text-sm text-slate-500 pt-4">Need an account? <span class="text-sky-400 font-bold cursor-pointer" onclick="toggleAuth(true)">Register</span></p>
         </div>
 
-        <div id="box-register" class="glass p-8 rounded-[2.5rem] hidden">
-            <h2 class="text-2xl font-bold mb-6">Create Account</h2>
-            <div class="space-y-4">
-                <input type="text" id="r-user" placeholder="Username" class="w-full bg-white/5 p-4 rounded-2xl border border-white/10">
-                <input type="email" id="r-email" placeholder="Email" class="w-full bg-white/5 p-4 rounded-2xl border border-white/10">
-                <input type="password" id="r-pass" placeholder="Password" class="w-full bg-white/5 p-4 rounded-2xl border border-white/10">
-                <input type="text" id="r-ref" placeholder="Referral Code (Optional)" class="w-full bg-white/5 p-4 rounded-2xl border border-white/10">
-                <button onclick="handleAuth('register')" class="w-full rida-gradient p-4 rounded-2xl font-bold text-lg">Join Network</button>
-            </div>
-            <p class="text-center mt-8 text-slate-400 text-sm">Already a member? <span class="text-sky-400 font-bold cursor-pointer" onclick="toggleAuth(false)">Login</span></p>
+        <div id="reg-box" class="glass p-8 rounded-[2.5rem] space-y-4 hidden">
+            <h2 class="text-xl font-bold mb-2">New Account</h2>
+            <input type="text" id="r-user" placeholder="Username" class="w-full bg-white/5 p-4 rounded-2xl border border-white/10 outline-none">
+            <input type="email" id="r-email" placeholder="Email" class="w-full bg-white/5 p-4 rounded-2xl border border-white/10 outline-none">
+            <input type="password" id="r-pass" placeholder="Password" class="w-full bg-white/5 p-4 rounded-2xl border border-white/10 outline-none">
+            <input type="text" id="r-ref" placeholder="Referral (Optional)" class="w-full bg-white/5 p-4 rounded-2xl border border-white/10 outline-none">
+            <button onclick="auth('register')" class="w-full rida-gradient p-4 rounded-2xl font-bold">Create Miner</button>
+            <p class="text-center text-sm text-slate-500 pt-4">Back to <span class="text-sky-400 font-bold cursor-pointer" onclick="toggleAuth(false)">Login</span></p>
         </div>
     </div>
 
-    <div id="screen-app" class="hidden pb-32">
+    <div id="screen-app" class="h-full hidden overflow-y-auto">
         <header class="p-8 flex justify-between items-center">
             <div>
-                <p class="text-slate-500 text-[10px] font-bold tracking-widest mb-1">CURRENT MINER</p>
-                <h3 id="u-display" class="text-xl font-bold">---</h3>
+                <p class="text-slate-500 text-[10px] font-black tracking-widest uppercase">Miner Identity</p>
+                <h2 id="u-name" class="text-xl font-bold">---</h2>
             </div>
-            <div id="v-status" class="px-4 py-2 rounded-full glass border-sky-500/30 text-[10px] font-black text-sky-400 uppercase tracking-tighter">
-                UNVERIFIED
+            <div id="v-badge" class="px-4 py-2 rounded-full glass border-sky-500/30 text-[10px] font-black text-sky-400 uppercase">
+                ...
             </div>
         </header>
 
-        <div class="px-8 space-y-8">
+        <div class="px-8 pb-32 space-y-6">
             <div class="rida-gradient p-10 rounded-[3rem] shadow-2xl relative overflow-hidden">
-                <div class="absolute -right-4 -bottom-4 opacity-10">
-                    <i class="fas fa-microchip text-9xl"></i>
-                </div>
-                <p class="text-white/60 text-xs font-bold tracking-widest mb-1 uppercase">Total Rida</p>
+                <i class="fas fa-cube absolute -right-4 -bottom-4 text-9xl opacity-10"></i>
+                <p class="text-white/60 text-[10px] font-bold tracking-widest mb-1 uppercase">Asset Balance</p>
                 <div class="flex items-baseline gap-2">
                     <h1 id="u-bal" class="text-5xl font-black tabular-nums">0.0000</h1>
-                    <span class="text-xl font-bold opacity-80 uppercase">RDA</span>
+                    <span class="text-lg font-bold opacity-70">RDA</span>
                 </div>
             </div>
 
-            <div class="glass p-10 rounded-[3.5rem] text-center">
+            <div class="glass p-10 rounded-[3rem] text-center">
                 <div id="m-idle">
-                    <button onclick="startMining()" class="w-40 h-40 rounded-full rida-gradient mx-auto flex items-center justify-center shadow-2xl active:scale-90 transition-all">
-                        <i class="fas fa-hammer text-4xl"></i>
+                    <button onclick="startMining()" class="w-36 h-36 rounded-full rida-gradient mx-auto flex items-center justify-center shadow-2xl hover:scale-105 active:scale-95 transition-all">
+                        <i class="fas fa-power-off text-4xl"></i>
                     </button>
-                    <h3 class="mt-8 text-xl font-bold">Start Session</h3>
-                    <p class="text-slate-500 text-sm mt-1">Base Rate: 0.20 RDA / 24h</p>
+                    <p class="mt-6 font-bold text-slate-300">Start 24h Session</p>
                 </div>
 
                 <div id="m-active" class="hidden">
-                    <div class="w-40 h-40 rounded-full border-4 border-sky-400 mx-auto flex items-center justify-center mining-pulse">
-                        <div class="w-32 h-32 rounded-full bg-slate-900/50 flex items-center justify-center">
-                            <i class="fas fa-pickaxe text-4xl text-sky-400"></i>
-                        </div>
+                    <div class="w-36 h-36 rounded-full border-4 border-sky-500 mx-auto flex items-center justify-center mining-pulse">
+                        <i class="fas fa-bolt text-4xl text-sky-400"></i>
                     </div>
-                    <h3 class="mt-8 text-xl font-bold text-sky-400">Mining Active</h3>
-                    <p id="timer" class="mt-2 font-mono text-3xl font-black tracking-widest">24:00:00</p>
+                    <p id="timer" class="mt-6 font-mono text-2xl font-black tracking-widest text-sky-400">24:00:00</p>
                 </div>
             </div>
 
             <div class="grid grid-cols-2 gap-4">
                 <div class="glass p-6 rounded-[2rem]">
                     <p class="text-slate-500 text-[10px] font-bold mb-1 uppercase">Ref Code</p>
-                    <p id="u-ref" class="font-bold text-sky-400 text-sm">---</p>
+                    <p id="u-ref" class="font-bold text-sky-400">---</p>
                 </div>
                 <div class="glass p-6 rounded-[2rem] flex items-center justify-center" onclick="logout()">
-                    <i class="fas fa-sign-out-alt text-slate-500 text-xl"></i>
+                    <i class="fas fa-right-from-bracket text-slate-500"></i>
                 </div>
             </div>
         </div>
 
-        <nav class="fixed bottom-8 left-8 right-8 h-20 glass rounded-[2.5rem] flex items-center justify-around px-4 border-t border-white/10 z-50">
-            <i class="fas fa-home text-sky-400 text-xl"></i>
+        <nav class="fixed bottom-6 left-6 right-6 h-20 glass rounded-[2.5rem] flex items-center justify-around z-50">
+            <i class="fas fa-chart-pie text-sky-400 text-xl"></i>
             <i class="fas fa-wallet text-slate-600 text-xl"></i>
             <i class="fas fa-users text-slate-600 text-xl"></i>
-            <i class="fas fa-comment-dots text-slate-600 text-xl"></i>
+            <i class="fas fa-gear text-slate-600 text-xl"></i>
         </nav>
     </div>
 
     <script>
-        const API = 'https://script.google.com/macros/s/AKfycbxFL7MjbEN20PohBW7OMH5xzAPI84b6sjnm58FEm5GMudQm6HcsO0rZswE9SI09JZg/exec';
-        let user = JSON.parse(localStorage.getItem('rida_v1_session')) || null;
-        let timerTick;
+        const API_URL = 'https://script.google.com/macros/s/AKfycbxYDJ1tSxrA64Q0FzhJP1Guscz65uwY5s2IPeFSBHZw8OGN8fv6MsHDAddXD9Jg8xks/exec';
+        let user = JSON.parse(localStorage.getItem('rida_v2_user')) || null;
+        let tRef;
 
-        window.onload = () => { if(user) openApp(); };
+        window.onload = () => { if(user) initApp(); };
 
-        function toggleAuth(isReg) {
-            document.getElementById('box-login').classList.toggle('hidden', isReg);
-            document.getElementById('box-register').classList.toggle('hidden', !isReg);
+        function toggleAuth(reg) {
+            document.getElementById('login-box').classList.toggle('hidden', reg);
+            document.getElementById('reg-box').classList.toggle('hidden', !reg);
         }
 
-        async function handleAuth(type) {
-            showLoader(true);
-            const payload = type === 'login' ? 
+        async function auth(mode) {
+            toggleLoader(true);
+            const data = mode === 'login' ? 
                 { action: 'login', email: document.getElementById('l-email').value, password: document.getElementById('l-pass').value } :
                 { action: 'register', username: document.getElementById('r-user').value, email: document.getElementById('r-email').value, password: document.getElementById('r-pass').value, referredBy: document.getElementById('r-ref').value };
 
             try {
-                const req = await fetch(API, { method: 'POST', body: JSON.stringify(payload) });
+                const req = await fetch(API_URL, { method: 'POST', body: JSON.stringify(data) });
                 const res = await req.json();
                 if(res.success) {
-                    if(type === 'login') {
+                    if(mode === 'login') {
                         user = res.data;
-                        localStorage.setItem('rida_v1_session', JSON.stringify(user));
-                        openApp();
+                        localStorage.setItem('rida_v2_user', JSON.stringify(user));
+                        initApp();
                     } else {
-                        alert("Account Ready! Login now.");
+                        alert("Account Created! You can now login.");
                         toggleAuth(false);
                     }
                 } else { alert(res.msg); }
-            } catch(e) { alert("API Connection Failed"); }
-            showLoader(false);
+            } catch(e) { alert("Server Busy. Try again in a moment."); }
+            toggleLoader(false);
         }
 
-        function openApp() {
+        function initApp() {
             document.getElementById('screen-auth').classList.add('hidden');
             document.getElementById('screen-app').classList.remove('hidden');
-            document.getElementById('u-display').innerText = user.username;
-            fetchStats();
+            document.getElementById('u-name').innerText = user.username;
+            sync();
         }
 
-        async function fetchStats() {
+        async function sync() {
             try {
-                const req = await fetch(API, { method: 'POST', body: JSON.stringify({ action: 'getDashboard', uid: user.uid }) });
+                const req = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'getDashboard', uid: user.uid }) });
                 const res = await req.json();
                 if(res.success) {
                     const d = res.data;
                     document.getElementById('u-bal').innerText = parseFloat(d.balance).toFixed(4);
                     document.getElementById('u-ref').innerText = d.refCode;
-                    document.getElementById('v-status').innerText = d.verified === "Yes" ? "Verified" : "Unverified";
+                    document.getElementById('v-badge').innerText = d.verified === "Yes" ? "Verified" : "Unverified";
                     if(d.miningStatus === "Active") startTimer(d.lastMiningTime);
                 }
-            } catch(e) { console.error("Sync Error"); }
+            } catch(e) {}
         }
 
         async function startMining() {
-            showLoader(true);
-            const req = await fetch(API, { method: 'POST', body: JSON.stringify({ action: 'startMining', uid: user.uid }) });
+            toggleLoader(true);
+            const req = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'startMining', uid: user.uid }) });
             const res = await req.json();
-            showLoader(false);
-            if(res.success) fetchStats();
+            toggleLoader(false);
+            if(res.success) sync();
         }
 
-        function startTimer(startTime) {
+        function startTimer(start) {
             document.getElementById('m-idle').classList.add('hidden');
             document.getElementById('m-active').classList.remove('hidden');
-            if(timerTick) clearInterval(timerTick);
-            
-            timerTick = setInterval(() => {
-                const now = Date.now();
-                const rem = (24 * 60 * 60 * 1000) - (now - parseInt(startTime));
-                
-                if(rem <= 0) {
-                    clearInterval(timerTick);
-                    location.reload();
-                    return;
-                }
-
-                const h = Math.floor(rem / 3600000).toString().padStart(2, '0');
-                const m = Math.floor((rem % 3600000) / 60000).toString().padStart(2, '0');
-                const s = Math.floor((rem % 60000) / 1000).toString().padStart(2, '0');
+            if(tRef) clearInterval(tRef);
+            tRef = setInterval(() => {
+                const diff = (24 * 60 * 60 * 1000) - (Date.now() - parseInt(start));
+                if(diff <= 0) { clearInterval(tRef); location.reload(); return; }
+                const h = Math.floor(diff/3600000).toString().padStart(2,'0');
+                const m = Math.floor((diff%3600000)/60000).toString().padStart(2,'0');
+                const s = Math.floor((diff%60000)/1000).toString().padStart(2,'0');
                 document.getElementById('timer').innerText = `${h}:${m}:${s}`;
                 
-                // Live Counter: Smooth increment simulation
-                const balEl = document.getElementById('u-bal');
-                const current = parseFloat(balEl.innerText);
-                balEl.innerText = (current + 0.0000023).toFixed(6);
+                // Visual increment
+                const b = document.getElementById('u-bal');
+                b.innerText = (parseFloat(b.innerText) + 0.0000023).toFixed(6);
             }, 1000);
         }
 
-        function showLoader(show) { document.getElementById('loader').classList.toggle('hidden', !show); }
+        function toggleLoader(s) { document.getElementById('loader').classList.toggle('hidden', !s); }
         function logout() { localStorage.clear(); location.reload(); }
     </script>
 </body>
