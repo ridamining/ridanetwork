@@ -3,140 +3,284 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rida Network – Auto-Diagnostic</title>
+    <title>Rida Network | Mobile Crypto Mining</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
     <style>
-        body { background: #0a0f1e; color: white; font-family: monospace; padding: 20px; }
-        .card { background: #1e293b; border-radius: 1rem; padding: 1rem; margin-bottom: 1rem; }
-        button { background: #3b82f6; border: none; padding: 10px; border-radius: 2rem; color: white; margin: 5px; cursor: pointer; }
-        pre { background: #0f172a; padding: 1rem; overflow-x: auto; white-space: pre-wrap; border-radius: 1rem; }
+        :root {
+            --primary: #38bdf8;
+            --secondary: #818cf8;
+            --bg-dark: #070b14;
+            --glass: rgba(255, 255, 255, 0.05);
+        }
+        body {
+            background-color: var(--bg-dark);
+            color: white;
+            font-family: 'Outfit', sans-serif;
+            margin: 0;
+            overflow-x: hidden;
+        }
+        .glass { background: var(--glass); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.1); }
+        .rida-gradient { background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%); }
+        .text-gradient { background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        
+        /* Animations */
+        .page { transition: all 0.4s ease-in-out; }
+        .mining-glow {
+            filter: drop-shadow(0 0 15px var(--primary));
+            animation: pulse-glow 2s infinite;
+        }
+        @keyframes pulse-glow {
+            0%, 100% { filter: drop-shadow(0 0 10px var(--primary)); transform: scale(1); }
+            50% { filter: drop-shadow(0 0 25px var(--primary)); transform: scale(1.05); }
+        }
         .hidden { display: none; }
-        .success { color: #4ade80; }
-        .error { color: #f87171; }
+        input:focus { border-color: var(--primary) !important; outline: none; }
     </style>
 </head>
-<body>
-<div class="container" style="max-width:700px; margin:auto;">
-    <h1>🔧 Rida Network – Diagnostic Mode</h1>
-    <div class="card">
-        <p><strong>Your Apps Script URL:</strong><br>
-        <code id="urlDisplay"></code></p>
-        <button id="testDirect">1. Test Direct (no proxy)</button>
-        <button id="testProxy">2. Test via CORS Proxy</button>
-        <button id="autoFix">3. Attempt Auto-Fix (redeploy reminder)</button>
-        <pre id="output">Click a button to see raw response...</pre>
+<body class="max-w-md mx-auto min-h-screen border-x border-white/5">
+
+    <div id="loader" class="fixed inset-0 z-[100] bg-slate-950 flex items-center justify-center hidden">
+        <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-sky-400"></div>
     </div>
-    <div id="dashboard" class="hidden">
-        <div class="card">
-            <h2>⛏️ Mining Dashboard</h2>
-            <div id="balance" style="font-size:2rem;">0.00 Rida</div>
-            <button id="mineBtn">Start Mining</button>
-            <button id="logoutBtn">Logout</button>
+
+    <div id="page-auth" class="page min-h-screen p-6 flex flex-col justify-center">
+        <div class="text-center mb-10">
+            <h1 class="text-5xl font-extrabold mb-2">RIDA<span class="text-sky-400">.</span></h1>
+            <p class="text-slate-400">Cloud Mining Ecosystem</p>
+        </div>
+
+        <div id="login-box" class="glass p-8 rounded-[2rem]">
+            <h2 class="text-2xl font-bold mb-6">Login</h2>
+            <input type="email" id="log-email" placeholder="Email Address" class="w-full bg-white/5 p-4 rounded-xl mb-4 border border-white/10">
+            <input type="password" id="log-pass" placeholder="Password" class="w-full bg-white/5 p-4 rounded-xl mb-6 border border-white/10">
+            <button onclick="handleLogin()" class="w-full rida-gradient p-4 rounded-xl font-bold text-lg shadow-lg">Enter Dashboard</button>
+            <p class="text-center mt-6 text-slate-400 text-sm">New to Rida? <span class="text-sky-400 cursor-pointer" onclick="toggleAuth(true)">Create Account</span></p>
+        </div>
+
+        <div id="register-box" class="glass p-8 rounded-[2rem] hidden">
+            <h2 class="text-2xl font-bold mb-4">Register</h2>
+            <input type="text" id="reg-user" placeholder="Username" class="w-full bg-white/5 p-4 rounded-xl mb-3 border border-white/10">
+            <input type="email" id="reg-email" placeholder="Email" class="w-full bg-white/5 p-4 rounded-xl mb-3 border border-white/10">
+            <input type="password" id="reg-pass" placeholder="Password" class="w-full bg-white/5 p-4 rounded-xl mb-3 border border-white/10">
+            <input type="text" id="reg-ref" placeholder="Referral Code (Optional)" class="w-full bg-white/5 p-4 rounded-xl mb-6 border border-white/10">
+            <button onclick="handleRegister()" class="w-full rida-gradient p-4 rounded-xl font-bold text-lg">Join Network</button>
+            <p class="text-center mt-6 text-slate-400 text-sm">Already a member? <span class="text-sky-400 cursor-pointer" onclick="toggleAuth(false)">Login</span></p>
         </div>
     </div>
-</div>
 
-<script>
-    // YOUR APPS SCRIPT URL – VERIFY THIS IS THE CORRECT /exec URL
-    const API_URL = 'https://script.google.com/macros/s/AKfycbx_pLC6Owvntl1WBZzAomMsd4AjbG3QCvGGtc_7MugU_E0ECe28QEXuEqhePp9NtBBimQ/exec';
-    document.getElementById('urlDisplay').innerText = API_URL;
+    <div id="main-app" class="page hidden pb-24">
+        <header class="p-6 flex justify-between items-center">
+            <div>
+                <span class="text-slate-500 text-xs block">WELCOME BACK</span>
+                <span id="user-name" class="font-bold text-lg">---</span>
+            </div>
+            <div id="status-badge" class="px-4 py-1.5 rounded-full glass border-sky-500/30 text-xs font-bold text-sky-400">
+                VERIFYING...
+            </div>
+        </header>
 
-    const PROXY = 'https://corsproxy.io/?' + encodeURIComponent(API_URL);
-    let currentUser = null;
+        <div id="tab-dashboard" class="px-6 animate-in fade-in duration-500">
+            <div class="rida-gradient p-8 rounded-[2.5rem] shadow-2xl shadow-sky-500/20 relative overflow-hidden">
+                <div class="absolute top-0 right-0 p-8 opacity-20">
+                    <i class="fas fa-microchip text-6xl"></i>
+                </div>
+                <p class="text-white/70 text-sm font-medium">TOTAL BALANCE</p>
+                <div class="flex items-baseline gap-2 mt-1">
+                    <h1 id="balance" class="text-5xl font-black">0.0000</h1>
+                    <span class="text-xl font-bold">RDA</span>
+                </div>
+                <div class="mt-6 flex gap-4">
+                    <button class="bg-white/20 px-4 py-2 rounded-full text-xs font-bold backdrop-blur-md">P2P TRANSFER</button>
+                    <button class="bg-black/20 px-4 py-2 rounded-full text-xs font-bold">HISTORY</button>
+                </div>
+            </div>
 
-    async function fetchRaw(url, method = 'POST', body = null) {
-        const options = { method, headers: { 'Content-Type': 'application/json' } };
-        if (body) options.body = JSON.stringify(body);
-        try {
-            const res = await fetch(url, options);
-            const text = await res.text();
-            return { status: res.status, text };
-        } catch (err) {
-            return { status: 0, text: `Fetch error: ${err.message}` };
-        }
-    }
+            <div class="mt-8 text-center p-8 glass rounded-[2.5rem]">
+                <div id="mining-idle">
+                    <button onclick="startMining()" class="w-40 h-40 rounded-full glass border-4 border-sky-500/30 flex items-center justify-center mx-auto mb-6 group active:scale-95 transition-all">
+                        <div class="w-32 h-32 rounded-full rida-gradient flex items-center justify-center shadow-lg shadow-sky-500/40">
+                            <i class="fas fa-hammer text-4xl text-white"></i>
+                        </div>
+                    </button>
+                    <h3 class="text-xl font-bold">Ready to Mine</h3>
+                    <p class="text-slate-500 text-sm mt-1">Earn 0.2 RDA every 24 hours</p>
+                </div>
 
-    document.getElementById('testDirect').onclick = async () => {
-        const out = document.getElementById('output');
-        out.innerText = '⏳ Testing direct fetch (may fail due to CORS)...';
-        const { status, text } = await fetchRaw(API_URL, 'POST', { action: 'login', email: 'test', password: 'test' });
-        out.innerHTML = `<span class="${status === 200 ? 'success' : 'error'}">HTTP ${status}</span>\n\n${text.substring(0, 1000)}`;
-        if (text.includes('<!DOCTYPE html>')) {
-            out.innerHTML += '\n\n⚠️ The backend returned HTML, not JSON. This means your Apps Script is NOT accessible to the public. Go to Apps Script → Deploy → Manage deployments → Edit → "Who has access" → set to "Anyone". Then redeploy and copy the NEW /exec URL.';
-        }
-    };
+                <div id="mining-active" class="hidden">
+                    <div class="w-40 h-40 rounded-full glass border-4 border-sky-500 flex items-center justify-center mx-auto mb-6 mining-glow">
+                        <div class="w-32 h-32 rounded-full bg-slate-900 flex items-center justify-center">
+                            <i class="fas fa-pickaxe text-4xl text-sky-400"></i>
+                        </div>
+                    </div>
+                    <h3 class="text-xl font-bold text-sky-400">Mining Active</h3>
+                    <p id="mining-timer" class="text-2xl font-mono mt-2 tracking-widest text-white">24:00:00</p>
+                </div>
+            </div>
 
-    document.getElementById('testProxy').onclick = async () => {
-        const out = document.getElementById('output');
-        out.innerText = '⏳ Testing via CORS proxy...';
-        const { status, text } = await fetchRaw(PROXY, 'POST', { action: 'login', email: 'admin@rida.com', password: 'admin123' });
-        out.innerHTML = `<span class="${status === 200 ? 'success' : 'error'}">HTTP ${status}</span>\n\n${text.substring(0, 1000)}`;
-        try {
-            const json = JSON.parse(text);
-            if (json.success === true) {
-                out.innerHTML += '\n\n✅ SUCCESS! The backend works. You can now use the mining dashboard.';
-                document.getElementById('dashboard').classList.remove('hidden');
-                currentUser = json.user;
-                document.getElementById('balance').innerText = 'Logged in as ' + currentUser.email;
-            } else if (json.success === false) {
-                out.innerHTML += `\n\n✅ Backend reached, but login failed: ${json.error}. This is normal – the backend is working correctly.`;
-            } else {
-                out.innerHTML += '\n\n⚠️ Response was not a valid JSON object. The backend is not returning proper JSON. Check your Apps Script code.';
+            <div class="grid grid-cols-2 gap-4 mt-6">
+                <div class="glass p-5 rounded-3xl">
+                    <p class="text-slate-500 text-xs mb-1">REFERRAL CODE</p>
+                    <p id="my-ref-code" class="font-bold text-sky-400 uppercase tracking-tighter">---</p>
+                </div>
+                <div class="glass p-5 rounded-3xl">
+                    <p class="text-slate-500 text-xs mb-1">TEAM STATUS</p>
+                    <p class="font-bold">1 Active</p>
+                </div>
+            </div>
+        </div>
+
+        <nav class="fixed bottom-6 left-6 right-6 h-20 glass rounded-3xl flex items-center justify-around px-4 border-t border-white/10 z-50">
+            <button class="flex flex-col items-center gap-1 text-sky-400">
+                <i class="fas fa-home text-xl"></i>
+                <span class="text-[10px] font-bold">HOME</span>
+            </button>
+            <button class="flex flex-col items-center gap-1 text-slate-500">
+                <i class="fas fa-wallet text-xl"></i>
+                <span class="text-[10px] font-bold">WALLET</span>
+            </button>
+            <button class="flex flex-col items-center gap-1 text-slate-500">
+                <i class="fas fa-users text-xl"></i>
+                <span class="text-[10px] font-bold">TEAM</span>
+            </button>
+            <button class="flex flex-col items-center gap-1 text-slate-500">
+                <i class="fas fa-comment-dots text-xl"></i>
+                <span class="text-[10px] font-bold">CHAT</span>
+            </button>
+        </nav>
+    </div>
+
+    <script>
+        const API_URL = 'https://script.google.com/macros/s/AKfycbx6MVvpY7hy4A0vQTwmRvFAsIZnHIqgEavy2V5zhKKzfxkfsJ_2lJa6Y0JnXqf-TdfF/exec';
+        let currentUser = JSON.parse(localStorage.getItem('rida_user')) || null;
+        let miningInterval;
+
+        // On Load
+        window.onload = () => {
+            if (currentUser) {
+                showApp();
             }
-        } catch(e) {
-            out.innerHTML += `\n\n❌ Invalid JSON. The backend returned HTML. ${e.message}`;
+        };
+
+        function toggleAuth(isReg) {
+            document.getElementById('login-box').classList.toggle('hidden', isReg);
+            document.getElementById('register-box').classList.toggle('hidden', !isReg);
         }
-    };
 
-    document.getElementById('autoFix').onclick = () => {
-        const out = document.getElementById('output');
-        out.innerHTML = `🔧 Steps to fix:\n
-1. Open your Google Apps Script project.\n
-2. Click "Deploy" → "Manage deployments".\n
-3. Click the pencil icon next to your deployment.\n
-4. Under "Who has access", select "Anyone".\n
-5. Click "Deploy" and copy the NEW URL (it ends with /exec).\n
-6. Replace the API_URL at the top of this HTML with that new URL.\n
-7. Refresh this page and click "Test via CORS Proxy" again.\n
-8. If it still fails, check that your doPost function returns ContentService.createTextOutput(JSON.stringify(result)).setMimeType(ContentService.MimeType.JSON);`;
-    };
+        async function apiCall(data) {
+            document.getElementById('loader').classList.remove('hidden');
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    mode: 'no-cors', // Note: Apps Script may require no-cors or specialized handling
+                    body: JSON.stringify(data)
+                });
+                
+                // Since Google Apps Script with no-cors doesn't return body, 
+                // for this specific production template we use a 'fetch' fallback.
+                const realResponse = await fetch(API_URL, {
+                    method: 'POST',
+                    body: JSON.stringify(data)
+                });
+                return await realResponse.json();
+            } catch (e) {
+                console.error(e);
+                return { success: false, msg: "Connection Error" };
+            } finally {
+                document.getElementById('loader').classList.add('hidden');
+            }
+        }
 
-    // Simple mining if backend works
-    let miningInterval = null;
-    document.getElementById('mineBtn')?.addEventListener('click', async () => {
-        if (!currentUser) return;
-        const btn = document.getElementById('mineBtn');
-        if (btn.innerText === 'Start Mining') {
-            const res = await fetch(PROXY, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: 'startMining', email: currentUser.email })
-            }).then(r => r.json());
+        async function handleRegister() {
+            const username = document.getElementById('reg-user').value;
+            const email = document.getElementById('reg-email').value;
+            const password = document.getElementById('reg-pass').value;
+            const referredBy = document.getElementById('reg-ref').value;
+
+            const res = await apiCall({ action: 'register', username, email, password, referredBy });
             if (res.success) {
-                btn.innerText = 'Stop Mining';
-                miningInterval = setInterval(async () => {
-                    const dash = await fetch(PROXY, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ action: 'getDashboard', email: currentUser.email })
-                    }).then(r => r.json());
-                    if (dash.success) document.getElementById('balance').innerText = dash.balance.toFixed(4) + ' Rida';
-                }, 3000);
-            } else alert(res.error);
-        } else {
-            await fetch(PROXY, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: 'stopMining', email: currentUser.email })
-            });
-            if (miningInterval) clearInterval(miningInterval);
-            btn.innerText = 'Start Mining';
+                alert("Account Created! Please Login.");
+                toggleAuth(false);
+            } else {
+                alert(res.msg);
+            }
         }
-    });
-    document.getElementById('logoutBtn')?.addEventListener('click', () => {
-        if (miningInterval) clearInterval(miningInterval);
-        currentUser = null;
-        document.getElementById('dashboard').classList.add('hidden');
-    });
-</script>
+
+        async function handleLogin() {
+            const email = document.getElementById('log-email').value;
+            const password = document.getElementById('log-pass').value;
+
+            const res = await apiCall({ action: 'login', email, password });
+            if (res.success) {
+                currentUser = res.data;
+                localStorage.setItem('rida_user', JSON.stringify(currentUser));
+                showApp();
+            } else {
+                alert(res.msg);
+            }
+        }
+
+        function showApp() {
+            document.getElementById('page-auth').classList.add('hidden');
+            document.getElementById('main-app').classList.remove('hidden');
+            document.getElementById('user-name').innerText = currentUser.username;
+            refreshDashboard();
+        }
+
+        async function refreshDashboard() {
+            const res = await apiCall({ action: 'getDashboard', uid: currentUser.uid });
+            if (res.success) {
+                const d = res.data;
+                document.getElementById('balance').innerText = parseFloat(d.balance).toFixed(4);
+                document.getElementById('status-badge').innerText = d.verified === "Yes" ? "● VERIFIED" : "● UNVERIFIED";
+                document.getElementById('my-ref-code').innerText = d.refCode;
+
+                if (d.miningStatus === "Active") {
+                    updateMiningUI(d.lastMiningTime);
+                }
+            }
+        }
+
+        async function startMining() {
+            const res = await apiCall({ action: 'startMining', uid: currentUser.uid });
+            if (res.success) {
+                refreshDashboard();
+            }
+        }
+
+        function updateMiningUI(startTime) {
+            document.getElementById('mining-idle').classList.add('hidden');
+            document.getElementById('mining-active').classList.remove('hidden');
+            
+            if (miningInterval) clearInterval(miningInterval);
+            
+            miningInterval = setInterval(() => {
+                const now = new Date().getTime();
+                const elapsed = now - parseInt(startTime);
+                const remaining = (24 * 60 * 60 * 1000) - elapsed;
+
+                if (remaining <= 0) {
+                    clearInterval(miningInterval);
+                    document.getElementById('mining-idle').classList.remove('hidden');
+                    document.getElementById('mining-active').classList.add('hidden');
+                    return;
+                }
+
+                const h = Math.floor(remaining / 3600000);
+                const m = Math.floor((remaining % 3600000) / 60000);
+                const s = Math.floor((remaining % 60000) / 1000);
+                
+                document.getElementById('mining-timer').innerText = 
+                    `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+                
+                // Simulation: Visual increment
+                const bal = document.getElementById('balance');
+                const current = parseFloat(bal.innerText);
+                bal.innerText = (current + 0.0000023).toFixed(7);
+            }, 1000);
+        }
+    </script>
 </body>
-</html>
+    </html>
+    
