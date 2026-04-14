@@ -16,6 +16,8 @@
         .nav-active { color: var(--sky) !important; transform: translateY(-5px); }
         .section { height: calc(100vh - 180px); overflow-y: auto; padding-bottom: 120px; scrollbar-width: none; }
         .section::-webkit-scrollbar { display: none; }
+        /* Iframe specific styling to make it feel integrated */
+        #rida-wall-frame { width: 100%; height: 100%; border: none; border-radius: 2rem; background: transparent; }
         .mining-active::after { content: ''; position: absolute; inset: -15px; border: 2px solid var(--sky); border-radius: 50%; animation: pulse-ring 2s infinite; }
         @keyframes pulse-ring { 0% { transform: scale(0.8); opacity: 0.8; } 100% { transform: scale(1.6); opacity: 0; } }
         .neon-text { text-shadow: 0 0 15px rgba(56, 189, 248, 0.4); }
@@ -108,6 +110,10 @@
                 </div>
             </div>
 
+            <div id="sec-wall" class="section hidden" style="padding-bottom: 20px;">
+                <iframe id="rida-wall-frame" src="about:blank"></iframe>
+            </div>
+
             <div id="sec-admin" class="section hidden space-y-4">
                 <div class="flex justify-between items-center">
                     <h3 class="text-xl font-black text-red-500 italic">ADMIN PANEL</h3>
@@ -117,9 +123,10 @@
             </div>
         </main>
 
-        <nav class="fixed bottom-0 left-0 right-0 h-24 glass flex justify-around items-center px-10 rounded-t-[2.5rem] z-50">
+        <nav class="fixed bottom-0 left-0 right-0 h-24 glass flex justify-around items-center px-6 rounded-t-[2.5rem] z-50">
             <i onclick="go('home', this)" class="nav-btn fas fa-wallet text-xl nav-active cursor-pointer"></i>
             <i onclick="go('news', this)" class="nav-btn fas fa-comment-dots text-xl text-slate-600 cursor-pointer"></i>
+            <i onclick="go('wall', this)" class="nav-btn fas fa-users text-xl text-slate-600 cursor-pointer"></i>
             <i onclick="go('admin', this)" id="nav-adm" class="nav-btn fas fa-user-shield text-xl text-slate-600 hidden cursor-pointer"></i>
             <i onclick="logout()" class="fas fa-sign-out-alt text-xl text-red-500/30 cursor-pointer"></i>
         </nav>
@@ -127,6 +134,8 @@
 
     <script>
         const API = 'https://script.google.com/macros/s/AKfycbycO3WbrAycpHFSCPWP2jTfZ_2_c8p47ugbgN1mg3JhcqHIsZaFd6jf9zBsTRP7eeuU/exec';
+        const WALL_URL = 'https://ridamining.github.io/ridachain/';
+        
         let user = JSON.parse(localStorage.getItem('rida_master_v12')) || null;
         let ticker;
 
@@ -156,7 +165,7 @@
                 document.getElementById('nav-adm').classList.remove('hidden');
             }
             sync();
-            setInterval(sync, 30000); // Auto-sync every 30s
+            setInterval(sync, 30000); 
         }
 
         async function sync() {
@@ -258,11 +267,21 @@
 
         function go(scr, el) {
             document.querySelectorAll('.section').forEach(s => s.classList.add('hidden'));
-            document.getElementById('sec-' + scr).classList.remove('hidden');
+            const target = document.getElementById('sec-' + scr);
+            target.classList.remove('hidden');
+            
             document.querySelectorAll('.nav-btn').forEach(n => n.classList.remove('nav-active', 'text-slate-600'));
             if(el) el.classList.add('nav-active');
+            
             if(scr === 'news') loadChat();
             if(scr === 'admin') loadAdmin();
+            
+            // Bridge Logic for Rida Wall
+            if(scr === 'wall') {
+                const frame = document.getElementById('rida-wall-frame');
+                // Pass user context via URL parameters to the Wall
+                frame.src = `${WALL_URL}?uid=${user.uid}&username=${encodeURIComponent(user.username)}`;
+            }
         }
 
         function copyRef() { navigator.clipboard.writeText(document.getElementById('u-ref').innerText); alert("Ref Code Copied!"); }
@@ -271,5 +290,5 @@
         function logout() { localStorage.clear(); location.reload(); }
     </script>
 </body>
-</html>
-
+                    </html>
+    
