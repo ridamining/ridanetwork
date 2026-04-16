@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>RIDA MASTER V12.0</title>
+    <title>RIDA MASTER V13.0 | WEB3 ECOSYSTEM</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -16,11 +16,10 @@
         .nav-active { color: var(--sky) !important; transform: translateY(-5px); }
         .section { height: calc(100vh - 180px); overflow-y: auto; padding-bottom: 120px; scrollbar-width: none; }
         .section::-webkit-scrollbar { display: none; }
-        /* Iframe specific styling to make it feel integrated */
-        #rida-wall-frame { width: 100%; height: 100%; border: none; border-radius: 2rem; background: transparent; }
         .mining-active::after { content: ''; position: absolute; inset: -15px; border: 2px solid var(--sky); border-radius: 50%; animation: pulse-ring 2s infinite; }
         @keyframes pulse-ring { 0% { transform: scale(0.8); opacity: 0.8; } 100% { transform: scale(1.6); opacity: 0; } }
         .neon-text { text-shadow: 0 0 15px rgba(56, 189, 248, 0.4); }
+        iframe { width: 100%; height: 100%; border: none; border-radius: 2.5rem; }
         .hidden { display: none; }
     </style>
 </head>
@@ -28,7 +27,7 @@
 
     <div id="loader" class="fixed inset-0 z-[100] bg-black/95 flex flex-col items-center justify-center hidden">
         <div class="w-12 h-12 border-4 border-t-sky-500 border-sky-500/10 rounded-full animate-spin"></div>
-        <p class="text-[9px] font-black tracking-[0.4em] text-sky-400 mt-6">RIDA MASTER SYNC</p>
+        <p class="text-[9px] font-black tracking-[0.4em] text-sky-400 mt-6 uppercase">Syncing Protocol</p>
     </div>
 
     <div id="auth-scr" class="h-full p-10 flex flex-col justify-center">
@@ -56,7 +55,7 @@
         <header class="p-6 flex justify-between items-center">
             <div>
                 <p id="u-uid" class="text-sky-500 text-[8px] font-black">ID: ---</p>
-                <h2 id="u-name" class="text-2xl font-black italic tracking-tighter">MINER</h2>
+                <h2 id="u-name" class="text-2xl font-black italic tracking-tighter uppercase">MINER</h2>
             </div>
             <div id="adm-badge" class="hidden px-3 py-1 bg-red-500/10 border border-red-500/30 rounded-full text-[8px] font-black text-red-500">ADMIN</div>
         </header>
@@ -81,51 +80,35 @@
                             <i class="fas fa-bolt text-3xl text-sky-400 animate-pulse"></i>
                         </div>
                         <p id="timer" class="mt-4 font-mono text-3xl font-black text-sky-400">24:00:00</p>
-                        <p id="yield-info" class="text-[8px] text-sky-500/60 font-black mt-1">RATE: 0.20 RIDA/DAY</p>
+                        <p id="yield-info" class="text-[8px] text-sky-500/60 font-black mt-1 uppercase">RATE: 0.20 RIDA/DAY</p>
                     </div>
                 </div>
 
                 <div class="glass p-6 rounded-[2.5rem] space-y-3">
-                    <p class="text-[9px] font-black text-sky-400">P2P TRANSFER (MIN 10)</p>
+                    <p class="text-[9px] font-black text-sky-400 uppercase">P2P Transfer (Min 10)</p>
                     <input type="text" id="p2p-uid" placeholder="Receiver UID" class="w-full bg-white/5 p-3 rounded-xl border border-white/5 outline-none text-xs">
                     <input type="number" id="p2p-amt" placeholder="Amount" class="w-full bg-white/5 p-3 rounded-xl border border-white/5 outline-none text-xs">
                     <button onclick="p2p()" class="w-full py-3 bg-white/10 rounded-xl text-[10px] font-black hover:bg-white/20 transition">SEND RIDA</button>
                 </div>
-
-                <div class="glass p-6 rounded-[2.5rem] flex justify-between items-center">
-                    <div>
-                        <p class="text-[8px] text-slate-500 font-black">YOUR REF CODE</p>
-                        <p id="u-ref" class="text-sm font-black text-sky-400 tracking-widest">---</p>
-                    </div>
-                    <button onclick="copyRef()" class="text-[10px] font-bold bg-sky-500/10 px-4 py-2 rounded-full border border-sky-500/20">COPY</button>
-                </div>
             </div>
 
-            <div id="sec-news" class="section hidden space-y-4">
-                <h3 class="text-xl font-black italic uppercase">Network Logs</h3>
-                <div id="chat-win" class="glass rounded-[2rem] p-4 h-80 overflow-y-auto space-y-3 text-[11px]"></div>
-                <div class="flex gap-2">
-                    <input type="text" id="chat-in" placeholder="Message..." class="flex-1 bg-white/5 p-4 rounded-2xl outline-none text-xs">
-                    <button onclick="sendMsg()" class="btn-prime px-6 rounded-2xl"><i class="fas fa-paper-plane"></i></button>
-                </div>
+            <div id="sec-explorer" class="section hidden">
+                <iframe id="rida-explorer-frame" src="about:blank"></iframe>
             </div>
 
-            <div id="sec-wall" class="section hidden" style="padding-bottom: 20px;">
+            <div id="sec-wall" class="section hidden">
                 <iframe id="rida-wall-frame" src="about:blank"></iframe>
             </div>
 
             <div id="sec-admin" class="section hidden space-y-4">
-                <div class="flex justify-between items-center">
-                    <h3 class="text-xl font-black text-red-500 italic">ADMIN PANEL</h3>
-                    <button onclick="broadcast()" class="bg-red-500/10 text-red-500 px-4 py-1 rounded text-[9px] font-black">BROADCAST</button>
-                </div>
+                <h3 class="text-xl font-black text-red-500 italic uppercase">Admin Terminal</h3>
                 <div id="admin-list" class="space-y-2"></div>
             </div>
         </main>
 
         <nav class="fixed bottom-0 left-0 right-0 h-24 glass flex justify-around items-center px-6 rounded-t-[2.5rem] z-50">
             <i onclick="go('home', this)" class="nav-btn fas fa-wallet text-xl nav-active cursor-pointer"></i>
-            <i onclick="go('news', this)" class="nav-btn fas fa-comment-dots text-xl text-slate-600 cursor-pointer"></i>
+            <i onclick="go('explorer', this)" class="nav-btn fas fa-microchip text-xl text-slate-600 cursor-pointer"></i>
             <i onclick="go('wall', this)" class="nav-btn fas fa-users text-xl text-slate-600 cursor-pointer"></i>
             <i onclick="go('admin', this)" id="nav-adm" class="nav-btn fas fa-user-shield text-xl text-slate-600 hidden cursor-pointer"></i>
             <i onclick="logout()" class="fas fa-sign-out-alt text-xl text-red-500/30 cursor-pointer"></i>
@@ -133,10 +116,14 @@
     </div>
 
     <script>
-        const API = 'https://script.google.com/macros/s/AKfycbycO3WbrAycpHFSCPWP2jTfZ_2_c8p47ugbgN1mg3JhcqHIsZaFd6jf9zBsTRP7eeuU/exec';
-        const WALL_URL = 'https://ridamining.github.io/ridachain/';
+        // Main App Backend (Original Mining & User Database)
+        const MAIN_API = 'https://script.google.com/macros/s/AKfycbycO3WbrAycpHFSCPWP2jTfZ_2_c8p47ugbgN1mg3JhcqHIsZaFd6jf9zBsTRP7eeuU/exec';
         
-        let user = JSON.parse(localStorage.getItem('rida_master_v12')) || null;
+        // External Portal URLs
+        const EXPLORER_URL = 'https://ridamining.github.io/rida/';
+        const WALL_URL = 'https://ridamining.github.io/ridachain/';
+
+        let user = JSON.parse(localStorage.getItem('rida_master_v13')) || null;
         let ticker;
 
         window.onload = () => { if(user) startApp(); };
@@ -147,11 +134,19 @@
                 { action, email: document.getElementById('l-email').value, password: document.getElementById('l-pass').value } :
                 { action, username: document.getElementById('r-user').value, email: document.getElementById('r-email').value, password: document.getElementById('r-pass').value, refBy: document.getElementById('r-ref').value };
             
-            const res = await (await fetch(API, { method: 'POST', body: JSON.stringify(data) })).json();
-            if(res.success) {
-                if(action === 'login') { user = res.data; localStorage.setItem('rida_master_v12', JSON.stringify(user)); startApp(); }
-                else { alert("Success! You can now login."); toggleAuth(false); }
-            } else alert(res.msg);
+            try {
+                const res = await (await fetch(MAIN_API, { method: 'POST', body: JSON.stringify(data) })).json();
+                if(res.success) {
+                    if(action === 'login') { 
+                        user = res.data; 
+                        localStorage.setItem('rida_master_v13', JSON.stringify(user)); 
+                        startApp(); 
+                    } else { 
+                        alert("Success! Account created."); 
+                        toggleAuth(false); 
+                    }
+                } else alert(res.msg);
+            } catch (e) { alert("Connection Error"); }
             loading(false);
         }
 
@@ -160,6 +155,7 @@
             document.getElementById('app-scr').classList.remove('hidden');
             document.getElementById('u-name').innerText = user.username;
             document.getElementById('u-uid').innerText = user.uid;
+            
             if(user.role === 'Admin') {
                 document.getElementById('adm-badge').classList.remove('hidden');
                 document.getElementById('nav-adm').classList.remove('hidden');
@@ -169,24 +165,24 @@
         }
 
         async function sync() {
-            const res = await (await fetch(API, { method: 'POST', body: JSON.stringify({ action: 'getDashboard', uid: user.uid }) })).json();
-            if(res.success) {
-                const d = res.data;
-                document.getElementById('u-v-tag').innerHTML = d.verified === 'Yes' ? 
-                    '<span class="text-green-400"><i class="fas fa-check-circle"></i> VERIFIED</span>' : 
-                    '<span class="text-red-400"><i class="fas fa-times-circle"></i> UNVERIFIED</span>';
-                document.getElementById('u-ref').innerText = d.referralCode;
-                document.getElementById('yield-info').innerText = `RATE: ${d.dailyRate.toFixed(2)} RIDA/DAY`;
-                
-                if(d.miningStatus === 'Active') {
-                    runTicker(d.balance, d.lastMiningTime, d.dailyRate);
-                    runTimer(d.lastMiningTime);
-                } else {
-                    document.getElementById('u-bal').innerText = parseFloat(d.balance).toFixed(6);
-                    document.getElementById('m-off').classList.remove('hidden');
-                    document.getElementById('m-on').classList.add('hidden');
+            try {
+                const res = await (await fetch(MAIN_API, { method: 'POST', body: JSON.stringify({ action: 'getDashboard', uid: user.uid }) })).json();
+                if(res.success) {
+                    const d = res.data;
+                    document.getElementById('u-v-tag').innerHTML = d.verified === 'Yes' ? 
+                        '<span class="text-green-400 font-black"><i class="fas fa-check-circle"></i> VERIFIED</span>' : 
+                        '<span class="text-red-400 font-black"><i class="fas fa-times-circle"></i> UNVERIFIED</span>';
+                    
+                    if(d.miningStatus === 'Active') {
+                        runTicker(d.balance, d.lastMiningTime, d.dailyRate);
+                        runTimer(d.lastMiningTime);
+                    } else {
+                        document.getElementById('u-bal').innerText = parseFloat(d.balance).toFixed(6);
+                        document.getElementById('m-off').classList.remove('hidden');
+                        document.getElementById('m-on').classList.add('hidden');
+                    }
                 }
-            }
+            } catch (e) { console.log("Sync failed"); }
         }
 
         function runTicker(base, start, rate) {
@@ -211,84 +207,60 @@
             }, 1000);
         }
 
+        async function startMining() {
+            loading(true);
+            await fetch(MAIN_API, { method: 'POST', body: JSON.stringify({ action: 'startMining', uid: user.uid }) });
+            sync();
+            loading(false);
+        }
+
         async function p2p() {
             const rid = document.getElementById('p2p-uid').value;
             const amt = document.getElementById('p2p-amt').value;
             if(!rid || !amt) return;
             loading(true);
-            const res = await (await fetch(API, { method: 'POST', body: JSON.stringify({ action: 'p2pTransfer', senderUid: user.uid, receiverUid: rid, amount: amt }) })).json();
+            const res = await (await fetch(MAIN_API, { method: 'POST', body: JSON.stringify({ action: 'p2pTransfer', senderUid: user.uid, receiverUid: rid, amount: amt }) })).json();
             alert(res.msg);
-            if(res.success) sync();
-            loading(false);
-        }
-
-        async function startMining() {
-            loading(true);
-            await fetch(API, { method: 'POST', body: JSON.stringify({ action: 'startMining', uid: user.uid }) });
             sync();
             loading(false);
-        }
-
-        async function loadChat() {
-            const res = await (await fetch(API, { method: 'POST', body: JSON.stringify({ action: 'getMessages', uid: user.uid }) })).json();
-            const win = document.getElementById('chat-win');
-            win.innerHTML = res.data.map(m => `
-                <div class="flex ${m[0] === user.uid ? 'justify-end' : 'justify-start'}">
-                    <div class="px-4 py-2 rounded-2xl ${m[0] === user.uid ? 'btn-prime text-white' : 'bg-white/5 text-slate-300'}">
-                        <p class="text-[7px] opacity-50 font-black">${m[0] === user.uid ? 'ME' : m[0]}</p>
-                        ${m[2]}
-                    </div>
-                </div>
-            `).join('');
-            win.scrollTop = win.scrollHeight;
-        }
-
-        async function sendMsg() {
-            const input = document.getElementById('chat-in');
-            if(!input.value) return;
-            await fetch(API, { method: 'POST', body: JSON.stringify({ action: 'sendMessage', uid: user.uid, message: input.value }) });
-            input.value = ''; loadChat();
-        }
-
-        async function broadcast() {
-            const m = prompt("Global Message:");
-            if(m) await fetch(API, { method: 'POST', body: JSON.stringify({ action: 'broadcast', message: m }) });
-        }
-
-        async function loadAdmin() {
-            const res = await (await fetch(API, { method: 'POST', body: JSON.stringify({ action: 'adminGetUsers' }) })).json();
-            document.getElementById('admin-list').innerHTML = res.data.map(u => `
-                <div class="bg-white/5 p-4 rounded-2xl flex justify-between items-center text-[10px]">
-                    <div><p class="font-black">${u.username} (${u.verified})</p><p class="opacity-50">${u.uid}</p></div>
-                    <p class="text-sky-400 font-black">${parseFloat(u.balance).toFixed(2)}</p>
-                </div>
-            `).join('');
         }
 
         function go(scr, el) {
             document.querySelectorAll('.section').forEach(s => s.classList.add('hidden'));
             const target = document.getElementById('sec-' + scr);
-            target.classList.remove('hidden');
+            if(target) target.classList.remove('hidden');
             
             document.querySelectorAll('.nav-btn').forEach(n => n.classList.remove('nav-active', 'text-slate-600'));
             if(el) el.classList.add('nav-active');
             
-            if(scr === 'news') loadChat();
-            if(scr === 'admin') loadAdmin();
+            const bridgeData = `?uid=${user.uid}&username=${encodeURIComponent(user.username)}`;
             
-            // Bridge Logic for Rida Wall
-            if(scr === 'wall') {
-                const frame = document.getElementById('rida-wall-frame');
-                // Pass user context via URL parameters to the Wall
-                frame.src = `${WALL_URL}?uid=${user.uid}&username=${encodeURIComponent(user.username)}`;
+            if(scr === 'explorer') {
+                document.getElementById('rida-explorer-frame').src = EXPLORER_URL + bridgeData;
             }
+            if(scr === 'wall') {
+                document.getElementById('rida-wall-frame').src = WALL_URL + bridgeData;
+            }
+            if(scr === 'admin') loadAdmin();
         }
 
-        function copyRef() { navigator.clipboard.writeText(document.getElementById('u-ref').innerText); alert("Ref Code Copied!"); }
-        function toggleAuth(reg) { document.getElementById('login-box').classList.toggle('hidden', reg); document.getElementById('reg-box').classList.toggle('hidden', !reg); }
+        async function loadAdmin() {
+            const res = await (await fetch(MAIN_API, { method: 'POST', body: JSON.stringify({ action: 'adminGetUsers' }) })).json();
+            document.getElementById('admin-list').innerHTML = res.data.map(u => `
+                <div class="bg-white/5 p-4 rounded-2xl flex justify-between items-center text-[10px]">
+                    <div><p class="font-black uppercase">${u.username}</p><p class="opacity-40">${u.uid}</p></div>
+                    <p class="text-sky-400 font-black">${parseFloat(u.balance).toFixed(2)}</p>
+                </div>
+            `).join('');
+        }
+
+        function toggleAuth(reg) { 
+            document.getElementById('login-box').classList.toggle('hidden', reg); 
+            document.getElementById('reg-box').classList.toggle('hidden', !reg); 
+        }
         function loading(s) { document.getElementById('loader').classList.toggle('hidden', !s); }
         function logout() { localStorage.clear(); location.reload(); }
     </script>
 </body>
-                    </html>
+    </html>
     
