@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>RIDA MASTER V13.2</title>
+    <title>RIDA MASTER V13.3</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -27,7 +27,7 @@
 
     <div id="loader" class="fixed inset-0 z-[100] bg-black/95 flex flex-col items-center justify-center hidden">
         <div class="w-12 h-12 border-4 border-t-sky-500 border-sky-500/10 rounded-full animate-spin"></div>
-        <p class="text-[9px] font-black tracking-[0.4em] text-sky-400 mt-6">RIDA PROTOCOL SYNC</p>
+        <p class="text-[9px] font-black tracking-[0.4em] text-sky-400 mt-6">RIDA SECURITY LAYER</p>
     </div>
 
     <div id="auth-scr" class="h-full p-10 flex flex-col justify-center">
@@ -57,13 +57,16 @@
                 <p id="u-uid" class="text-sky-500 text-[8px] font-black">ID: ---</p>
                 <h2 id="u-name" class="text-2xl font-black italic tracking-tighter uppercase">OPERATOR</h2>
             </div>
-            <div id="adm-badge" class="hidden px-3 py-1 bg-red-500/10 border border-red-500/30 rounded-full text-[8px] font-black text-red-500">ADMIN</div>
+            <div id="adm-badge" class="hidden px-3 py-1 bg-red-500/10 border border-red-500/30 rounded-full text-[8px] font-black text-red-500">ADMIN CONTROL</div>
         </header>
 
         <main class="flex-1 px-6">
             <div id="sec-home" class="section space-y-5">
-                <div class="glass p-6 rounded-[2.5rem]">
-                    <p class="text-white/30 text-[9px] font-bold mb-1 uppercase tracking-widest">Balance</p>
+                <div class="glass p-6 rounded-[2.5rem] relative">
+                    <div class="flex justify-between items-start mb-1">
+                        <p class="text-white/30 text-[9px] font-bold uppercase tracking-widest">Asset Balance</p>
+                        <p id="u-rate" class="text-sky-400 text-[9px] font-black uppercase tracking-widest">0.00 RIDA/DAY</p>
+                    </div>
                     <h1 id="u-bal" class="text-5xl font-black tabular-nums tracking-tighter neon-text">0.000000</h1>
                     <div id="u-v-tag" class="mt-4 text-[9px] font-black flex items-center gap-2"></div>
                 </div>
@@ -73,7 +76,7 @@
                         <button onclick="startMining()" class="w-28 h-28 rounded-full btn-prime shadow-xl mx-auto flex items-center justify-center">
                             <i class="fas fa-power-off text-3xl"></i>
                         </button>
-                        <p class="mt-4 font-black text-slate-500 text-[9px] tracking-widest uppercase">Start Session</p>
+                        <p class="mt-4 font-black text-slate-500 text-[9px] tracking-widest uppercase">Engage Miner</p>
                     </div>
                     <div id="m-on" class="hidden">
                         <div class="w-28 h-28 rounded-full border-2 border-sky-400/30 mx-auto flex items-center justify-center mining-active relative">
@@ -85,21 +88,22 @@
 
                 <div class="glass p-6 rounded-[2.5rem] flex justify-between items-center">
                     <div>
-                        <p class="text-[8px] text-slate-500 font-black uppercase">Invitation Code</p>
+                        <p class="text-[8px] text-slate-500 font-black uppercase">Your Node Key</p>
                         <p id="u-ref" class="text-sm font-black text-sky-400 tracking-widest">---</p>
                     </div>
                     <button onclick="copyRef()" class="text-[10px] font-bold bg-sky-500/10 px-4 py-2 rounded-full border border-sky-500/20 text-sky-400">COPY</button>
                 </div>
 
-                <div class="glass p-6 rounded-[2.5rem] space-y-3">
-                    <p class="text-[9px] font-black text-sky-400 uppercase">P2P Transfer</p>
+                <div class="glass p-6 rounded-[2.5rem] space-y-3 border border-sky-500/10">
+                    <p class="text-[9px] font-black text-sky-400 uppercase">Secure P2P Transfer</p>
                     <input type="text" id="p2p-uid" placeholder="Receiver UID" class="w-full bg-white/5 p-3 rounded-xl border border-white/5 outline-none text-xs">
-                    <input type="number" id="p2p-amt" placeholder="Amount" class="w-full bg-white/5 p-3 rounded-xl border border-white/5 outline-none text-xs">
-                    <button onclick="p2p()" class="w-full py-3 bg-white/10 rounded-xl text-[10px] font-black">SEND RIDA</button>
+                    <input type="number" id="p2p-amt" placeholder="Min. 10 RIDA" class="w-full bg-white/5 p-3 rounded-xl border border-white/5 outline-none text-xs">
+                    <button onclick="secureP2P()" class="w-full py-3 bg-white/10 rounded-xl text-[10px] font-black uppercase">Initiate Transfer</button>
+                    <p class="text-[7px] text-slate-500 text-center italic">Verified Nodes Only • No Fee</p>
                 </div>
             </div>
 
-            <div id="sec-rida" class="section hidden" style="padding-bottom: 20px;">
+            <div id="sec-rida" class="section hidden">
                 <iframe id="rida-embed-frame" src="about:blank"></iframe>
             </div>
 
@@ -109,7 +113,7 @@
 
             <div id="sec-admin" class="section hidden space-y-4">
                 <div class="flex justify-between items-center">
-                    <h3 class="text-xl font-black text-red-500 italic uppercase">Admin Console</h3>
+                    <h3 class="text-xl font-black text-red-500 italic uppercase">System Admin</h3>
                     <button onclick="broadcast()" class="bg-red-500/10 text-red-500 px-4 py-1 rounded text-[9px] font-black">BROADCAST</button>
                 </div>
                 <div id="admin-list" class="space-y-2"></div>
@@ -130,8 +134,9 @@
         const WALL_URL = 'https://ridamining.github.io/ridachain/';
         const RIDA_URL = 'https://ridamining.github.io/rida/';
         
-        let user = JSON.parse(localStorage.getItem('rida_master_v13_2')) || null;
+        let user = JSON.parse(localStorage.getItem('rida_master_v13_3')) || null;
         let ticker;
+        let isVerified = false;
 
         window.onload = () => { if(user) startApp(); };
 
@@ -144,10 +149,10 @@
             try {
                 const res = await (await fetch(API, { method: 'POST', body: JSON.stringify(data) })).json();
                 if(res.success) {
-                    if(action === 'login') { user = res.data; localStorage.setItem('rida_master_v13_2', JSON.stringify(user)); startApp(); }
-                    else { alert("Success! You can now login."); toggleAuth(false); }
+                    if(action === 'login') { user = res.data; localStorage.setItem('rida_master_v13_3', JSON.stringify(user)); startApp(); }
+                    else { alert("Registration Success!"); toggleAuth(false); }
                 } else alert(res.msg);
-            } catch(e) { alert("Connection Error"); }
+            } catch(e) { alert("Handshake Failed"); }
             loading(false);
         }
 
@@ -156,7 +161,9 @@
             document.getElementById('app-scr').classList.remove('hidden');
             document.getElementById('u-name').innerText = user.username;
             document.getElementById('u-uid').innerText = user.uid;
-            if(user.role === 'Admin') {
+            
+            // ADMIN CHECK FOR ridaAdmin (RIDA-259259)
+            if(user.role === 'Admin' || user.uid === 'RIDA-259259') {
                 document.getElementById('adm-badge').classList.remove('hidden');
                 document.getElementById('nav-adm').classList.remove('hidden');
             }
@@ -169,10 +176,12 @@
                 const res = await (await fetch(API, { method: 'POST', body: JSON.stringify({ action: 'getDashboard', uid: user.uid }) })).json();
                 if(res.success) {
                     const d = res.data;
-                    document.getElementById('u-v-tag').innerHTML = d.verified === 'Yes' ? 
-                        '<span class="text-green-400 font-black"><i class="fas fa-check-circle"></i> VERIFIED</span>' : 
-                        '<span class="text-red-400 font-black"><i class="fas fa-times-circle"></i> UNVERIFIED</span>';
+                    isVerified = (d.verified === 'Yes');
+                    document.getElementById('u-v-tag').innerHTML = isVerified ? 
+                        '<span class="text-green-400 font-black"><i class="fas fa-shield-check"></i> VERIFIED NODE</span>' : 
+                        '<span class="text-red-400 font-black"><i class="fas fa-shield-exclamation"></i> UNVERIFIED</span>';
                     document.getElementById('u-ref').innerText = d.referralCode;
+                    document.getElementById('u-rate').innerText = `${d.dailyRate} RIDA/DAY`;
                     
                     if(d.miningStatus === 'Active') {
                         runTicker(d.balance, d.lastMiningTime, d.dailyRate);
@@ -209,10 +218,14 @@
             }, 1000);
         }
 
-        async function p2p() {
+        async function secureP2P() {
             const rid = document.getElementById('p2p-uid').value;
-            const amt = document.getElementById('p2p-amt').value;
-            if(!rid || !amt) return;
+            const amt = parseFloat(document.getElementById('p2p-amt').value);
+
+            if(!isVerified) return alert("Verify your account to be eligible for this service.");
+            if(!rid || isNaN(amt)) return alert("Please enter valid transfer details.");
+            if(amt < 10) return alert("Minimum transfer amount is 10 Rida.");
+
             loading(true);
             const res = await (await fetch(API, { method: 'POST', body: JSON.stringify({ action: 'p2pTransfer', senderUid: user.uid, receiverUid: rid, amount: amt }) })).json();
             alert(res.msg);
@@ -233,14 +246,15 @@
             document.querySelectorAll('.nav-btn').forEach(n => n.classList.remove('nav-active', 'text-slate-600'));
             if(el) el.classList.add('nav-active');
             
-            if(scr === 'wall') document.getElementById('rida-wall-frame').src = `${WALL_URL}?uid=${user.uid}`;
-            if(scr === 'rida') document.getElementById('rida-embed-frame').src = `${RIDA_URL}?uid=${user.uid}`;
+            if(scr === 'wall') document.getElementById('rida-wall-frame').src = `${WALL_URL}?uid=${user.uid}&isAdmin=${user.uid === 'RIDA-259259'}`;
+            if(scr === 'rida') document.getElementById('rida-embed-frame').src = `${RIDA_URL}?uid=${user.uid}&user=${user.username}&admin=RIDA-259259`;
         }
 
-        function copyRef() { navigator.clipboard.writeText(document.getElementById('u-ref').innerText); alert("Ref Code Copied!"); }
+        function copyRef() { navigator.clipboard.writeText(document.getElementById('u-ref').innerText); alert("Referral Link Copied!"); }
         function toggleAuth(reg) { document.getElementById('login-box').classList.toggle('hidden', reg); document.getElementById('reg-box').classList.toggle('hidden', !reg); }
         function loading(s) { document.getElementById('loader').classList.toggle('hidden', !s); }
         function logout() { localStorage.clear(); location.reload(); }
     </script>
 </body>
-</html>
+                            </html>
+    
